@@ -1,0 +1,39 @@
+.line-title {
+    padding: 0 10px; /* Espacio entre las líneas y el texto */
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.line-title::before,
+.line-title::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #333; /* Color y grosor de la línea */
+    margin: 0 10px;
+}
+
+.drop-form{
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.drop-form .icon {
+    position: absolute;
+    left: 10px; /* Ajusta la posición del icono */
+    opacity: 0; /* Oculta el icono inicialmente */
+    transition: opacity 0.3s ease; /* Transición para mostrar el icono */
+}
+
+.drop-form:hover {
+    transform: translateY(-5px); /* Mueve el botón hacia arriba */
+}
+
+.drop-form:hover .icon {
+    opacity: 1; /* Muestra el icono al hacer hover */
+    top: 110%;
+}
+
+.span-group {
+    width: 150px;
+}
