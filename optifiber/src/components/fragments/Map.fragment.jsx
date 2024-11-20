@@ -5,7 +5,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { APIProvider,Map,Pin, Marker } from "@vis.gl/react-google-maps";
 
 function MapGoogle({ zoom, marker}) {
-    const API_KEY = 'AIzaSyChLoPQvv1n4ueqaHvbPlO1AoAXOoXIltM'
+    const API_KEY = ''
     
     return (
         <APIProvider apiKey={API_KEY}>
