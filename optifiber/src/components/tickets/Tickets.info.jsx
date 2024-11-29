@@ -1,70 +1,69 @@
-import styleTools from './css/ticketsInfo.module.css';
-import styleInputs from './css/ticketsInfo.module.css'
+import styleInfo from './css/ticketsInfo.module.css';
 
 function TicketInfo({ ticket }) {
     return (
-        <div className="card ms-3 border-0" style={{ width: '35rem' }}>
-            <div className="card-body border-0">
-                
-                <div className="card-header d-flex justify-content-between">
-                    <div className={styleTools.tools}>
-                        <div className={styleTools.circle}>
-                            <span className={`${styleTools.red} ${styleTools.box}`}></span>
-                        </div>
-                        <div className={styleTools.circle}>
-                            <span className={`${styleTools.yellow} ${styleTools.box}`}></span>
-                        </div>
-                        <div className={styleTools.circle}>
-                            <span className={`${styleTools.green} ${styleTools.box}`}></span>
-                        </div>
+        <div className={`card ms-5 mt-3 ${styleInfo['container-card']}`}>
+
+            <div className={`d-flex justify-content-between align-items-center mt-1 mx-3 ${styleInfo['header']}`}>
+                <span className={styleInfo['title']}><i className="bi bi-clipboard2-pulse-fill"></i> Ticket Details</span>
+
+                <div className={styleInfo['tools']}>
+                    <div className={styleInfo['circle']}>
+                        <span className={`${styleInfo['red']} ${styleInfo['box']}`}></span>
                     </div>
-
-                    <span><i className="bi bi-clipboard2-pulse-fill"></i> Ticket Details</span>
+                    <div className={styleInfo['circle']}>
+                        <span className={`${styleInfo['yellow']} ${styleInfo['box']}`}></span>
+                    </div>
+                    <div className={styleInfo['circle']}>
+                        <span className={`${styleInfo['green']} ${styleInfo['box']}`}></span>
+                    </div>
                 </div>
+            </div>
 
-                <div className="card-body border-0">
-                    <p><strong>Folio:</strong> {ticket.Folio}</p>
-                    <label className="form-label"><strong>Cliente:</strong></label>
-                    <div className="d-flex input-group border-bottom border-primary">
-                        <input type="text"
-                            className={styleInputs.input}
-                            value={`${ticket.Client.Name.FirstName} 
+            <div className={`card-body ${styleInfo['body']}`}>
+                <p className="form-label"><strong>Folio:</strong> {ticket.Folio}</p>
+                <br />
+                <p className="form-label"><strong>Cliente:</strong></p>
+                <div className="input-group">
+                    <input type="text"
+                        className={styleInfo['input']}
+                        value={`${ticket.Client.Name.FirstName} 
                                 ${ticket.Client.Name.SecondName || ''} 
                                 ${ticket.Client.LastName.FatherLastName} 
                                 ${ticket.Client.LastName.MotherLastName}`
-                                .replace(/\s+/g, ' ').trim()}
-                            disabled />
-                        <span />
-                    </div>
-                    <br />
+                            .replace(/\s+/g, ' ').trim()}
+                        disabled />
+                    <span />
+                </div>
+                <br />
 
-                    <label className="form-label"><strong>Asunto:</strong></label>
-                    <div className="d-flex input-group border-bottom border-primary">
-                        <input type="text"
-                            className={styleInputs.input}
-                            disabled
-                            value={ticket.Issue} />
-                    </div>
-                    <br />
+                <p className="form-label"><strong>Asunto:</strong></p>
+                <div className="d-flex input-group">
+                    <input type="text"
+                        className={styleInfo['input']}
+                        disabled
+                        value={ticket.Issue} />
+                </div>
+                <br />
 
-                    <label className="form-label"><strong>Descripción:</strong></label>
-                    <div className="d-flex input-group border-bottom border-primary">
-                        <textarea
-                            className={`${styleInputs.input} ${styleInputs.textarea}`}
-                            disabled
-                            value={ticket.Description}></textarea>
-                    </div>
-
+                <p className="form-label"><strong>Descripción:</strong></p>
+                <div className="d-flex input-group">
+                    <textarea
+                        className={`${styleInfo['textarea']}`}
+                        disabled
+                        value={ticket.Description}></textarea>
                 </div>
 
-                <div className="card-footer d-flex justify-content-between">
-                    <div className="row" style={{ fontSize: "0.7em" }}>
-                        <span>Creador: {ticket.Admin.UserName}</span>
-                        <span>Dia: {ticket.CreateDate.split("T")[0]}</span>
-                    </div>
-
-                </div>
             </div>
+
+            <div className="card-footer d-flex justify-content-between">
+                <div className="row" style={{ fontSize: "0.7em" }}>
+                    <span>Creador: {ticket.Admin.UserName}</span>
+                    <span>Dia: {ticket.CreateDate.split("T")[0]}</span>
+                </div>
+
+            </div>
+
         </div>
     );
 }

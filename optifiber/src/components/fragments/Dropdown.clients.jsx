@@ -14,15 +14,13 @@ export function DropdownClients({ filteredOptions, onOptionClick }) {
                         ${option.LastName.MotherLastName}`
                             .replace(/\s+/g, ' ').trim();
                         return (
-                            <>
-                                <li
-                                    className="list-group-item list-group-item-action"
-                                    role="button"
-                                    key={index}
-                                    onMouseDown={() => onOptionClick(option)}>
-                                    {clientName}
-                                </li>
-                            </>
+                            <li
+                                className="list-group-item"
+                                role="button"
+                                key={index}
+                                onMouseDown={() => onOptionClick(option)}>
+                                {clientName}
+                            </li>
                         );
                     })}
                 </ul>

@@ -1,6 +1,6 @@
 export const handleLoadPay = async (client) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         const res = await fetch(`http://localhost:3200/api/pay/all/${client}`,{
             method: 'GET',

@@ -1,7 +1,7 @@
 import { Route, Navigate } from 'react-router-dom';
 
 const isUserAuth = () => {
-    return localStorage.getItem('token') !== null;
+    return sessionStorage.getItem('token') !== null;
 }
 
 const ProtectedRoute = ({children}) => {

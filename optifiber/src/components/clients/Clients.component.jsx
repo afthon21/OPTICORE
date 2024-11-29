@@ -11,7 +11,7 @@ function ClientsComponent() {
 
     const handleLoad = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
 
             const res = await fetch('http://localhost:3200/api/client/all',{
                 method: 'GET',
@@ -40,10 +40,9 @@ function ClientsComponent() {
     }, []);
 
     return(
+        
         <>
-            <NavbarFragmentAll />
-
-            <div className="container-fluid d-flex justify-content-center mt-1" style={{paddingLeft: '65px'}}>
+            <div className="container-fluid d-flex justify-content-start mt-1 ms-4" style={{paddingLeft: '65px'}}>
                 <ClientsCard clients = { data ? data: []} onSelected={setSelect}/>         
                 {select ? (
                     select && <ClientsInfo client={select}/>

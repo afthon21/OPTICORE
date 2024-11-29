@@ -1,18 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 /** input search */
 .group {
     position: relative;
     height: auto;
-    
 }
 
 .input {
-    font-size: 16px;
+    font-size: 16pt;
+    font-family: 'Agdasima';
     padding: 10px 10px 10px 5px;
     display: block;
     width: 200px;
     height: 15px;
     border: none;
-    border-bottom: 1px solid #515151;
     background: transparent;
 }
 
@@ -21,7 +23,8 @@
 }
 
 .place-holder {
-    color: #999;
+    color: #00b4d8;
+    font-family: 'Agdasima';
     font-size: 12px;
     font-weight: normal;
     position: absolute;
@@ -37,7 +40,6 @@
 .input:valid~label {
     top: -20px;
     font-size: 14px;
-    color: #0d6efd;
 }
 
 .bar {
@@ -53,7 +55,6 @@
     width: 0;
     bottom: 1px;
     position: absolute;
-    background: #0d6efd;
     -moz-transition: 0.2s ease all;
     -webkit-transition: 0.2s ease all;
     transition: 0.2s ease all;
@@ -97,11 +98,38 @@
     }
 }
 
+/** Card-container */
+.card-container {
+    width: 25rem;
+    background: transparent;
+    border: none;
+}
+
 /** table */
+.head-table {
+    font-family: 'Kanit';
+    font-size: 14pt;
+}
+
+.head-table th {
+    background: transparent;
+    color: #404040;
+    border-bottom: 2px solid #a8a8a8;
+}
+
+.table-body {
+    font-family: 'Agdasima';
+    font-size: 12pt;
+}
+
+.table-body td {
+    background: transparent;
+}
+
 .selected-row {
     overflow: hidden;
     cursor: pointer;
-    transform-origin: left;
+    transition: transform 0.3s ease;
 }
 
 .selected-row:hover {
@@ -111,8 +139,13 @@
 /** card-header */
 .header {
     height: 50px;
-    display: flex;
-    justify-content: space-between; /* Mantiene los elementos separados */
-    align-items: flex-end; /* Alinea los hijos al fondo del contenedor */
-    padding: 10px; /* Opcional, para añadir espacio alrededor */
+    border: none;
+    border-bottom: 2px solid #2a9d8f;
+}
+
+.title {
+    font-size: 15pt;
+    font-weight: bold;
+    font-family: 'Kanit';
+    color: #002b5b;
 }

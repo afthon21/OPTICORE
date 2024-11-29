@@ -1,6 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import styleCard from './css/clientsCard.module.css';
+import styleTable from './css/clientsCard.module.css';
 
 import { useState } from 'react';
 
@@ -22,34 +21,42 @@ function ClientsCard({ clients = [], onSelected }) {
     });
 
     return (
-        <div className="card" style={{ width: '25rem', maxHeight: '250px'}}>
-            <div className="card-body">
-                <div className="card-header d-flex justify-content-between w-100">
-                    <span>Tickets</span>
-                    <div className="input-group input-group-sm" style={{ width: 'auto' }}>
-                        <span className="input-group-text">
-                            <i className="bi bi-search"></i>
-                        </span>
-                        <input type="text" className="form-control"
-                            placeholder="Buscar..."
-                            onChange={handleInputSearch} />
-                    </div>
-                </div>
+        <div className={`card d-flex mt-3 ${styleCard['card-container']}`}>
 
-                <table className="table table-hover  table-sm">
-                    <thead>
+            <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}>
+                <span className={`me-2 ${styleCard['title']}`}>Tickets</span>
+                <div className={styleCard['group']}>
+                    <input required type="text"
+                        className={styleCard['input']}
+                        onChange={handleInputSearch} />
+                    <span className={styleCard['highlight']} />
+                    <span className={styleCard['bar']} />
+                    <label className={styleCard['place-holder']}>
+                        <i className="bi bi-search"></i>
+                        Buscar...
+                    </label>
+                </div>
+            </div>
+
+            <div className="card-body">
+                <table className="table table-hover justify-content-center">
+                    <thead className={styleCard['head-table']}>
                         <tr>
                             <th>Cliente</th>
                         </tr>
                     </thead>
-                    <tbody className="text-wrap" style={{ fontSize: "0.8em" }}>
+                    <tbody className={`text-wrap ${styleCard['table-body']}`}>
                         {filteredName.map((item) => (
-                            <tr key={item._id} onClick={() => onSelected(item)} style={{ cursor: 'pointer' }}>
-                                
+                            <tr 
+                                className={styleTable['selected-row']}
+                                key={item._id} 
+                                onClick={() => onSelected(item)}>
+
                                 <td>{`${item.Name.FirstName} 
                                         ${item.Name.SecondName || ''} 
                                         ${item.LastName.FatherLastName} 
-                                        ${item.LastName.MotherLastName}`}</td>
+                                        ${item.LastName.MotherLastName}`}
+                                </td>
                             </tr>
                         ))}
                     </tbody>

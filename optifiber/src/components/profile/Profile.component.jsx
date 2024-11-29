@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { NavbarFragmentAll } from '../fragments/Navbar.fragment.jsx';
 import ProfileCard from './Profile.card.jsx';
 import { LoadFragment } from '../fragments/Load.fragment.jsx';
 
@@ -10,7 +9,7 @@ function ProfileComponent() {
     const handleLoad = async () => {
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
 
             const res = await fetch('http://localhost:3200/api/profile/', {
                 method: 'GET',
@@ -30,7 +29,7 @@ function ProfileComponent() {
             const result = await res.json();
             setData(result);
 
-            localStorage.setItem('userName', result.UserName);
+            sessionStorage.setItem('userName', result.UserName);
 
         } catch (error) {
             console.log('Error en la solicitud', error)
@@ -43,9 +42,7 @@ function ProfileComponent() {
 
     return (
         <>
-            <NavbarFragmentAll />
-
-            <div className="container-fluid d-flex justify-content-center mt-1" style={{paddingLeft: '65px'}}>
+            <div className="container-fluid d-flex justify-content-center mt-1">
                 {data ? (
                     <ProfileCard profile={data ? data : {}} />
                 ) : (

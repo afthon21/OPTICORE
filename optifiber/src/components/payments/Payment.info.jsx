@@ -1,31 +1,32 @@
-import styleTools from './css/paymentInfo.module.css';
-import styleInputs from './css/paymentInfo.module.css';
+import styleInfo from './css/paymentInfo.module.css';
 
 function PaymentInfo({ payment }) {
     return (
-        <div className="card ms-3 border-0" style={{ width: '35rem' }}>
+        <div className={`card ms-5 mt-3 ${styleInfo['container-card']}`}>
 
-            <div className="card-header d-flex justify-content-between">
-                <div className={styleTools.tools}>
-                    <div className={styleTools.circle}>
-                        <span className={`${styleTools.red} ${styleTools.box}`}></span>
+            <div className={`d-flex justify-content-between align-items-center mt-1 mx-3 ${styleInfo['header']}`}>
+                <span className={styleInfo['title']}><i className="bi bi-cash-coin"></i> Payment Details</span>
+
+                <div className={styleInfo['tools']}>
+                    <div className={styleInfo['circle']}>
+                        <span className={`${styleInfo['red']} ${styleInfo['box']}`}></span>
                     </div>
-                    <div className={styleTools.circle}>
-                        <span className={`${styleTools.yellow} ${styleTools.box}`}></span>
+                    <div className={styleInfo['circle']}>
+                        <span className={`${styleInfo['yellow']} ${styleInfo['box']}`}></span>
                     </div>
-                    <div className={styleTools.circle}>
-                        <span className={`${styleTools.green} ${styleTools.box}`}></span>
+                    <div className={styleInfo['circle']}>
+                        <span className={`${styleInfo['green']} ${styleInfo['box']}`}></span>
                     </div>
                 </div>
-                <span><i className="bi bi-cash-coin"></i> Payment Details</span>
             </div>
 
-            <div className="card-body border-0">
+            <div className={`card-body ${styleInfo['body']}`}>
                 <p><strong>Folio:</strong> {payment.Folio}</p>
-                <label className="form-label">Cliente</label>
-                <div className="d-flex input-group border-bottom border-primary">
+                <br />
+                <p className="form-label"><strong>Cliente</strong></p>
+                <div className="input-group">
                     <input type="text"
-                        className={styleInputs.input}
+                        className={styleInfo['input']}
                         value={`${payment.Client.Name.FirstName} 
                             ${payment.Client.Name.SecondName || ''} 
                             ${payment.Client.LastName.FatherLastName} 
@@ -35,21 +36,21 @@ function PaymentInfo({ payment }) {
                 </div>
                 <br />
 
-                <label className="form-label">Forma de pago</label>
-                <div className="d-flex input-group border-bottom border-primary">
+                <p className="form-label"><strong>Forma de pago</strong></p>
+                <div className="input-group">
                     <input type="text"
-                        className={styleInputs.input}
+                        className={styleInfo['input']}
                         disabled
                         value={payment.Method} />
                 </div>
                 <br />
 
-                <label className="form-label">Monto</label>
-                <div className="d-flex input-group border-bottom border-primary">
-                    <textarea
-                        className={styleInputs.input}
+                <p className="form-label"><strong>Monto:</strong></p>
+                <div className="input-group">
+                    <input
+                        className={styleInfo['input']}
                         disabled
-                        value={payment.Amount}></textarea>
+                        value={payment.Amount} />
                 </div>
 
             </div>
@@ -59,7 +60,6 @@ function PaymentInfo({ payment }) {
                     <span>Creador: {payment.Admin.UserName}</span>
                     <span>Dia: {payment.CreateDate.split("T")[0]}</span>
                 </div>
-
             </div>
         </div>
     );

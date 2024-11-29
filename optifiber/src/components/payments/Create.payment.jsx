@@ -1,10 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-
 import { useState,useEffect } from 'react';
 
-import { NavbarFragmentAll } from '../fragments/Navbar.fragment';
 import CardCreatePayment from './Create.card';
 
 function CreatePayment() {
@@ -12,7 +7,7 @@ function CreatePayment() {
 
     const handleLoadClients = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
 
             const res = await fetch('http://localhost:3200/api/client/all',{
                 method: 'GET',
@@ -42,8 +37,6 @@ function CreatePayment() {
 
     return (
         <>
-            <NavbarFragmentAll />
-
             <div className="container-fluid d-flex justify-content-center mt-4">
                 <CardCreatePayment clients={data ? data: []}/>
             </div>

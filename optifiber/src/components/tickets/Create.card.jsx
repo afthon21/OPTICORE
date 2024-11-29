@@ -1,4 +1,4 @@
-import './css/create.card.css'
+import styleCreate from './css/createCard.module.css'
 
 import { useEffect, useState } from 'react';
 import { getDate } from '../fragments/js/getDate.js';
@@ -76,7 +76,7 @@ export function CardCreateTicket({ clients = [] }) {
 
         const cleanedData = cleanData(data)
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const res = await fetch('http://localhost:3200/api/ticket/new', {
                 method: 'POST',
                 headers: {
@@ -118,19 +118,20 @@ export function CardCreateTicket({ clients = [] }) {
 
     return (
 
-        <div className="card shadow p-3 mb-5 bg-body-tertiary rounded" style={{ width: '45rem' }}>
-            <div className="card-header justify-content-between d-flex">
+        <div className={`card p-3 mb-5 ${styleCreate['card-container']}`}>
+
+            <div className={`justify-content-between d-flex align-items-center ${styleCreate['header']}`}>
                 <span>Nuevo Ticket</span>
                 <span><i className="bi bi-calendar-date"></i> {getDate()}</span>
             </div>
 
-            <div className="card-body">
+            <div className={`card-body ${styleCreate['body']}`}>
 
                 <form onSubmit={handleSubmit}>
                     <label className="form-label">Cliente</label>
 
-                    <div className="d-flex input-group" style={{position:'relative'}}>
-                        <input className="form-control"
+                    <div className="d-flex input-group">
+                        <input className={`form-control ${styleCreate['input']}`}
                             type="text"
                             value={search}
                             onChange={handleInputChange}
@@ -149,18 +150,20 @@ export function CardCreateTicket({ clients = [] }) {
                     <label className="form-label">Asunto</label>
                     <div className="d-flex input-group">
                         <input type="text"
-                            className="form-control"
+                            className={`form-control ${styleCreate['input']}`}
                             name="Issue"
                             value={formValues.Issue}
+                            placeholder='Asunto...'
                             onChange={handleChangue} />
                     </div>
                     <br />
 
                     <label className="form-label">Descripción</label>
                     <div className="d-flex input-group">
-                        <textarea className="form-control"
+                        <textarea className={`form-control ${styleCreate['text-area']}`}
                             name="Description"
                             value={formValues.Description}
+                            placeholder='Descripción...'
                             onChange={handleChangue}></textarea>
                     </div>
                     <br />
@@ -168,10 +171,10 @@ export function CardCreateTicket({ clients = [] }) {
                     {formErrors && (<p style={{ color: 'red' }} >{formErrors}</p>)}
 
                     <div className="d-flex justify-content-end">
-                        <button className="btn btn-success" type="submit">Aceptar</button>
+                        <button className={styleCreate['button']} type="submit">
+                            Aceptar
+                        </button>
                     </div>
-
-
                 </form>
 
             </div>

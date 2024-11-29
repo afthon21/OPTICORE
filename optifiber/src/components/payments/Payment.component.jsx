@@ -2,7 +2,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-import { NavbarFragmentAll } from '../fragments/Navbar.fragment';
 import { LoadFragment } from '../fragments/Load.fragment';
 
 import { useState,useEffect } from 'react';
@@ -15,7 +14,7 @@ function PaymentComponent() {
 
     const handleLoad = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
 
             const res = await fetch('http://localhost:3200/api/pay/all', {
                 method: 'GET',
@@ -45,15 +44,13 @@ function PaymentComponent() {
 
     return(
         <>
-            <NavbarFragmentAll />
-
-            <div className="container-fluid d-flex justify-content-center mt-1" style={{paddingLeft: '65px'}}>
+            <div className="container-fluid d-flex justify-content-start mt-1 ms-4" style={{paddingLeft: '65px'}}>
                 <PaymentCard payments={data ? data : []} onSelected={setSelect} />
 
                 {select ? (
                     select && <PaymentInfo payment={select} />
                 ) : (
-                    <div className="card justify-content-center mx-4 border-0" style={{width: '30rem'}}>
+                    <div className="card justify-content-center mx-4 border-0" style={{width: '30rem',  background: 'transparent' }}>
                         <LoadFragment />
                     </div>
                 )}

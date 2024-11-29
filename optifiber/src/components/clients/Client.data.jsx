@@ -27,7 +27,7 @@ function ClientData({ client }) {
             <div className="input-group mb-4 border-bottom border-primary">
                 <input type="text"
                     className="form-control border-0"
-                    value={client.Email}
+                    value={client.Email || ''}
                     disabled />
             </div>
 
@@ -36,7 +36,7 @@ function ClientData({ client }) {
                 <span className="input-group-text border-0 ">Calle</span>
                 <input type="text"
                     className="form-control border-0"
-                    value={client.Location.Address}
+                    value={client.Location.Address || ''}
                     disabled />
             </div>
             <div className="d-flex justify-content-between text-wrap">
@@ -44,7 +44,7 @@ function ClientData({ client }) {
                     <span className="input-group-text border-0 ">Numero Exterior</span>
                     <input type="text"
                         className="form-control border-0"
-                        value={client.Location.OutNumber}
+                        value={client.Location.OutNumber || ''}
                         disabled />
                 </div>
                 <div className="input-group mb-4 ms-4 border-bottom border-primary">
@@ -60,14 +60,14 @@ function ClientData({ client }) {
                     <span className="input-group-text border-0">Estado</span>
                     <input type="text"
                         className="form-control border-0"
-                        value={client.Location.State}
+                        value={client.Location.State || ''}
                         disabled />
                 </div>
                 <div className="input-group mb-4 ms-4 border-bottom border-primary">
                     <span className="input-group-text border-0">Código Postal</span>
                     <input type="text"
                         className="form-control border-0"
-                        value={client.Location.ZIP}
+                        value={client.Location.ZIP || ''}
                         disabled />
                 </div>
             </div>
@@ -76,7 +76,7 @@ function ClientData({ client }) {
                     <span className="input-group-text border-0">Municipio</span>
                     <input type="text"
                         className="form-control border-0"
-                        value={client.Location.Municipally}
+                        value={client.Location.Municipality || ''}
                         disabled />
                 </div>
                 <div className="input-group mb-4 ms-4 border-bottom border-primary">

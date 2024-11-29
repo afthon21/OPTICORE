@@ -3,7 +3,6 @@
 
 .main-menu {
     background: #ededed;
-    z-index: 9999;
     width: 60px;
     transition: width 0.4s ease;
     float: left;
@@ -67,7 +66,8 @@
 
 .sub-menu a {
     font-family: 'Agdasima';
-    color: #a8a8a8;
+    color: #404040;
+    font-weight: bold;
 }
 
 .sub-menu a:hover {
@@ -93,7 +93,16 @@
     transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
-.border {
+.border-div {
     border: none;
     border-top: 2px solid #002b5b;
+}
+
+.content { /* Margen inicial cuando el navbar está colapsado */
+    transition: margin-left 0.4s ease; /* Sincroniza la transición con el navbar */
+}
+
+.main-menu:hover ~ .content {
+    margin-left: 200px;
+    display: flex; /* Ajusta el contenido cuando el navbar se expande */
 }

@@ -106,13 +106,13 @@ function LoginComponent() {
             setMessageError('');
 
             // Guarda el token o datos importantes en el almacenamiento si es necesario
-            localStorage.setItem('adminId', result.adminId);
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('userName', result.userName);
-            localStorage.setItem('loginSuccess', true);
+            sessionStorage.setItem('adminId', result.adminId);
+            sessionStorage.setItem('token', result.token);
+            sessionStorage.setItem('userName', result.userName);
+            sessionStorage.setItem('loginSuccess', true);
 
             // Guardamos el id del perfil
-            const adminId = localStorage.getItem('adminId');
+            const adminId = sessionStorage.getItem('adminId');
             const homeUrl = `/home/${adminId}`;
 
             // Navegar a la siguiente vista

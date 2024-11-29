@@ -1,4 +1,4 @@
-import './css/create.card.css'
+import styleCreate from './css/createCard.module.css';
 
 import { useEffect, useState } from 'react';
 import { cleanData } from "../fragments/js/cleanData.js";
@@ -8,7 +8,7 @@ import { getDate } from '../fragments/js/getDate.js';
 import { DropdownClients } from '../fragments/Dropdown.clients.jsx';
 
 function CardCreatePayment({ clients = [] }) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState('');
     const [formValues, setFormValues] = useState({
@@ -24,6 +24,14 @@ function CardCreatePayment({ clients = [] }) {
         Amount: formValues.Amount,
         Note: formValues.Note
     }
+
+    const paymentMethods = [
+        { id: '0', name: 'Método de pago...', disable: true},
+        { id: '1', name: 'Tarjeta de Crédito', icon: 'bi bi-credit-card', disable: false},
+        { id: '2', name: 'Transferencia Bancaria', icon: 'bi bi-cash-coin', disable: false},
+        { id: '3', name: 'Efectivo', icon: 'bi bi-cash-stack', disable: false},
+        { id: '4', name: 'PayPal', icon: 'bi bi-paypal', disable: false}
+    ];
 
     useEffect(() => {
         setFormValues(prevValues => ({
@@ -43,8 +51,8 @@ function CardCreatePayment({ clients = [] }) {
 
     const handleInputChange = (e) => {
         setSearch(e.target.value);
-        setIsOpen(true);
-    };
+        setIsOpen(false)
+    }
 
     // Selecciona una opción y cierra la lista
     const handleOptionClick = (option) => {
@@ -78,7 +86,7 @@ function CardCreatePayment({ clients = [] }) {
         const cleanedData = cleanData(data);
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const res = await fetch('http://localhost:3200/api/pay/new', {
                 method: 'POST',
                 headers: {
@@ -119,64 +127,76 @@ function CardCreatePayment({ clients = [] }) {
     }
 
     return (
-        <div className="card shadow p-3 mb-5 bg-body-tertiary rounded" style={{ width: '45rem' }}>
-            <div className="card-header justify-content-between d-flex">
+        <div className={`card p-3 mb-5 ${styleCreate['card-container']}`}>
+
+            <div className={`justify-content-between d-flex align-items-center ${styleCreate['header']}`}>
                 <span>Nuevo Pago</span>
                 <span><i className="bi bi-calendar-date"></i> {getDate()}</span>
             </div>
 
-            <div className="card-body">
+            <div className={`card-body ${styleCreate['body']}`}>
                 <form onSubmit={handleSubmit}>
                     <label className="form-label">Cliente</label>
                     <div className="input-group">
-                        <input className="form-control"
+                        <input className={`form-control ${styleCreate['input']}`}
                             type="text"
                             value={search}
                             onChange={handleInputChange}
-                            onFocus={() => setIsOpen(true)}
                             onBlur={() => setIsOpen(false)}
+                            onFocus={() => setIsOpen(true)}
                             placeholder="Seleccionar Cliente..." />
                     </div>
-                    <div className="text-bg-secondary">
-                        {isOpen && (
-                            <DropdownClients
-                                filteredOptions={filteredOptions}
-                                onOptionClick={handleOptionClick} />
-                        )}
-                    </div>
+
+                    {isOpen && (
+                        <DropdownClients
+                            filteredOptions={filteredOptions}
+                            onOptionClick={handleOptionClick} />
+                    )}
+
                     <br />
 
+                    {/* Selección de método de pago */}
                     <label className="form-label">Forma de Pago</label>
                     <div className="input-group">
-                        <input type="text"
-                            className="form-control"
-                            onChange={handleChangue}
+                        <select
+                            className={`form-select ${styleCreate['select']}`}
                             name="Method"
-                            value={formValues.Method} />
+                            onChange={handleChangue}
+                            value={formValues.Method}
+                        >
+                            {paymentMethods.map((method) => (
+                                <option key={method.id} value={method.name} className={styleCreate['option']}>
+                                    {method.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <br />
 
                     <label className="form-label">Monto</label>
                     <div className="input-group">
+                        <span className="input-group-text">$</span>
                         <input type="number"
-                            className="form-control"
+                            className={`form-control ${styleCreate['input']}`}
                             onChange={handleChangue}
                             name="Amount"
-                            value={formValues.Amount} />
+                            value={formValues.Amount}
+                            placeholder='...' />
                     </div>
                     <br />
 
                     <label className="form-label">Nota</label>
                     <div className="input-group">
-                        <textarea className="form-control"
+                        <input className={`form-control ${styleCreate['input']}`}
                             onChange={handleChangue}
                             name="note"
-                            value={formValues.Note}></textarea>
+                            value={formValues.Note}
+                            placeholder='Nota...' />
                     </div>
                     <br />
 
                     <div className="d-flex justify-content-end">
-                        <button className="btn btn-success" type="submit">Aceptar</button>
+                        <button className={styleCreate['button']} type="submit">Aceptar</button>
                     </div>
                 </form>
             </div>
