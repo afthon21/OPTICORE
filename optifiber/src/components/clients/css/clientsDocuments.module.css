@@ -1,5 +1,7 @@
-/** Botón de subida */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+/** Botón de subida */
 .button {
     width: 5em;
     height: 2em;
@@ -32,6 +34,10 @@
 
 .button svg {
     width: 1.5em;
+}
+
+.text {
+    font-family: 'Agdasima';
 }
 
 /** Botón de descarga*/
@@ -123,4 +129,43 @@
         transform: translateY(0px);
         opacity: 1;
     }
+}
+
+/** Tabla **/
+.head {
+    font-family: 'Kanit';
+    font-size: 14pt;
+}
+
+.head th {
+    background: transparent;
+    color: #404040;
+    border-bottom: 2px solid #a8a8a8;
+}
+
+.body {
+    font-family: 'Agdasima';
+    font-size: 12pt;
+}
+
+.body td {
+    background: transparent;
+}
+
+.select-row {
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+/** Botón ver */
+.btn-view {
+    font-size: 12pt;
+    text-decoration: none;
+    color: #a8a8a8;
+}
+
+.btn-view:hover {
+    color: #404040;
+    border-bottom: 2px solid #a8a8a8;
 }

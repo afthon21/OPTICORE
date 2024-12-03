@@ -24,7 +24,7 @@ function ClientsCard({ clients = [], onSelected }) {
         <div className={`card d-flex mt-3 ${styleCard['card-container']}`}>
 
             <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}>
-                <span className={`me-2 ${styleCard['title']}`}>Tickets</span>
+                <span className={`me-2 ${styleCard['title']}`}>Clientes</span>
                 <div className={styleCard['group']}>
                     <input required type="text"
                         className={styleCard['input']}
@@ -42,7 +42,7 @@ function ClientsCard({ clients = [], onSelected }) {
                 <table className="table table-hover justify-content-center">
                     <thead className={styleCard['head-table']}>
                         <tr>
-                            <th>Cliente</th>
+                            <th>Nombre</th>
                         </tr>
                     </thead>
                     <tbody className={`text-wrap ${styleCard['table-body']}`}>

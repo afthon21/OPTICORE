@@ -26,7 +26,7 @@ function TicketInfo({ ticket }) {
                 <p className="form-label"><strong>Cliente:</strong></p>
                 <div className="input-group">
                     <input type="text"
-                        className={styleInfo['input']}
+                        className={`form-control ${styleInfo['input']}`}
                         value={`${ticket.Client.Name.FirstName} 
                                 ${ticket.Client.Name.SecondName || ''} 
                                 ${ticket.Client.LastName.FatherLastName} 
@@ -40,7 +40,7 @@ function TicketInfo({ ticket }) {
                 <p className="form-label"><strong>Asunto:</strong></p>
                 <div className="d-flex input-group">
                     <input type="text"
-                        className={styleInfo['input']}
+                        className={`form-control ${styleInfo['input']}`}
                         disabled
                         value={ticket.Issue} />
                 </div>
@@ -49,7 +49,7 @@ function TicketInfo({ ticket }) {
                 <p className="form-label"><strong>Descripción:</strong></p>
                 <div className="d-flex input-group">
                     <textarea
-                        className={`${styleInfo['textarea']}`}
+                       className={`form-control ${styleInfo['textarea']}`}
                         disabled
                         value={ticket.Description}></textarea>
                 </div>

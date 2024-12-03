@@ -1,3 +1,5 @@
+import styleCard from './css/clientInfo.module.css'
+
 import { useState } from 'react';
 import ClientPayments from './Client.payments';
 import ClientData from './Client.data';
@@ -95,39 +97,50 @@ function ClientsInfo({ client }) {
                 </div>
             </nav>
 
-            <div className="card ms-3 me-5 border-0" style={{ width: '45rem' }}>
-                <div className="card-body shadow">
-                    <div className="card-header d-flex justify-content-between">
-                        <span><i className="bi bi-person-fill"></i> Client Details</span>
-                    </div>
+            <div className={`card ${styleCard['card-container']}`}>
 
-                    <div className="card-body">
+                <div className={`d-flex justify-content-between align-items-center mt-1 mx-3 ${styleCard['header']}`}>
+                    <span className={styleCard['title']}><i className="bi bi-person-fill"></i> Client Details</span>
 
-                        {/** datos personales  */}
-                        {show.personal && (
-                            <ClientData client={client} />
-                        )}
-
-                        {/** Ver Documentos */}
-                        {show.documents && (
-                            <ClientDocuments client={client._id} />
-                        )}
-
-                        {/** Ver pagos */}
-                        {show.payments && (
-                            <div className="d-flex justify-content-center">
-                                <ClientPayments client={client._id} />
-                            </div>
-                        )}
-
-                    </div>
-
-                    <div className="card-footer d-flex justify-content-between">
-                        <div className="row" style={{ fontSize: "0.7em" }}>
-                            <span>Dia: {client.CreateDate.split("T")[0]}</span>
+                    <div className={styleCard['tools']}>
+                        <div className={styleCard['circle']}>
+                            <span className={`${styleCard['red']} ${styleCard['box']}`}></span>
                         </div>
-
+                        <div className={styleCard['circle']}>
+                            <span className={`${styleCard['yellow']} ${styleCard['box']}`}></span>
+                        </div>
+                        <div className={styleCard['circle']}>
+                            <span className={`${styleCard['green']} ${styleCard['box']}`}></span>
+                        </div>
                     </div>
+                </div>
+
+                <div className={`card-body ${styleCard['body']}`}>
+
+                    {/** datos personales  */}
+                    {show.personal && (
+                        <ClientData client={client} />
+                    )}
+
+                    {/** Ver Documentos */}
+                    {show.documents && (
+                        <ClientDocuments client={client._id} />
+                    )}
+
+                    {/** Ver pagos */}
+                    {show.payments && (
+                        <div className="d-flex justify-content-center">
+                            <ClientPayments client={client._id} />
+                        </div>
+                    )}
+
+                </div>
+
+                <div className="card-footer d-flex justify-content-between">
+                    <div className="row" style={{ fontSize: "0.7em" }}>
+                        <span>Dia: {client.CreateDate.split("T")[0]}</span>
+                    </div>
+
                 </div>
             </div>
         </div>

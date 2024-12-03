@@ -1,9 +1,10 @@
-import styleDocs from './css/clientsDocuments.module.css'
+import styleDocs from './css/clientsDocuments.module.css';
+import styleTable from './css/clientsDocuments.module.css'
 
 import { useEffect, useState } from "react";
 import { handleLoadDocuments } from "./js/clientDocuments";
 import Swal from "sweetalert2";
-import { UploadDoc } from './Uploap.modal';
+import { UploadDoc } from './Upload.modal.jsx';
 
 function ClientDocuments({ client }) {
     const [data, setData] = useState([]);
@@ -26,7 +27,8 @@ function ClientDocuments({ client }) {
             imageAlt: title,
             imageUrl: document,
             showCloseButton: true,
-            showConfirmButton: false
+            showConfirmButton: false,
+            background: '#ededed'
         })
     }
 
@@ -50,26 +52,31 @@ function ClientDocuments({ client }) {
     return (
         <>
             <table className="table table-hover table-sm">
-                <thead>
+                <thead className={styleTable['head']}>
                     <tr>
                         <th></th>
                         <th>Nombre</th>
-                        <th>Archivo</th>
+                        <th className="text-center">Archivo</th>
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className={`text-wrap ${styleTable['body']}`}>
                     {data.map((item) => (
-                        <tr key={item._id} style={{ width: '30rem' }}>
-                            <td><i className="bi bi-file-earmark-richtext-fill"></i></td>
-                            <td>{item.Description}</td>
-                            <td><a
-                                role="button"
-                                onClick={() => documentModal(item.Document, item.Description)}>Ver Archivo</a></td>
-                            <td>
+                        <tr key={item._id} className={styleTable['select-row']}>
+                            <td style={{width: '1.5rem'}}><i className="bi bi-file-earmark-richtext-fill"></i></td>
+                            <td style={{width: '12rem'}}>{item.Description}</td>
+                            <td className="text-center" style={{width: '5rem'}}>
+                                <a  
+                                    className={`${styleTable['btn-view']}`}
+                                    role="button"
+                                    onClick={() => documentModal(item.Document, item.Description)}>
+                                    Ver Archivo
+                                </a>
+                            </td>
+                            <td style={{width: '5rem'}}>
                                 <button
                                     onClick={() => handleDownload(item.Document)} 
-                                    className={styleDocs['Btn']}>
+                                    className={`${styleDocs['Btn']}`}>
                                     <svg className={styleDocs['svgIcon']} viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" /></svg>
                                     <span className={styleDocs['icon2']} />
                                     <span className={styleDocs['tooltip']}>Descargar</span>
@@ -82,7 +89,7 @@ function ClientDocuments({ client }) {
 
             <div className="d-flex justify-content-end mt-4">
                 <button 
-                    className={styleDocs['button']} 
+                    className={`${styleDocs['button']}`} 
                     type="button" 
                     data-bs-toggle="modal" 
                     data-bs-target="#uploadModal">
@@ -95,7 +102,7 @@ function ClientDocuments({ client }) {
                     </span>
                 </button>
 
-                <UploadDoc />
+                <UploadDoc client={client}/>
             </div>
         </>
 

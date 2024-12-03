@@ -151,7 +151,7 @@ function ProfileCard({ profile }) {
                 </label>
                 
                 <div className="input-group mb-3">
-                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Nombre(s)</span>
+                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Nombre(s):</span>
                     <input
                         type="text"
                         className={`form-control ${styleCard['input']}`}
@@ -160,7 +160,7 @@ function ProfileCard({ profile }) {
                 </div>
 
                 <div className="input-group mb-3">
-                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Apellidos</span>
+                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Apellidos:</span>
                     <input
                         type="text"
                         className={`form-control ${styleCard['input']}`}
@@ -184,7 +184,7 @@ function ProfileCard({ profile }) {
                 </div>
 
                 <div className="input-group mb-3">
-                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Correo</span>
+                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Correo:</span>
                     <input
                         type="text"
                         className={`form-control ${styleCard['input']}`}
@@ -205,7 +205,7 @@ function ProfileCard({ profile }) {
 
 
                 <div className="input-group mb-3">
-                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Contraseña</span>
+                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Contraseña:</span>
                     <input
                         type="password"
                         className={`form-control ${styleCard['input']}`}

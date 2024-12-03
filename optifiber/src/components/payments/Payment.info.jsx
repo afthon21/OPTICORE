@@ -26,7 +26,7 @@ function PaymentInfo({ payment }) {
                 <p className="form-label"><strong>Cliente</strong></p>
                 <div className="input-group">
                     <input type="text"
-                        className={styleInfo['input']}
+                        className={`form-control ${styleInfo['input']}`}
                         value={`${payment.Client.Name.FirstName} 
                             ${payment.Client.Name.SecondName || ''} 
                             ${payment.Client.LastName.FatherLastName} 
@@ -39,7 +39,7 @@ function PaymentInfo({ payment }) {
                 <p className="form-label"><strong>Forma de pago</strong></p>
                 <div className="input-group">
                     <input type="text"
-                        className={styleInfo['input']}
+                        className={`form-control ${styleInfo['input']}`}
                         disabled
                         value={payment.Method} />
                 </div>
@@ -48,7 +48,7 @@ function PaymentInfo({ payment }) {
                 <p className="form-label"><strong>Monto:</strong></p>
                 <div className="input-group">
                     <input
-                        className={styleInfo['input']}
+                        className={`form-control ${styleInfo['input']}`}
                         disabled
                         value={payment.Amount} />
                 </div>

@@ -47,6 +47,10 @@
     border-bottom: 2px solid #2a9d8f;
 }
 
+.input:disabled {
+    background: transparent;
+}
+
 .textarea {
     overflow-y: auto;
 }
@@ -82,4 +86,8 @@
     border: none;
     background: transparent;
     border-bottom: 2px solid #2a9d8f;
+}
+
+.textarea:disabled {
+    background: transparent;
 }

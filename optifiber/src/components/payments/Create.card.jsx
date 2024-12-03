@@ -26,11 +26,11 @@ function CardCreatePayment({ clients = [] }) {
     }
 
     const paymentMethods = [
-        { id: '0', name: 'Método de pago...', disable: true},
-        { id: '1', name: 'Tarjeta de Crédito', icon: 'bi bi-credit-card', disable: false},
-        { id: '2', name: 'Transferencia Bancaria', icon: 'bi bi-cash-coin', disable: false},
-        { id: '3', name: 'Efectivo', icon: 'bi bi-cash-stack', disable: false},
-        { id: '4', name: 'PayPal', icon: 'bi bi-paypal', disable: false}
+        { id: '0', name: 'Método de pago...', hide: true, selected: true},
+        { id: '1', name: 'Tarjeta de Crédito', icon: 'bi bi-credit-card'},
+        { id: '2', name: 'Transferencia Bancaria', icon: 'bi bi-cash-coin'},
+        { id: '3', name: 'Efectivo', icon: 'bi bi-cash-stack'},
+        { id: '4', name: 'PayPal', icon: 'bi bi-paypal'}
     ];
 
     useEffect(() => {
@@ -46,7 +46,7 @@ function CardCreatePayment({ clients = [] }) {
         setFormValues((prevValues) => ({
             ...prevValues,
             [name]: value
-        }))
+        }));
     }
 
     const handleInputChange = (e) => {
@@ -165,7 +165,13 @@ function CardCreatePayment({ clients = [] }) {
                             value={formValues.Method}
                         >
                             {paymentMethods.map((method) => (
-                                <option key={method.id} value={method.name} className={styleCreate['option']}>
+                                <option 
+                                    key={method.id} 
+                                    value={method.name}
+                                    hidden={method.hide}
+                                    selected={method.selected}
+                                    className={styleCreate['option']}>
+
                                     {method.name}
                                 </option>
                             ))}

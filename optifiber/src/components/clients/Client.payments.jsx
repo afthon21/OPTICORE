@@ -1,3 +1,5 @@
+import stylePayment from './css/clientPayments.module.css'
+
 import { useEffect, useState } from "react";
 import { handleLoadPay } from "./js/clientLoadPay";
 
@@ -22,14 +24,14 @@ function ClientPayments({ client }) {
 
     return (
 
-        <table className="table table-hover table-sm" style={{ width: '30rem' }}>
-            <thead>
+        <table className={`table table-hover table-sm ${stylePayment['container']}`}>
+            <thead className={`${stylePayment['header']}`}>
                 <tr>
                     <th>Folio</th>
                     <th>Cliente</th>
                 </tr>
             </thead>
-            <tbody className="text-wrap" style={{ fontSize: "0.8em" }}>
+            <tbody className={`text-wrap ${stylePayment['body']}`}>
                 {data ? (
                     data.map((item) => (
                         <tr key={item._id} onClick={()=>setSelect(item)}  style={{ cursor: 'pointer' }}>
