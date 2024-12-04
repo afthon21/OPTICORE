@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ClientPayments from './Client.payments';
 import ClientData from './Client.data';
 import ClientDocuments from './Clients.documents';
+import ClientTickets from './Client.tickets';
 
 function ClientsInfo({ client }) {
     const [show, setShow] = useState({
@@ -129,9 +130,12 @@ function ClientsInfo({ client }) {
 
                     {/** Ver pagos */}
                     {show.payments && (
-                        <div className="d-flex justify-content-center">
-                            <ClientPayments client={client._id} />
-                        </div>
+                        <ClientPayments client={client._id} />
+                    )}
+
+                    {/** Ver tickets */}
+                    {show.tickets && (
+                        <ClientTickets client={client._id}/>
                     )}
 
                 </div>

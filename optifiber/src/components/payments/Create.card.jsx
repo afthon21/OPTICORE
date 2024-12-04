@@ -114,7 +114,7 @@ function CardCreatePayment({ clients = [] }) {
                 background: '#e5e8e8'
             }).then(() => {
                 setFormValues({
-                    Method: '',
+                    Method: paymentMethods.find((item) => item.id === '0').name,
                     Amount: '',
                     Note: '',
                 });

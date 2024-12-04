@@ -2,7 +2,7 @@ import styleDocs from './css/clientsDocuments.module.css';
 import styleTable from './css/clientsDocuments.module.css'
 
 import { useEffect, useState } from "react";
-import { handleLoadDocuments } from "./js/clientDocuments";
+import { handleLoadDocuments } from "./js/clientLoadData.js";
 import Swal from "sweetalert2";
 import { UploadDoc } from './Upload.modal.jsx';
 
@@ -41,7 +41,7 @@ function ClientDocuments({ client }) {
 
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = "document.jpg"; // Nombre del archivo
+        link.download = "img.jpg"; // Nombre del archivo
         link.click();
     
         // Limpia la URL para evitar problemas de memoria

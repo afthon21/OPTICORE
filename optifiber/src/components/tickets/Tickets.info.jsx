@@ -42,7 +42,7 @@ function TicketInfo({ ticket }) {
                     <input type="text"
                         className={`form-control ${styleInfo['input']}`}
                         disabled
-                        value={ticket.Issue} />
+                        value={ticket.Issue || ''} />
                 </div>
                 <br />
 
@@ -51,7 +51,7 @@ function TicketInfo({ ticket }) {
                     <textarea
                        className={`form-control ${styleInfo['textarea']}`}
                         disabled
-                        value={ticket.Description}></textarea>
+                        value={ticket.Description || ''}></textarea>
                 </div>
 
             </div>

@@ -134,6 +134,8 @@ export const viewClientTicketS = async (req, res) => {
                 .populate('Client', 'Name LastName')
                 .populate('Admin', 'UserName')
                 .exec();
+            
+            return res.status(200).json(tickets);
         }
     } catch (error) {
         console.log(error);

@@ -8,6 +8,6 @@ ticketRoute.post('/new',protectRoute,getProfile,createTicket);
 ticketRoute.get('/all',protectRoute,getProfile,viewAllTickets);
 ticketRoute.get('/view/:id',protectRoute,getProfile,viewOneTicket);
 ticketRoute.post('/new/:id',protectRoute,getProfile,createTicketById);
-ticketRoute.get('/all/:id',protectRoute,getProfile,viewAllTickets);
+ticketRoute.get('/all/:id',protectRoute,getProfile,viewClientTicketS);
 
 export default ticketRoute;

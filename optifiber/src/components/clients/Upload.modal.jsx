@@ -1,7 +1,7 @@
-import Swal from 'sweetalert2';
 import styleFormModal from './css/uploadModal.module.css'
 
 import { useEffect, useState } from "react";
+import Swal from 'sweetalert2';
 
 export function UploadDoc({ client }) {
 
@@ -45,7 +45,7 @@ export function UploadDoc({ client }) {
      * Limpiar al cerrar el modal
      */
     const handleClear = () => {
-        setValue("Nombre del archivo...")
+        setValue(documentName.find((item) => item.id === '0').name)
         setFile(null)
     }
 
@@ -69,7 +69,7 @@ export function UploadDoc({ client }) {
         e.preventDefault();
 
         const formData = new FormData();
-        formData.append('Description',value);
+        formData.append('Description', value);
         if (file) {
             formData.append('file', file)
         }
@@ -196,7 +196,13 @@ export function UploadDoc({ client }) {
                             )}
 
                             <div className="d-flex justify-content-end">
-                                <button type="submit">Aceptar</button>
+                                <button
+                                    className={`mt-2 ${styleFormModal['btn-submit']}`} 
+                                    type="submit"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                    Aceptar
+                                </button>
                             </div>
                         </form>
                     </div>

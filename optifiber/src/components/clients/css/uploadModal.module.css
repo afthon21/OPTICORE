@@ -149,4 +149,19 @@
     background: transparent;
     border-bottom: 2px solid #2a9d8f;
 }
+
+.btn-submit {
+    border-radius: 10%;
+    background: #2a9d8f;
+    font-size: 16pt;
+    font-family: 'Agdasima';
+    color: #ededed;
+    border: none;
+    width: 80px;
+    transition: width 0.4s ease;
+}
+
+.btn-submit:hover {
+    width: 100px;
+}
 /** Modal */
