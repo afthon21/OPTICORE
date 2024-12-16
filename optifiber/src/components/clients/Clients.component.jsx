@@ -44,14 +44,9 @@ function ClientsComponent() {
         <>
             <div className="container-fluid d-flex justify-content-start mt-1 ms-4" style={{paddingLeft: '65px'}}>
                 <ClientsCard clients = { data ? data: []} onSelected={setSelect}/>         
-                {select ? (
-                    select && <ClientsInfo client={select}/>
-                ) : (
-                    <div className="card mx-4 justify-content-center border-0" style={{width: '30rem'}}>
-                        <LoadFragment />
-                    </div>
-                    
-                )}
+                
+                <ClientsInfo client={select}/>
+                
             </div>
         </>
     );

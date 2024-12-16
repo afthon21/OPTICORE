@@ -2,6 +2,8 @@ import styleTickets from './css/clientTickets.module.css';
 
 import { useEffect, useState } from 'react';
 import { handleLoadTicket } from './js/clientLoadData.js';
+import CreateTicket from './CreateTicket.modal.jsx';
+import { LoadFragment } from '../fragments/Load.fragment.jsx';
 
 function ClientTickets({ client }) {
     const [data, setData] = useState([]);
@@ -20,12 +22,19 @@ function ClientTickets({ client }) {
         fetchData()
     }, [client])
 
+    if (!client) return <LoadFragment />
+
     return (
         <>
             <div className="justify-content-end d-flex">
-                <button className={`${styleTickets['btn']}`}>
+                <button
+                    data-bs-toggle="modal"
+                    data-bs-target="#CreateTicketModal"
+                    className={`${styleTickets['btn']}`}>
                     <i class="bi bi-plus-square-fill"></i>
                 </button>
+
+                <CreateTicket client={client} />
             </div>
             <table className={`table table-hover table-sm ${styleTickets['container']}`}>
                 <thead className={`${styleTickets['header']}`}>
@@ -36,7 +45,7 @@ function ClientTickets({ client }) {
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${styleTickets['body']}`}>
-                    {data ? (
+                    {
                         data.map((item) => (
                             <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}>
                                 <td>{item.Folio}</td>
@@ -44,9 +53,8 @@ function ClientTickets({ client }) {
                                 <td>{item.Description}</td>
                             </tr>
                         ))
-                    ) : (
-                        <LoadFragment />
-                    )}
+
+                    }
                 </tbody>
             </table>
         </>

@@ -98,13 +98,6 @@
     }
 }
 
-/** Card-container */
-.card-container {
-    width: 25rem;
-    background: transparent;
-    border: none;
-}
-
 /** table */
 .head-table {
     font-family: 'Kanit';
@@ -129,11 +122,6 @@
 .selected-row {
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.selected-row:hover {
-    transform: scale(1.1);
 }
 
 /** card-header */

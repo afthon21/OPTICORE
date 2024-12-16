@@ -45,17 +45,17 @@ export function UploadDoc({ client }) {
      * Limpiar al cerrar el modal
      */
     const handleClear = () => {
-        setValue(documentName.find((item) => item.id === '0').name)
-        setFile(null)
+        setValue(documentName.find((item) => item.id === '0').name);
+        setFile(null);
     }
 
     useEffect(() => {
         /**
          * Usar para eliminar el contenido del formulario cuando se cierra el modal
          */
-        const modal = document.getElementById("uploadModal");
+        const modal = document.getElementById('uploadModal');
         if (modal) {
-            modal.addEventListener("hidden.bs.modal", handleClear)
+            modal.addEventListener("hidden.bs.modal", handleClear);
         }
 
         return () => {
@@ -101,7 +101,7 @@ export function UploadDoc({ client }) {
                 position: 'bottom-end',
                 background: '#e5e8e8'
             }).then(() => {
-                setValue("Nombre del archivo...")
+                setValue(documentName.find((item) => item.id === '0').name)
                 setFile(null)
             });
 

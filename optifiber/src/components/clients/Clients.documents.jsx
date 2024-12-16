@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { handleLoadDocuments } from "./js/clientLoadData.js";
 import Swal from "sweetalert2";
 import { UploadDoc } from './Upload.modal.jsx';
+import { LoadFragment } from '../fragments/Load.fragment.jsx';
 
 function ClientDocuments({ client }) {
     const [data, setData] = useState([]);
@@ -49,6 +50,8 @@ function ClientDocuments({ client }) {
     }
 
 
+    if (!client) return <LoadFragment />
+
     return (
         <>
             <table className="table table-hover table-sm">
@@ -64,7 +67,7 @@ function ClientDocuments({ client }) {
                     {data.map((item) => (
                         <tr key={item._id} className={styleTable['select-row']}>
                             <td style={{width: '1.5rem'}}><i className="bi bi-file-earmark-richtext-fill"></i></td>
-                            <td style={{width: '12rem'}}>{item.Description}</td>
+                            <td style={{width: '12rem'}}>{item.Description || ''}</td>
                             <td className="text-center" style={{width: '5rem'}}>
                                 <a  
                                     className={`${styleTable['btn-view']}`}

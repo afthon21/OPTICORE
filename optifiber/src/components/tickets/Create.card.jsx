@@ -1,6 +1,8 @@
 import styleCreate from './css/createCard.module.css'
 
 import { useEffect, useState } from 'react';
+import ApiRequest from '../hooks/apiRequest.jsx';
+
 import { getDate } from '../fragments/js/getDate.js';
 import { cleanData } from '../fragments/js/cleanData.js';
 import Swal from 'sweetalert2';
@@ -8,6 +10,7 @@ import Swal from 'sweetalert2';
 import { DropdownClients } from '../fragments/Dropdown.clients.jsx';
 
 export function CardCreateTicket({ clients = [] }) {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState('');
@@ -70,49 +73,35 @@ export function CardCreateTicket({ clients = [] }) {
         return clientName.toLowerCase().includes(search.toLowerCase());
     });
 
-
+    /**
+     * Enviar formulario
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const cleanedData = cleanData(data);
 
-        const cleanedData = cleanData(data)
         try {
-            const token = sessionStorage.getItem('token');
-            const res = await fetch('http://localhost:3200/api/ticket/new', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(cleanedData)
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
+            await makeRequest('/ticket/new', 'POST', cleanedData);
+        
             Swal.fire({
                 icon: 'success',
                 title: 'Creado exitosamente!',
-                timer: 1000,
+                timer: 1200,
                 showConfirmButton: false,
                 timerProgressBar: true,
                 toast: true,
                 position: 'bottom-end',
                 background: '#e5e8e8'
-            }).then(() => {
+            }). then(() => {
                 setFormValues({
                     Issue: '',
-                    Description: '',
-                });
-                setSearch('');
-                setSelected('')
-            });
+                    Description: ''
+                })
 
+                setSearch('');
+            })
         } catch (error) {
-            console.log(error);
+            console.log(error.message);
         }
     }
 
@@ -172,10 +161,12 @@ export function CardCreateTicket({ clients = [] }) {
 
                     <div className="d-flex justify-content-end">
                         <button className={styleCreate['button']} type="submit">
-                            Aceptar
+                            {loading ? 'Creando...' : 'Crear'}
                         </button>
                     </div>
                 </form>
+
+                {error && <p>Error: {error}</p>}
 
             </div>
         </div>

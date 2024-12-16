@@ -1,10 +1,12 @@
-import styleCard from './css/clientInfo.module.css'
+import styleCard from './css/clientInfo.module.css';
+import styleNav from './css/navbar.module.css';
 
 import { useState } from 'react';
 import ClientPayments from './Client.payments';
 import ClientData from './Client.data';
 import ClientDocuments from './Clients.documents';
 import ClientTickets from './Client.tickets';
+import Swal from 'sweetalert2';
 
 function ClientsInfo({ client }) {
     const [show, setShow] = useState({
@@ -16,19 +18,32 @@ function ClientsInfo({ client }) {
     });
 
     const toggleData = (data) => {
-        setShow({
-            personal: false,
-            payments: false,
-            documents: false,
-            location: false,
-            tickets: false,
-            [data]: true
-        })
+        if (!client) {
+            Swal.fire({
+                icon: 'warning',
+                iconColor: 'red',
+                title: 'Advertencia',
+                text: 'Seleccione un cliente',
+                timer: 700,
+                toast: true,
+                position: 'top',
+                showConfirmButton: false
+            })
+        } else {
+            setShow({
+                personal: false,
+                payments: false,
+                documents: false,
+                location: false,
+                tickets: false,
+                [data]: true
+            })
+        }
     }
 
     return (
         <div>
-            <nav className="navbar navbar-expand-lg bg-body-tertiary w-100">
+            <nav className="navbar navbar-expand-lg w-100">
                 <div className="container-fluid align-content-center">
                     <button
                         className="navbar-toggler"
@@ -137,13 +152,6 @@ function ClientsInfo({ client }) {
                     {show.tickets && (
                         <ClientTickets client={client._id}/>
                     )}
-
-                </div>
-
-                <div className="card-footer d-flex justify-content-between">
-                    <div className="row" style={{ fontSize: "0.7em" }}>
-                        <span>Dia: {client.CreateDate.split("T")[0]}</span>
-                    </div>
 
                 </div>
             </div>

@@ -56,11 +56,8 @@
 }
 
 /** card */
-.container-card {
-    height: 10rem;
-    width: 35rem;
-    background: transparent;
-    border: 1px solid #ededed
+.body {
+    background: #f8f9fa;
 }
 
 .title {
@@ -70,7 +67,7 @@
 }
 
 .body p{
-    font-family: 'Agdasima';
+    font-family: 'Kanit';
     font-size: 14pt;
     color: #404040;
 }

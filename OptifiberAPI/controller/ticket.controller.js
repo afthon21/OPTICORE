@@ -24,13 +24,13 @@ export const createTicket = async (req, res) => {
             ${clientData.Name.SecondName || ''} 
             ${clientData.LastName.FatherLastName} 
             ${clientData.LastName.MotherLastName}`
-            .replace(/\s+/g, ' ').trim();;
+            .replace(/\s+/g, ' ').trim();
 
         const adminName = `${adminData.Name.FirstName} 
             ${adminData.Name.SecondName || ''} 
             ${adminData.LastName.FatherLastName} 
             ${adminData.LastName.MotherLastName}`
-            .replace(/\s+/g, ' ').trim();;
+            .replace(/\s+/g, ' ').trim();
 
         const newTicket = ticket({
             Issue,
@@ -44,7 +44,7 @@ export const createTicket = async (req, res) => {
 
         await newTicket.save();
 
-        return res.status(201).json(newTicket);
+        return res.status(201).json({ message: 'New ticket created'});
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error creating ticket' });
@@ -95,25 +95,41 @@ export const createTicketById = async (req, res) => {
         Description,
     } = req.body;
 
-    const id = req.params.id;
+    const Client = req.params.id;
     const Admin = req.adminId;
 
     try {
-        const clientExist = await client.findById(id);
+        const clientExist = await client.findById(Client);
+        const adminData = await admin.findById(Admin);
 
         if (!clientExist) {
             return res.status(404).json({ message: 'Client does not exist yet' });
-        } else {
-            const newTicket = new ticket({
-                Issue,
-                Description,
-                Client: clientExist._id,
-                Admin
-            });
-
-            await newTicket.save();
-            return res.status(201).json(newTicket);
         }
+
+        const clientName = `${clientExist.Name.FirstName} 
+        ${clientExist.Name.SecondName || ''} 
+        ${clientExist.LastName.FatherLastName} 
+        ${clientExist.LastName.MotherLastName}`
+        .replace(/\s+/g, ' ').trim();
+
+    const adminName = `${adminData.Name.FirstName} 
+        ${adminData.Name.SecondName || ''} 
+        ${adminData.LastName.FatherLastName} 
+        ${adminData.LastName.MotherLastName}`
+        .replace(/\s+/g, ' ').trim();
+
+        const newTicket = new ticket({
+            Issue,
+            Description,
+            Client: clientExist._id,
+            Admin
+        });
+
+        //Creamos el folio
+        newTicket.setFolio(newTicket._id, clientName, adminName, newTicket.CreateDate);
+
+        await newTicket.save();
+        return res.status(201).json({ message: 'New ticket created'});
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error creating ticket' });
@@ -134,7 +150,7 @@ export const viewClientTicketS = async (req, res) => {
                 .populate('Client', 'Name LastName')
                 .populate('Admin', 'UserName')
                 .exec();
-            
+
             return res.status(200).json(tickets);
         }
     } catch (error) {

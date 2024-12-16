@@ -1,59 +1,38 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-
-import { LoadFragment } from '../fragments/Load.fragment';
-
 import { useState,useEffect } from 'react';
+import ApiRequest from '../hooks/apiRequest';
+
 import PaymentCard from './Payment.card';
 import PaymentInfo from './Payment.info';
-
+import { LoadFragment } from '../fragments/Load.fragment.jsx'
+ 
 function PaymentComponent() {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data,setData] = useState([]);
     const [select,setSelect] = useState(null)
 
     const handleLoad = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-
-            const res = await fetch('http://localhost:3200/api/pay/all', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
-            const result = await res.json();
-            setData(result);
+            const res = await makeRequest('/pay/all');
+            setData(res);
         } catch (error) {
-            
+            console.log(error)
         }
     }
 
     useEffect(() => {
         handleLoad()
-    },[]);
+    },[makeRequest]);
+
+    if (loading) return <LoadFragment />;
+
+    if (error) return <p>Error: {error}</p>;
 
     return(
         <>
-            <div className="container-fluid d-flex justify-content-start mt-1 ms-4" style={{paddingLeft: '65px'}}>
+            <div className="container-fluid d-flex justify-content-center mt-1">
                 <PaymentCard payments={data ? data : []} onSelected={setSelect} />
 
-                {select ? (
-                    select && <PaymentInfo payment={select} />
-                ) : (
-                    <div className="card justify-content-center mx-4 border-0" style={{width: '30rem',  background: 'transparent' }}>
-                        <LoadFragment />
-                    </div>
-                )}
+                <PaymentInfo payment={select ? select: ''} />
             </div>
         </>
     );

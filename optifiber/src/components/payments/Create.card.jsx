@@ -1,6 +1,8 @@
 import styleCreate from './css/createCard.module.css';
 
 import { useEffect, useState } from 'react';
+import ApiRequest from '../hooks/apiRequest.jsx';
+
 import { cleanData } from "../fragments/js/cleanData.js";
 import Swal from 'sweetalert2';
 import { getDate } from '../fragments/js/getDate.js';
@@ -8,7 +10,8 @@ import { getDate } from '../fragments/js/getDate.js';
 import { DropdownClients } from '../fragments/Dropdown.clients.jsx';
 
 function CardCreatePayment({ clients = [] }) {
-    const [isOpen, setIsOpen] = useState(false)
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState('');
     const [formValues, setFormValues] = useState({
@@ -26,11 +29,11 @@ function CardCreatePayment({ clients = [] }) {
     }
 
     const paymentMethods = [
-        { id: '0', name: 'Método de pago...', hide: true, selected: true},
-        { id: '1', name: 'Tarjeta de Crédito', icon: 'bi bi-credit-card'},
-        { id: '2', name: 'Transferencia Bancaria', icon: 'bi bi-cash-coin'},
-        { id: '3', name: 'Efectivo', icon: 'bi bi-cash-stack'},
-        { id: '4', name: 'PayPal', icon: 'bi bi-paypal'}
+        { id: '0', name: 'Método de pago...', hide: true, selected: true },
+        { id: '1', name: 'Tarjeta de Crédito', icon: 'bi bi-credit-card' },
+        { id: '2', name: 'Transferencia Bancaria', icon: 'bi bi-cash-coin' },
+        { id: '3', name: 'Efectivo', icon: 'bi bi-cash-stack' },
+        { id: '4', name: 'PayPal', icon: 'bi bi-paypal' }
     ];
 
     useEffect(() => {
@@ -82,27 +85,10 @@ function CardCreatePayment({ clients = [] }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const cleanedData = cleanData(data);
 
         try {
-            const token = sessionStorage.getItem('token');
-            const res = await fetch('http://localhost:3200/api/pay/new', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(cleanedData)
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
+            await makeRequest('/pay/new', 'POST', cleanedData);
             Swal.fire({
                 icon: 'success',
                 title: 'Creado exitosamente!',
@@ -165,8 +151,8 @@ function CardCreatePayment({ clients = [] }) {
                             value={formValues.Method}
                         >
                             {paymentMethods.map((method) => (
-                                <option 
-                                    key={method.id} 
+                                <option
+                                    key={method.id}
                                     value={method.name}
                                     hidden={method.hide}
                                     selected={method.selected}
@@ -195,16 +181,20 @@ function CardCreatePayment({ clients = [] }) {
                     <div className="input-group">
                         <input className={`form-control ${styleCreate['input']}`}
                             onChange={handleChangue}
-                            name="note"
+                            name="Note"
                             value={formValues.Note}
                             placeholder='Nota...' />
                     </div>
                     <br />
 
                     <div className="d-flex justify-content-end">
-                        <button className={styleCreate['button']} type="submit">Aceptar</button>
+                        <button className={styleCreate['button']} type="submit">
+                            {loading ? 'Creando...' : 'Crear'}
+                        </button>
                     </div>
                 </form>
+
+                {error && <p>Error: {error}</p>}
             </div>
         </div>
     );

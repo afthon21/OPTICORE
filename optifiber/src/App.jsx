@@ -25,7 +25,6 @@ function App() {
       
         <NavbarFragmentAll />
         
-
         <div className="content d-flex">
         
         <Routes>

@@ -84,57 +84,7 @@ function ProfileCard({ profile }) {
     }
 
     const handleSubmit = async (e, fieldName) => {
-        e.preventDefault();
-
-        if (!validators(fieldName)) {
-            return;
-        }
-
-        try {
-            const token = sessionStorage.getItem('token');
-            const toSend = { [fieldName]: values[fieldName] };
-
-            const res = await fetch('http://localhost:3200/api/profile/edit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(toSend)
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                messageError(errorDetails.message);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: errorDetails.message,
-                    toast: true,
-                    position: 'bottom-right',
-                    timer: 1500,
-                    showCloseButton: true,
-                    timerProgressBar: true
-                }).then(() => {
-                    messageError('');
-                })
-            }
-
-            const result = await res.json();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Actualizado!',
-                text: result.message,
-                timer: 1000,
-                showConfirmButton: false,
-                timerProgressBar: true,
-            });
-        } catch (error) {
-            console.log(error);
-        }
+        e.preventDefault();       
     }
 
     return (

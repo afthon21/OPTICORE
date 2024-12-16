@@ -129,11 +129,6 @@
 .selected-row {
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.selected-row:hover {
-    transform: scale(1.1);
 }
 
 /** card-header */

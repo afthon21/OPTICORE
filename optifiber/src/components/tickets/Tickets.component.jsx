@@ -1,54 +1,36 @@
 import { useEffect, useState } from 'react';
+import ApiRequest from '../hooks/apiRequest.jsx';
 
 import TicketsCard from './Tickets.card.jsx';
 import TicketInfo from './Tickets.info.jsx';
-import { LoadFragment } from '../fragments/Load.fragment.jsx';
+import { LoadFragment } from '../fragments/Load.fragment.jsx'
 
 function TicketComponent() {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE)
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
 
     const handleLoad = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-
-            const res = await fetch('http://localhost:3200/api/ticket/all', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
-            const result = await res.json();
-            setData(result);
+            const res = await makeRequest('/ticket/all');
+            setData(res);
         } catch (error) {
             console.log(error);
         }
     }
-
     useEffect(() => {
         handleLoad();
-    }, []);
+    }, [makeRequest]);
 
+    if (loading) return <LoadFragment />;
+
+    if (error) return <p>Error: {error}</p>;
+    
     return (
-        <div className="container-fluid d-flex justify-content-start mt-1 ms-4" style={{ paddingLeft: '65px' }}>
-            <TicketsCard tickets={data ? data : []} onSelected={setSelect} />
+        <div className="container-fluid d-flex justify-content-center mt-1 ms-4">
+            <TicketsCard tickets={data ? data : []}  onSelected={setSelect}/>
 
-            {select ? (
-                select && <TicketInfo ticket={select} />
-            ) : (
-                <div className="card justify-content-center me-4 border-0" style={{ width: '30rem', background: 'transparent' }}>
-                    <LoadFragment />
-                </div>
-            )}
+            <TicketInfo ticket={select ? select: ''}/>
         </div>
     );
 }

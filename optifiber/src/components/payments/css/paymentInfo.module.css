@@ -51,22 +51,10 @@
     background: transparent;
 }
 
-/** card */
-.container-card {
-    height: 10rem;
-    width: 35rem;
-    background: transparent;
-    border: 1px solid #ededed
+.body {
+    background: #f8f9fa;
 }
 
-.title {
+.body p {
     font-family: 'Kanit';
-    font-size: 16pt;
-    color: #002b5b;
-}
-
-.body p{
-    font-family: 'Agdasima';
-    font-size: 14pt;
-    color: #404040;
 }

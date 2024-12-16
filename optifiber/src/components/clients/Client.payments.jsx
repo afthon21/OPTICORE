@@ -23,17 +23,19 @@ function ClientPayments({ client }) {
         fetchData();
     }, [client]);
 
+    if (!client) return <LoadFragment />
+
     return (
         <>
             <div className="justify-content-end d-flex">
-                <button 
-                    data-bs-toggle="modal" 
+                <button
+                    data-bs-toggle="modal"
                     data-bs-target="#CreatePayModal"
                     className={`${stylePayment['btn']}`}>
                     <i class="bi bi-plus-square-fill"></i>
                 </button>
 
-                <CreatePay client={client}/>
+                <CreatePay client={client} />
             </div>
             <table className={`table table-hover table-sm ${stylePayment['container']}`}>
                 <thead className={`${stylePayment['header']}`}>
@@ -44,7 +46,7 @@ function ClientPayments({ client }) {
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${stylePayment['body']}`}>
-                    {data ? (
+                    {
                         data.map((item) => (
                             <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}>
                                 <td>{item.Folio}</td>
@@ -52,9 +54,7 @@ function ClientPayments({ client }) {
                                 <td>{item.Amount}</td>
                             </tr>
                         ))
-                    ) : (
-                        <LoadFragment />
-                    )}
+                    }
                 </tbody>
             </table>
         </>

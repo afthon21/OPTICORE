@@ -25,7 +25,7 @@ export const createDocument = async (req,res) => {
             }
 
             await newDocument.save();
-            return res.status(201).json( newDocument );
+            return res.status(201).json({ message: 'Upload successfully'});
         }
     } catch (error) {
         console.log(error);

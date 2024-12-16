@@ -26,13 +26,13 @@ export const createPayment = async (req, res) => {
         ${clientData.Name.SecondName || ''} 
         ${clientData.LastName.FatherLastName} 
         ${clientData.LastName.MotherLastName}`
-            .replace(/\s+/g, ' ').trim();;
-    
+            .replace(/\s+/g, ' ').trim();
+
         const adminName = `${adminData.Name.FirstName} 
         ${adminData.Name.SecondName || ''} 
         ${adminData.LastName.FatherLastName} 
         ${adminData.LastName.MotherLastName}`
-            .replace(/\s+/g, ' ').trim();;
+            .replace(/\s+/g, ' ').trim();
 
 
         const newPayment = payment({
@@ -48,7 +48,7 @@ export const createPayment = async (req, res) => {
         newPayment.setFolio(newPayment._id, clientName, adminName, newPayment.CreateDate)
 
         await newPayment.save();
-        return res.status(201).json(newPayment);
+        return res.status(201).json({ message: 'New payment created'});
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error creating pay' });
@@ -75,7 +75,7 @@ export const viewOnePayment = async (req, res) => {
 
     try {
         const exist = await payment.findById(id);
-        if(!exist) {
+        if (!exist) {
             return res.status(404).json({ message: 'ticket does not exist yet' });
         }
         const idPayment = await payment.findById(id)
@@ -97,27 +97,43 @@ export const createPaymentById = async (req, res) => {
         Note
     } = req.body;
 
-    const id = req.params.id; //Id del cliente
+    const Client = req.params.id; //Id del cliente
     const Admin = req.adminId;
 
     try {
-        const clientExist = await client.findById(id);
+        const clientExist = await client.findById(Client);
+        const adminData = await admin.findById(Admin);
 
         if (!clientExist) {
             return res.status(404).json({ message: 'Client does not exist yet' });
-        } else {
-            const newPayment = new payment({
-                CreateDate,
-                Client: clientExist._id,
-                Method,
-                Amount,
-                Note,
-                Admin
-            });
-
-            await newPayment.save();
-            return res.status(201).json(newPayment);
         }
+
+        const clientName = `${clientExist.Name.FirstName} 
+        ${clientExist.Name.SecondName || ''} 
+        ${clientExist.LastName.FatherLastName} 
+        ${clientExist.LastName.MotherLastName}`
+            .replace(/\s+/g, ' ').trim();
+
+        const adminName = `${adminData.Name.FirstName} 
+        ${adminData.Name.SecondName || ''} 
+        ${adminData.LastName.FatherLastName} 
+        ${adminData.LastName.MotherLastName}`
+            .replace(/\s+/g, ' ').trim();
+
+        const newPayment = new payment({
+            CreateDate,
+            Client: clientExist._id,
+            Method,
+            Amount,
+            Note,
+            Admin
+        });
+
+        //Creamos el folio
+        newPayment.setFolio(newPayment._id, clientName, adminName, newPayment.CreateDate)
+
+        await newPayment.save();
+        return res.status(201).json({ message: 'New payment created'});
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error creating payment' });
