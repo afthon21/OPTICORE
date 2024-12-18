@@ -5,7 +5,6 @@ function ClientData({ client }) {
 
     if (!client) {
         return (
-
             <>
                 <label className={`form-label ${styleData['label']}`}>Nombre:</label>
                 <div className="input-group mb-4">

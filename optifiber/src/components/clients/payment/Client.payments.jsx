@@ -1,19 +1,20 @@
-import stylePayment from './css/clientPayments.module.css'
+import stylePayment from '../css/clientPayments.module.css'
 
 import { useEffect, useState } from "react";
-import { handleLoadPay } from "./js/clientLoadData.js";
+import ApiRequest from '../../hooks/apiRequest.jsx';
 
-import { LoadFragment } from "../fragments/Load.fragment";
+import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import CreatePay from './CreatePay.modal.jsx';
 
 function ClientPayments({ client }) {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null)
 
     const fetchData = async () => {
         try {
-            const result = await handleLoadPay(client);
-            setData(result);
+            const res = await makeRequest(`/pay/all/${client}`);
+            setData(res);
         } catch (error) {
             console.log(error);
         }
@@ -21,9 +22,11 @@ function ClientPayments({ client }) {
 
     useEffect(() => {
         fetchData();
-    }, [client]);
+    }, [makeRequest]);
 
-    if (!client) return <LoadFragment />
+    if (loading) return <LoadFragment />
+
+    if(error) return <p>Error!</p>
 
     return (
         <>
@@ -43,6 +46,7 @@ function ClientPayments({ client }) {
                         <th>Folio</th>
                         <th>Método</th>
                         <th>Monto</th>
+                        <th>Fecha</th>
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${stylePayment['body']}`}>
@@ -52,6 +56,7 @@ function ClientPayments({ client }) {
                                 <td>{item.Folio}</td>
                                 <td>{item.Method}</td>
                                 <td>{item.Amount}</td>
+                                <td>{item.CreateDate.split("T")[0]}</td>
                             </tr>
                         ))
                     }

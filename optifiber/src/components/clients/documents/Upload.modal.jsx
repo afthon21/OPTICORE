@@ -1,10 +1,11 @@
-import styleFormModal from './css/uploadModal.module.css'
+import styleFormModal from '../css/uploadModal.module.css'
 
 import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
+import ApiRequest from '../../hooks/apiRequest';
 
 export function UploadDoc({ client }) {
-
+    const { makeRequest, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [file, setFile] = useState(null);
     const [value, setValue] = useState(undefined);
 
@@ -74,22 +75,9 @@ export function UploadDoc({ client }) {
             formData.append('file', file)
         }
 
+
         try {
-            const token = sessionStorage.getItem('token');
-            const res = await fetch(`http://localhost:3200/api/document/new/${client}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
+            await makeRequest(`/document/new/${client}`, 'POST', formData, true);
 
             Swal.fire({
                 toast: true,
@@ -109,6 +97,8 @@ export function UploadDoc({ client }) {
             console.log(error)
         }
     }
+
+    if (error) return <p>Error!</p>
 
     return (
         <div className="modal fade"

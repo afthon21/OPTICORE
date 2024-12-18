@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { cleanData } from '../fragments/js/cleanData.js';
 import { getDate } from '../fragments/js/getDate.js';
+import ApiRequest from '../hooks/apiRequest.jsx'
 
 function CardCreateClient() {
-    const [show, setShow] = useState({
-        personalData: true,
-        addressData: false
-    });
+    const { makeRequest, error } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     const [formValues, setFormValues] = useState({
         FirstName: undefined,
@@ -51,15 +49,6 @@ function CardCreateClient() {
         }
     }
 
-    const toggleForm = (form) => {
-        setShow({
-            personalData: false,
-            documents: false,
-            addressData: false,
-            [form]: true // Activar solo el formulario seleccionado
-        });
-    }
-
     const handleChangue = (e) => {
         const { name, value } = e.target;
 
@@ -75,22 +64,7 @@ function CardCreateClient() {
 
         const cleanedData = cleanData(data);
         try {
-            const token = sessionStorage.getItem('token');
-            const res = await fetch('http://localhost:3200/api/client/new', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(cleanedData)
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
+            await makeRequest('/client/new', 'POST', cleanedData);
 
             Swal.fire({
                 icon: 'success',
@@ -123,6 +97,8 @@ function CardCreateClient() {
             console.log(error);
         }
     }
+
+    if (error) return <p>Error!</p>
 
     return (
 

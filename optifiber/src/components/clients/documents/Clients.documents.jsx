@@ -1,27 +1,28 @@
-import styleDocs from './css/clientsDocuments.module.css';
-import styleTable from './css/clientsDocuments.module.css'
+import styleDocs from '../css/clientsDocuments.module.css';
+import styleTable from '../css/clientsDocuments.module.css'
 
 import { useEffect, useState } from "react";
-import { handleLoadDocuments } from "./js/clientLoadData.js";
 import Swal from "sweetalert2";
 import { UploadDoc } from './Upload.modal.jsx';
-import { LoadFragment } from '../fragments/Load.fragment.jsx';
+import { LoadFragment } from '../../fragments/Load.fragment.jsx';
+import ApiRequest from '../../hooks/apiRequest.jsx';
 
 function ClientDocuments({ client }) {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
 
     const fetchData = async () => {
         try {
-            const result = await handleLoadDocuments(client);
-            setData(result);
+            const res = await makeRequest(`/document/all/${client}`)
+            setData(res)
         } catch (error) {
-            console.log(error);
+            console.log(error)
         }
     }
 
     useEffect(() => {
         fetchData()
-    }, [client]);
+    }, [makeRequest]);
 
     function documentModal(document, title) {
         Swal.fire({
@@ -32,7 +33,6 @@ function ClientDocuments({ client }) {
             background: '#ededed'
         })
     }
-
 
     const handleDownload = async (url) => {
         const imgUrl = url;
@@ -49,8 +49,9 @@ function ClientDocuments({ client }) {
         URL.revokeObjectURL(link.href);
     }
 
+    if (loading) return <LoadFragment />
 
-    if (!client) return <LoadFragment />
+    if (error) return <p>Error!</p>
 
     return (
         <>

@@ -1,10 +1,12 @@
-import StyleFormPay from './css/CreatePay.module.css';
+import StyleFormPay from '../css/CreatePay.module.css';
 
-import { cleanData } from '../fragments/js/cleanData';
+import { cleanData } from '../../fragments/js/cleanData';
 import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
+import ApiRequest from '../../hooks/apiRequest.jsx'
 
 function CreatePay({ client }) {
+    const { makeRequest, loading, error} = ApiRequest(import.meta.env.VITE_API_BASE)
     const [formValues, setFormValues] = useState({
         Method: undefined,
         Amount: undefined,
@@ -46,22 +48,7 @@ function CreatePay({ client }) {
         const cleanedData = cleanData(data);
 
         try {
-            const token = sessionStorage.getItem('token');
-            const res = await fetch(`http://localhost:3200/api/pay/new/${client}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(cleanedData)
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
+            await makeRequest(`/pay/new/${client}`, 'POST', cleanedData);
 
             Swal.fire({
                 icon: 'success',
@@ -96,6 +83,8 @@ function CreatePay({ client }) {
             }
         }
     }, []);
+
+    if (error) return <p>Error!</p>
 
     return (
         <div className="modal fade" id="CreatePayModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">

@@ -1,28 +1,31 @@
-import styleTickets from './css/clientTickets.module.css';
+import styleTickets from '../css/clientTickets.module.css';
 
 import { useEffect, useState } from 'react';
-import { handleLoadTicket } from './js/clientLoadData.js';
 import CreateTicket from './CreateTicket.modal.jsx';
-import { LoadFragment } from '../fragments/Load.fragment.jsx';
+import { LoadFragment } from '../../fragments/Load.fragment.jsx';
+import ApiRequest from '../../hooks/apiRequest.jsx';
 
 function ClientTickets({ client }) {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
 
     const fetchData = async () => {
         try {
-            const result = await handleLoadTicket(client);
-            setData(result)
+            const res = await makeRequest(`/ticket/all/${client}`);
+            setData(res);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     }
 
     useEffect(() => {
         fetchData()
-    }, [client])
+    }, [makeRequest])
 
-    if (!client) return <LoadFragment />
+    if (loading) return <LoadFragment />
+
+    if (error) return <p>Error!</p>
 
     return (
         <>
@@ -42,6 +45,7 @@ function ClientTickets({ client }) {
                         <th>Folio</th>
                         <th>Asunto</th>
                         <th>Detalles</th>
+                        <th>Fecha</th>
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${styleTickets['body']}`}>
@@ -51,6 +55,7 @@ function ClientTickets({ client }) {
                                 <td>{item.Folio}</td>
                                 <td>{item.Issue}</td>
                                 <td>{item.Description}</td>
+                                <td>{item.CreateDate.split("T")[0]}</td>
                             </tr>
                         ))
 

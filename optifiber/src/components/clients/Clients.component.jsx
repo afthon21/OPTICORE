@@ -1,35 +1,19 @@
 import { useState,useEffect } from 'react';
 
-import { NavbarFragmentAll } from '../fragments/Navbar.fragment';
 import ClientsCard from './Clients.card';
 import { LoadFragment } from '../fragments/Load.fragment.jsx';
 import ClientsInfo from './Clients.info';
+import ApiRequest from '../hooks/apiRequest.jsx';
 
 function ClientsComponent() {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE); 
     const [data,setData] = useState([]);
     const [select, setSelect] = useState(null);
 
     const handleLoad = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-
-            const res = await fetch('http://localhost:3200/api/client/all',{
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
-            const data = await res.json();
-            setData(data);
+            const res = await makeRequest('/client/all');
+            setData(res);
         } catch (error) {
             console.log(error);
         }
@@ -39,6 +23,10 @@ function ClientsComponent() {
         handleLoad();
     }, []);
 
+    if(loading) return <LoadFragment />
+
+    if(error) return <p>Error!</p>
+    
     return(
         
         <>

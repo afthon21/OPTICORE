@@ -1,8 +1,8 @@
-import styleFormTIcket from './css/createTicket.module.css';
+import styleFormTIcket from '../css/createTicket.module.css';
 
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
-import { cleanData } from '../fragments/js/cleanData';
+import { cleanData } from '../../fragments/js/cleanData';
 
 function CreateTicket({ client }) {
     const [formValues, setFormValues] = useState({
@@ -52,22 +52,7 @@ function CreateTicket({ client }) {
         const cleanedData = cleanData(data);
 
         try {
-            const token = sessionStorage.getItem('token');
-            const res = await fetch(`http://localhost:3200/api/ticket/new/${client}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(cleanedData)
-            });
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
+            await fetch(`/ticket/new/${client}`, 'POST', cleanedData);
 
             Swal.fire({
                 icon: 'success',

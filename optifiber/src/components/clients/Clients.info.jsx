@@ -2,10 +2,10 @@ import styleCard from './css/clientInfo.module.css';
 import styleNav from './css/navbar.module.css';
 
 import { useState } from 'react';
-import ClientPayments from './Client.payments';
+import ClientPayments from './payment/Client.payments';
 import ClientData from './Client.data';
-import ClientDocuments from './Clients.documents';
-import ClientTickets from './Client.tickets';
+import ClientDocuments from './documents/Clients.documents';
+import ClientTickets from './tickets/Client.tickets';
 import Swal from 'sweetalert2';
 
 function ClientsInfo({ client }) {
