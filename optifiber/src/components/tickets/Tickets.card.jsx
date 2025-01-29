@@ -33,7 +33,7 @@ function TicketsCard({ tickets = [], onSelected }) {
                     <span className={styleCard['highlight']} />
                     <span className={styleCard['bar']} />
                     <label className={styleCard['place-holder']}>
-                        <i className="bi bi-search"></i>
+                        <i className="bi bi-search me-1"></i>
                         Buscar...
                     </label>
                 </div>
@@ -45,7 +45,9 @@ function TicketsCard({ tickets = [], onSelected }) {
                         <tr>
                             <th>Folio</th>
                             <th>Cliente</th>
+                            <th>Prioridad</th>
                             <th>Asunto</th>
+                            <th>Estado</th>
                             <th>Fecha</th>
                         </tr>
                     </thead>
@@ -60,7 +62,9 @@ function TicketsCard({ tickets = [], onSelected }) {
                                         ${item.Client.LastName.FatherLastName} 
                                         ${item.Client.LastName.MotherLastName}`}
                                 </td>
+                                <td>{item.Priority}</td>
                                 <td>{item.Issue}</td>
+                                <td>{item.Status}</td>
                                 <td>{item.CreateDate.split("T")[0]}</td>
                             </tr>
                         ))}

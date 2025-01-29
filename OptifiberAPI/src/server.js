@@ -1,9 +1,9 @@
 import express from 'express';
 import './db_conn.js';
 import dotenv from 'dotenv';
-import configureRoutes from '../routes/routes.js'
+import configureRoutes from './routes/routes.js'
 import cors from 'cors';
-import corsOptions from '../libs/cors.js';
+import corsOptions from './libs/cors.js';
 
 //Config
 const app = express();
@@ -17,6 +17,6 @@ configureRoutes(app)
 dotenv.config();
 
 app.listen(process.env.PORT, () => {
-    console.log('App Runnig');
+    console.log('App running');
     console.log(`${process.env.HOST}:${process.env.PORT}/api`);
 });

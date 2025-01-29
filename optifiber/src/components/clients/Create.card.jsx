@@ -7,23 +7,23 @@ import { getDate } from '../fragments/js/getDate.js';
 import ApiRequest from '../hooks/apiRequest.jsx'
 
 function CardCreateClient() {
-    const { makeRequest, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     const [formValues, setFormValues] = useState({
-        FirstName: undefined,
-        SecondName: undefined,
-        FatherLastName: undefined,
-        MotherLastName: undefined,
+        FirstName: '',
+        SecondName: '',
+        FatherLastName: '',
+        MotherLastName: '',
         PhoneNumber: [],
-        Email: undefined,
-        State: undefined,
-        Municipality: undefined,
-        ZIP: undefined,
-        Address: undefined,
-        Cologne: undefined,
-        Locality: undefined,
-        OutNumber: undefined,
-        InNumber: undefined
+        Email: '',
+        State: '',
+        Municipality: '',
+        ZIP: '',
+        Address: '',
+        Cologne: '',
+        Locality: '',
+        OutNumber: '',
+        InNumber: ''
     });
 
     const data = {
@@ -66,6 +66,21 @@ function CardCreateClient() {
         try {
             await makeRequest('/client/new', 'POST', cleanedData);
 
+            if (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'error creando!',
+                    timer: 1200,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top',
+                    background: '#e5e8e8'
+                });
+    
+                return
+            }
+
             Swal.fire({
                 icon: 'success',
                 title: 'Creado exitosamente!',
@@ -97,8 +112,6 @@ function CardCreateClient() {
             console.log(error);
         }
     }
-
-    if (error) return <p>Error!</p>
 
     return (
 
@@ -258,7 +271,6 @@ function CardCreateClient() {
                                     value={formValues.ZIP}
                                     placeholder="c.p..." />
                             </div>
-
                         </div>
                     </div>
 

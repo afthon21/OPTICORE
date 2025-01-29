@@ -23,9 +23,9 @@
 }
 
 .place-holder {
-    color: #00b4d8;
+    color: #002b5b;
     font-family: 'Agdasima';
-    font-size: 12px;
+    font-size: 10pt;
     font-weight: normal;
     position: absolute;
     pointer-events: none;
@@ -89,7 +89,7 @@
 
 @keyframes inputHighlighter {
     from {
-        background: #0d6efd;
+        background: #002b5b;
     }
 
     to {

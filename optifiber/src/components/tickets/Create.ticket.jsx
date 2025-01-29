@@ -1,31 +1,16 @@
 import { CardCreateTicket } from './Create.card';
 
+import ApiRequest from '../hooks/apiRequest';
 import { useEffect, useState } from 'react';
+import { LoadFragment } from '../fragments/Load.fragment';
 
 function CreateTicket() {
-
+    const { makeRequest, loading, error} = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data,setData] = useState([])
 
     const handleLoadClients = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-
-            const res = await fetch('http://localhost:3200/api/client/all',{
-                method: 'GET',
-                headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if(!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
-            const result = await res.json();
+            const result = await makeRequest('/client/all');
             setData(result);
         } catch (error) {
             console.log(error);
@@ -35,6 +20,10 @@ function CreateTicket() {
     useEffect(() => {
         handleLoadClients();
     },[]);
+
+    if (loading) return <LoadFragment />
+
+    if (error) return <p>{error}</p>
 
     return (
         <> 

@@ -1,30 +1,17 @@
 import { useState,useEffect } from 'react';
+import ApiRequest from '../hooks/apiRequest';
 
 import CardCreatePayment from './Create.card';
+import { LoadFragment } from '../fragments/Load.fragment';
 
 function CreatePayment() {
+    const { makeRequest, loading, error} = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data,setData] = useState([]);
 
     const handleLoadClients = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-
-            const res = await fetch('http://localhost:3200/api/client/all',{
-                method: 'GET',
-                headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if(!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
-            const result = await res.json();
+            const result = await makeRequest('/client/all');
+            console.log(result);
             setData(result);
         } catch (error) {
             console.log(error);
@@ -34,6 +21,10 @@ function CreatePayment() {
     useEffect(() => {
         handleLoadClients();
     }, []);
+
+    if (loading) return <LoadFragment />
+
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <>

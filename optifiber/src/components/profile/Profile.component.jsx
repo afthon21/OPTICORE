@@ -2,34 +2,19 @@ import { useEffect, useState } from 'react';
 
 import ProfileCard from './Profile.card.jsx';
 import { LoadFragment } from '../fragments/Load.fragment.jsx';
+import ApiRequest from '../hooks/apiRequest.jsx'
 
 function ProfileComponent() {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE)
     const [data, setData] = useState(null);
 
     const handleLoad = async () => {
 
         try {
-            const token = sessionStorage.getItem('token');
+            const res = await makeRequest('/profile/');
+            setData(res);
 
-            const res = await fetch('http://localhost:3200/api/profile/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-
-                return;
-            }
-
-            const result = await res.json();
-            setData(result);
-
-            sessionStorage.setItem('userName', result.UserName);
+            sessionStorage.setItem('userName', res.UserName);
 
         } catch (error) {
             console.log('Error en la solicitud', error)
@@ -38,16 +23,16 @@ function ProfileComponent() {
 
     useEffect(() => {
         handleLoad();
-    }, []);
+    }, [makeRequest]);
+
+    if (loading) return <LoadFragment />
+
+    if(error) return <p>Error!</p>
 
     return (
         <>
-            <div className="container-fluid d-flex justify-content-center mt-1">
-                {data ? (
-                    <ProfileCard profile={data ? data : {}} />
-                ) : (
-                    <LoadFragment />
-                )}
+            <div className="container-fluid d-flex justify-content-center mt-1">  
+                <ProfileCard profile={data ? data : {}} />    
             </div>
         </>
     );

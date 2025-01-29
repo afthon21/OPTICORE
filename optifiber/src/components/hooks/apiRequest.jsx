@@ -30,18 +30,20 @@ function ApiRequest(baseUrl) {
 
             if (!res.ok) {
                 const errorDetails = await res.json();
-                throw await res.json(errorDetails.message || 'Error en la solicitud');
+                setError(errorDetails.message);
+                return;
             }
 
             return await res.json();
         } catch (error) {
             setError(error.message);
+            return null;
         } finally {
             setLoading(false);
         }
     }, [baseUrl]);
 
-    return { makeRequest, loading, error }
+    return { makeRequest, loading, error };
 }
 
 export default ApiRequest;

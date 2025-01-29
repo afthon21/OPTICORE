@@ -3,16 +3,28 @@ import styleFormTIcket from '../css/createTicket.module.css';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { cleanData } from '../../fragments/js/cleanData';
+import ApiRequest from '../../hooks/apiRequest';
 
 function CreateTicket({ client }) {
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
-        Issue: undefined,
-        Description: undefined,
+        Issue: '',
+        Description: '',
+        Priority: ''
     });
+    const [formErrors, setFormErrors] = useState({});
     const data = {
         Issue: formValues.Issue,
-        Description: formValues.Description
+        Description: formValues.Description,
+        Priority: formValues.Priority
     }
+    const priority = [
+        { id: '0', name: 'Seleccione la prioridad...', hide: true, selected: true },
+        { id: '1', name: 'Urgente' },
+        { id: '2', name: 'Alta' },
+        { id: '3', name: 'Media' },
+        { id: '4', name: 'Baja' }
+    ];
 
     const handleChangue = (e) => {
         const { name, value } = e.target;
@@ -26,7 +38,8 @@ function CreateTicket({ client }) {
     const handleClear = () => {
         setFormValues({
             Issue: '',
-            Description: ''
+            Description: '',
+            Priority: priority.find((item) => item.id === '0').name
         })
     }
 
@@ -45,14 +58,51 @@ function CreateTicket({ client }) {
                 modal.removeEventListener("hidden.bs.modal", handleClear)
             }
         }
-    })
+    });
+
+    const validators = () => {
+        const errors = {};
+
+        if (formValues.Issue.trim() === '' || !formValues.Issue) {
+            errors.Issue = 'El asunto es obligatorio.';
+        }
+        if (formValues.Description.trim() === '' || !formValues.Description) {
+            errors.Description = 'La descripción es obligatoria.';
+        }
+
+        if (!formValues.Priority || formValues.Priority === priority[0].name){
+            errors.Priority = 'Selecciona la prioridad';
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const cleanedData = cleanData(data);
 
+        if (!validators()) {
+            setTimeout(() => {
+                setFormErrors({});
+            }, 1200);
+            return
+        }
+
         try {
-            await fetch(`/ticket/new/${client}`, 'POST', cleanedData);
+            await makeRequest(`/ticket/new/${client}`, 'POST', cleanedData);
+
+            if (loading) {
+                await Swal.fire({
+                    icon: 'info',
+                    title: 'Espere!',
+                    text: 'creando...',
+                    toast: true,
+                    position: top,
+                    timer: 1200,
+                    timerProgressBar: true
+                });
+            }
 
             Swal.fire({
                 icon: 'success',
@@ -61,17 +111,33 @@ function CreateTicket({ client }) {
                 showConfirmButton: false,
                 timerProgressBar: true,
                 toast: true,
-                position: 'bottom-end',
+                position: 'top',
                 background: '#e5e8e8'
             }).then(() => {
                 handleClear();
             });
-        } catch (error) {
 
+            if (error) {
+                Swal.fire({
+                    icon:'error',
+                    title: 'Error!',
+                    text: error,
+                    showConfirmButton: false,
+                    timer: 1200,
+                    toast: true,
+                    timerProgressBar: true,
+                    position: 'top'
+                });
+
+                return
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
+    
     return (
-        <div className="modal fade" id="CreateTicketModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div className="modal fade" id="CreateTicketModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
@@ -91,6 +157,26 @@ function CreateTicket({ client }) {
                                     placeholder='Asunto...'
                                 />
                             </div>
+                            {formErrors.Issue && <p className={styleFormTIcket['error']}>{formErrors.Issue}</p>}
+                            <br />
+
+                            <label className="form-label">Prioridad</label>
+                            <div className="d-flex input-group">
+                                <select className={`form-select ${styleFormTIcket['select']}`}
+                                    name="Priority"
+                                    onChange={handleChangue}
+                                    value={formValues.Priority || priority[0].name}>
+                                    {priority.map((index) => (
+                                        <option
+                                            key={index.id}
+                                            value={index.name}
+                                            hidden={index.hide}>
+                                            {index.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            {formErrors.Priority && <p className={styleFormTIcket['error']}>{formErrors.Priority}</p>}
                             <br />
 
                             <label className="form-label">Descripción</label>
@@ -102,16 +188,20 @@ function CreateTicket({ client }) {
                                     placeholder='Descripción...'
                                 ></textarea>
                             </div>
+                            {formErrors.Description && <p className={styleFormTIcket['error']}>{formErrors.Description}</p>}
                             <br />
 
                             <div className="d-flex justify-content-end mt-4">
                                 <button
                                     className={`mt-2 ${styleFormTIcket['btn-submit']}`}
-                                    type="submit"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close">
-                                    Aceptar
+                                    type="submit" >
+                                    {loading ? 'Creando...' : 'Aceptar'}
                                 </button>
+
+                                <button
+                                    className={`ms-2 mt-2 ${styleFormTIcket['btn-exit']}`}
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close">Cerrar</button>
                             </div>
                         </form>
 

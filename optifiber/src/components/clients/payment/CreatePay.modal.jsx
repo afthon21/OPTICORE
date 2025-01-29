@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest.jsx'
 
 function CreatePay({ client }) {
-    const { makeRequest, loading, error} = ApiRequest(import.meta.env.VITE_API_BASE)
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE)
     const [formValues, setFormValues] = useState({
         Method: undefined,
         Amount: undefined,
@@ -50,6 +50,18 @@ function CreatePay({ client }) {
         try {
             await makeRequest(`/pay/new/${client}`, 'POST', cleanedData);
 
+            if (loading) {
+                await Swal.fire({
+                    icon: 'info',
+                    title: 'Espere!',
+                    text: 'creando...',
+                    toast: true,
+                    position: top,
+                    timer: 1200,
+                    timerProgressBar: true
+                });
+            }
+
             Swal.fire({
                 icon: 'success',
                 title: 'Creado exitosamente!',
@@ -57,9 +69,9 @@ function CreatePay({ client }) {
                 showConfirmButton: false,
                 timerProgressBar: true,
                 toast: true,
-                position: 'bottom-end',
+                position: 'top',
                 background: '#e5e8e8'
-            }). then(() => {
+            }).then(() => {
                 handleClear();
             });
         } catch (error) {
@@ -87,7 +99,7 @@ function CreatePay({ client }) {
     if (error) return <p>Error!</p>
 
     return (
-        <div className="modal fade" id="CreatePayModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div className="modal fade" id="CreatePayModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
@@ -148,7 +160,7 @@ function CreatePay({ client }) {
                                     type="submit"
                                     data-bs-dismiss="modal"
                                     aria-label="Close">
-                                        Aceptar
+                                    Aceptar
                                 </button>
                             </div>
                         </form>

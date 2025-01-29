@@ -4,6 +4,7 @@ import ApiRequest from '../hooks/apiRequest.jsx';
 import TicketsCard from './Tickets.card.jsx';
 import TicketInfo from './Tickets.info.jsx';
 import { LoadFragment } from '../fragments/Load.fragment.jsx'
+import Swal from 'sweetalert2';
 
 function TicketComponent() {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE)
@@ -24,7 +25,9 @@ function TicketComponent() {
 
     if (loading) return <LoadFragment />;
 
-    if (error) return <p>Error: {error}</p>;
+    if (error) {
+        
+    }
     
     return (
         <div className="container-fluid d-flex justify-content-center mt-1 ms-4">

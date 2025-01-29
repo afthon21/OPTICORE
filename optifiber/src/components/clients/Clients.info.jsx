@@ -7,6 +7,7 @@ import ClientData from './Client.data';
 import ClientDocuments from './documents/Clients.documents';
 import ClientTickets from './tickets/Client.tickets';
 import Swal from 'sweetalert2';
+import ClientLocation from './location/location.map';
 
 function ClientsInfo({ client }) {
     const [show, setShow] = useState({
@@ -43,7 +44,7 @@ function ClientsInfo({ client }) {
 
     return (
         <div>
-            <nav className="navbar navbar-expand-lg w-100">
+            <nav className={`navbar navbar-expand-lg w-100 ${styleNav['nav']}`}>
                 <div className="container-fluid align-content-center">
                     <button
                         className="navbar-toggler"
@@ -141,6 +142,11 @@ function ClientsInfo({ client }) {
                     {/** Ver Documentos */}
                     {show.documents && (
                         <ClientDocuments client={client._id} />
+                    )}
+
+                    {/** Ver Marcador */}
+                    {show.location && (
+                        <ClientLocation />
                     )}
 
                     {/** Ver pagos */}

@@ -7,12 +7,14 @@ import Swal from 'sweetalert2';
 
 function ProfileCard({ profile }) {
     const [values, setValues] = useState({
-        FirstName: profile.Name.FirstName || '',
-        SecondName: profile.Name.SecondName || '',
-        FatherLastName: profile.LastName.FatherLastName || '',
-        MotherLastName: profile.LastName.MotherLastName || '',
-        Email: profile.Email || '',
-        Password: profile.Password.slice(0, 4) + '****' + profile.Password.slice(-4) || '',
+        FirstName: profile?.Name?.FirstName || '',
+        SecondName: profile?.Name?.SecondName || '',
+        FatherLastName: profile?.LastName?.FatherLastName || '',
+        MotherLastName: profile?.LastName?.MotherLastName || '',
+        Email: profile?.Email || '',
+        Password: profile?.Password
+        ? profile.Password.slice(0, 4) + '****' + profile.Password.slice(-4)
+        : '',
         ConfirmPassword: ''
     });
     const [disable, setDisable] = useState({
@@ -44,7 +46,6 @@ function ProfileCard({ profile }) {
 
     const [formErrors, setFormErrors] = useState({});
 
-    const [messageError] = useState('');
 
     const validators = (field) => {
         const errors = {};
@@ -106,7 +107,7 @@ function ProfileCard({ profile }) {
                         type="text"
                         className={`form-control ${styleCard['input']}`}
                         disabled={disable.inputGroupA}
-                        value={`${values.FirstName} ${values.SecondName || ''}`} />
+                        value={`${values.FirstName} ${values.SecondName}`} />
                 </div>
 
                 <div className="input-group mb-3">

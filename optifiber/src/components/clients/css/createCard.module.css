@@ -19,6 +19,12 @@
     color: #002b5b;
 }
 
+.header h3 {
+    font-family: 'Kanit';
+    font-weight: bold;
+    color: #002b5b;
+}
+
 .body span{
     font-family: 'Agdasima';
     font-size: 14pt;

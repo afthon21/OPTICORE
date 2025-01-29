@@ -3,6 +3,8 @@ import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { cleanData } from "../fragments/js/cleanData.js";
+import ApiRequest from '../hooks/apiRequest.jsx';
+import { LoadFragment } from '../fragments/Load.fragment.jsx';
 
 function RegisterComponent() {
     /** Cambiar entre Modals */
@@ -20,6 +22,7 @@ function RegisterComponent() {
     };
 
     /** Hooks */
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
         FirstName: undefined,
         SecondName: undefined,
@@ -30,7 +33,6 @@ function RegisterComponent() {
         ConfirmPassword: undefined
     });
     const [formErrors, setFormErrors] = useState({});
-    const [messageError, setMessageError] = useState('');
 
     /** Modelo de datos */
     const data = {
@@ -87,10 +89,10 @@ function RegisterComponent() {
             setFormErrors({});
         };
 
-        // Agregar el evento de cierre del modal
+        // cierre del modal
         registerModal.addEventListener('hidden.bs.modal', resetForm);
 
-        // Cleanup para eliminar el evento cuando el componente se desmonta
+        // Cleanup para eliminar cuando el componente se desmonta
         return () => {
             registerModal.removeEventListener('hidden.bs.modal', resetForm);
         };
@@ -100,6 +102,9 @@ function RegisterComponent() {
         e.preventDefault();
 
         if (!validators()) {
+            setTimeout(() => {
+               setFormErrors({}); 
+            }, 1200);
             return;
         }
 
@@ -107,31 +112,30 @@ function RegisterComponent() {
         const cleanedData = cleanData(data);
 
         try {
-            const res = await fetch('http://localhost:3200/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(cleanedData)
-            });
+            const res = await makeRequest('/auth/register', 'POST', cleanedData);
 
-            /** Obtener errores */
-            if (!res.ok) {
-                const errorDetails = await res.json(); // obtener el error
-                console.log('Server response error:', errorDetails);
-                setMessageError(errorDetails.message);
-                setTimeout(() => {
-                    setMessageError(undefined);
-                }, 5000);
-                return; // salir si no hay error
+            /**
+             * Mostrar alerta de error
+             */
+            if (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en el servidor!',
+                    text: error || 'Error desconocido',
+                    timer: 1200,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top',
+                    background: '#e5e8e8'
+                });
             }
 
-            const result = await res.json();
-            setMessageError('');
-
-            // Mostrar alerta de éxito con SweetAlert
+            // Mostrar alerta de éxito
             Swal.fire({
                 icon: 'success',
                 title: '¡Registro exitoso!',
-                text: result.message,
+                text: res.message,
                 position: 'top',
                 timer: 1200,
                 showConfirmButton: false,
@@ -227,12 +231,9 @@ function RegisterComponent() {
 
                                 </div>
                                 <div className="d-flex justify-content-center" >
-                                    <button className="btn btn-primary" type="submit">Regístrate</button>
+                                    <button className="btn btn-primary" type="submit">{loading ? 'Creando...' : 'Regístrate'}</button>
                                 </div>
                             </form>
-
-                            {messageError && (<div className="alert alert-danger" role="alert">{messageError}</div>)}
-
                         </div>
                         <div className="modal-footer">
                             <span>¿Ya tienes cuneta? <a href="#" onClick={handleSwitchToLogin}>Inicia Sesión</a></span>

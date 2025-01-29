@@ -1,14 +1,14 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 
 import PaymentCard from './Payment.card';
 import PaymentInfo from './Payment.info';
 import { LoadFragment } from '../fragments/Load.fragment.jsx'
- 
+
 function PaymentComponent() {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
-    const [data,setData] = useState([]);
-    const [select,setSelect] = useState(null)
+    const [data, setData] = useState([]);
+    const [select, setSelect] = useState(null)
 
     const handleLoad = async () => {
         try {
@@ -21,18 +21,18 @@ function PaymentComponent() {
 
     useEffect(() => {
         handleLoad()
-    },[makeRequest]);
+    }, [makeRequest]);
 
     if (loading) return <LoadFragment />;
 
     if (error) return <p>Error: {error}</p>;
 
-    return(
+    return (
         <>
             <div className="container-fluid d-flex justify-content-center mt-1">
                 <PaymentCard payments={data ? data : []} onSelected={setSelect} />
 
-                <PaymentInfo payment={select ? select: ''} />
+                <PaymentInfo payment={select ? select : ''} />
             </div>
         </>
     );

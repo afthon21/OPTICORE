@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ApiRequest from '../hooks/apiRequest.jsx';
 
-import 'bootstrap/dist/css/bootstrap.min.css'
+import Swal from "sweetalert2";
+
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 function LoginComponent() {
@@ -27,12 +29,12 @@ function LoginComponent() {
     }
 
     /** Hooks */
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
         Email: undefined,
         Password: undefined
     });
     const [formErrors, setFormErrors] = useState({});
-    const [messageError, setMessageError] = useState('');
     const nav = useNavigate();
 
     /** Modelo de datos */
@@ -81,34 +83,34 @@ function LoginComponent() {
         e.preventDefault();
 
         if (!validators()) {
+            setTimeout(() => {
+                setFormErrors({})
+            }, 1200);
             return;
         }
 
         try {
-            const res = await fetch('http://localhost:3200/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            const res = await makeRequest('/auth/login', 'POST', data);
 
-            if (!res.ok) {
-                const errorDetails = await res.json();
-                console.log('Server response error:', errorDetails);
-                setMessageError(errorDetails.message);
-
-                setTimeout(() => {
-                    setMessageError(undefined);
-                }, 5000);
-                return; // salir si no hay error
+            if (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en el servidor!',
+                    text: error || 'Error desconocido',
+                    timer: 1200,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top',
+                    background: '#e5e8e8'
+                });
+                
             }
 
-            const result = await res.json();
-            setMessageError('');
-
             // Guarda el token o datos importantes en el almacenamiento si es necesario
-            sessionStorage.setItem('adminId', result.adminId);
-            sessionStorage.setItem('token', result.token);
-            sessionStorage.setItem('userName', result.userName);
+            sessionStorage.setItem('adminId', res.adminId);
+            sessionStorage.setItem('token', res.token);
+            sessionStorage.setItem('userName', res.userName);
             sessionStorage.setItem('loginSuccess', true);
 
             // Guardamos el id del perfil
@@ -159,11 +161,9 @@ function LoginComponent() {
 
                                 </div>
                                 <div className="d-flex justify-content-center" >
-                                    <button className="btn btn-primary" type="submit">Iniciar Sesión</button>
+                                    <button className="btn btn-primary" type="submit">{loading ? 'Iniciando...' : 'Iniciar Sesión'}</button>
                                 </div>
                             </form>
-
-                            {messageError && (<div className="alert alert-danger align-content-center h-25" role="alert">{messageError}</div>)}
 
                         </div>
                         <div className="modal-footer">

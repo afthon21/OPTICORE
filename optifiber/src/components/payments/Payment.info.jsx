@@ -3,7 +3,7 @@ import styleInfo from './css/paymentInfo.module.css';
 function PaymentInfo({ payment }) {
 
     return (
-        <div className="modal fade" id="PaymentModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div className="modal fade" id="PaymentModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header justify-content-between">
@@ -68,7 +68,10 @@ function PaymentInfo({ payment }) {
 
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button 
+                            type="button" 
+                            className={styleInfo['btn-exit']}
+                            data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>

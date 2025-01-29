@@ -5,15 +5,21 @@ import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest';
 
 export function UploadDoc({ client }) {
-    const { makeRequest, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [file, setFile] = useState(null);
     const [value, setValue] = useState(undefined);
+    const [formErrors, setFormErrors] = useState({});
 
     const documentName = [
         { id: '0', name: 'Nombre del archivo...', hide: true, selected: true },
         { id: '1', name: 'Comprobante de domicilio' },
-        { id: '2', name: 'CURP' },
-        { id: '3', name: 'Identification' },
+        { id: '2', name: 'INE - Frente' },
+        { id: '3', name: 'INE - Reverso' },
+        { id: '4', name: 'Foto de Fachada' },
+        { id: '5', name: 'Dirección MAC' },
+        { id: '6', name: 'Megas' },
+        { id: '7', name: 'Contraseña de modem' },
+        { id: '8', name: 'Potencia' }
     ];
 
     const handleChangue = (e) => {
@@ -38,12 +44,13 @@ export function UploadDoc({ client }) {
         }
     };
 
+    // Capturar archivo desde el input
     const handleFileChange = (e) => {
-        setFile(e.target.files[0]); // Capturar archivo desde el input
+        setFile(e.target.files[0]);
     };
 
     /**
-     * Limpiar al cerrar el modal
+     * Limpiar formulario
      */
     const handleClear = () => {
         setValue(documentName.find((item) => item.id === '0').name);
@@ -66,8 +73,31 @@ export function UploadDoc({ client }) {
         }
     }, []);
 
+    const validators = () => {
+        const errors = {};
+
+        if (value === documentName[0].name || !value) {
+            errors.Description = 'Selecciona el nombre del documento';
+        }
+
+        if (!file) {
+            errors.File = 'Sin archivo cargado'
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validators()) {
+            setTimeout(() => {
+                setFormErrors({});
+            }, 1200);
+
+            return;
+        }
 
         const formData = new FormData();
         formData.append('Description', value);
@@ -75,9 +105,23 @@ export function UploadDoc({ client }) {
             formData.append('file', file)
         }
 
-
         try {
             await makeRequest(`/document/new/${client}`, 'POST', formData, true);
+
+            if (error) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: 'Error!',
+                    text: error,
+                    timer: 1200,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    position: 'top'
+                });
+
+                return;
+            }
 
             Swal.fire({
                 toast: true,
@@ -86,11 +130,10 @@ export function UploadDoc({ client }) {
                 timer: 1200,
                 showConfirmButton: false,
                 timerProgressBar: true,
-                position: 'bottom-end',
+                position: 'top',
                 background: '#e5e8e8'
             }).then(() => {
-                setValue(documentName.find((item) => item.id === '0').name)
-                setFile(null)
+                handleClear();
             });
 
         } catch (error) {
@@ -98,12 +141,10 @@ export function UploadDoc({ client }) {
         }
     }
 
-    if (error) return <p>Error!</p>
-
     return (
         <div className="modal fade"
             id="uploadModal"
-            tabindex="-1"
+            tabIndex="-1"
             aria-labelledby="#staticBackdropLabel"
             aria-hidden="true"
             data-bs-backdrop="static"
@@ -155,6 +196,7 @@ export function UploadDoc({ client }) {
 
                                 </select>
                             </div>
+                            {formErrors.Description && <p style={{ color: 'red' }}>{formErrors.Description}</p>}
 
                             <label htmlFor="file-input" className={styleFormModal['drop-container']}>
                                 <span className="drop-title">Suelta los archivos aquí</span>
@@ -168,11 +210,15 @@ export function UploadDoc({ client }) {
                                 />
                                 <span className={`mb-2 ${styleFormModal['input']}`}>Selecciona un Archivo</span>
                             </label>
+                            {formErrors.File && <p style={{ color: 'red' }}>{formErrors.File}</p>}
 
                             {/* Mostrar detalles del archivo cargado */}
                             {file && (
                                 <div className={styleFormModal['file-details']}>
-                                    <p>Archivo cargado: {file.name}</p>
+                                    <div className="justify-content-between d-flex">
+                                        <p>Archivo cargado: {file.name}</p>
+                                        <button className="btn-close" onClick={handleClear}></button>
+                                    </div>
                                     {/* Vista previa si es una imagen */}
                                     {file.type.startsWith('image/') && (
                                         <img
@@ -187,12 +233,15 @@ export function UploadDoc({ client }) {
 
                             <div className="d-flex justify-content-end">
                                 <button
-                                    className={`mt-2 ${styleFormModal['btn-submit']}`} 
-                                    type="submit"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close">
+                                    className={`mt-2 ${styleFormModal['btn-submit']}`}
+                                    type="submit">
                                     Aceptar
                                 </button>
+
+                                <button className={`mt-2 ms-2 ${styleFormModal['btn-exit']}`}
+                                    data-bs-dismiss="modal"
+                                    type="button"
+                                    aria-label="Close">Cerrar</button>
                             </div>
                         </form>
                     </div>

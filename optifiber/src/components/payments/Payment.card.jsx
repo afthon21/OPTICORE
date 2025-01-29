@@ -33,7 +33,7 @@ function PaymentCard({ payments = [], onSelected }) {
                         <span className={styleCard['highlight']} />
                         <span className={styleCard['bar']} />
                         <label className={styleCard['place-holder']}>
-                            <i className="bi bi-search"></i>
+                            <i className="bi bi-search me-1"></i>
                             Buscar...
                         </label>
                     </div>

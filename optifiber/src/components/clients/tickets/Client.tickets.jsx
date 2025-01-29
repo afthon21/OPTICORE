@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import CreateTicket from './CreateTicket.modal.jsx';
 import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import ApiRequest from '../../hooks/apiRequest.jsx';
+import TicketInfo from './Client.ticketInfo.jsx';
 
 function ClientTickets({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
@@ -34,7 +35,7 @@ function ClientTickets({ client }) {
                     data-bs-toggle="modal"
                     data-bs-target="#CreateTicketModal"
                     className={`${styleTickets['btn']}`}>
-                    <i class="bi bi-plus-square-fill"></i>
+                    <i className="bi bi-plus-square-fill"></i>
                 </button>
 
                 <CreateTicket client={client} />
@@ -43,18 +44,21 @@ function ClientTickets({ client }) {
                 <thead className={`${styleTickets['header']}`}>
                     <tr>
                         <th>Folio</th>
+                        <th>Prioridad</th>
                         <th>Asunto</th>
-                        <th>Detalles</th>
+                        <th>Estado</th>
                         <th>Fecha</th>
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${styleTickets['body']}`}>
                     {
                         data.map((item) => (
-                            <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}>
+                            <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}
+                                data-bs-toggle="modal" data-bs-target="#TicketClientModal">
                                 <td>{item.Folio}</td>
+                                <td>{item.Priority}</td>
                                 <td>{item.Issue}</td>
-                                <td>{item.Description}</td>
+                                <td>{item.Status}</td>
                                 <td>{item.CreateDate.split("T")[0]}</td>
                             </tr>
                         ))
@@ -62,6 +66,8 @@ function ClientTickets({ client }) {
                     }
                 </tbody>
             </table>
+
+            <TicketInfo ticket={select ? select : ''} />
         </>
     );
 }

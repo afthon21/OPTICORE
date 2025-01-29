@@ -15,14 +15,14 @@ function CardCreatePayment({ clients = [] }) {
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState('');
     const [formValues, setFormValues] = useState({
-        Client: selected,
-        Method: undefined,
-        Amount: undefined,
-        Note: undefined,
+        Method: '',
+        Amount: '',
+        Note: ''
     });
+    const [formErrors, setFormErrors] = useState({})
 
     const data = {
-        Client: formValues.Client,
+        Client: selected,
         Method: formValues.Method,
         Amount: formValues.Amount,
         Note: formValues.Note
@@ -30,10 +30,10 @@ function CardCreatePayment({ clients = [] }) {
 
     const paymentMethods = [
         { id: '0', name: 'Método de pago...', hide: true, selected: true },
-        { id: '1', name: 'Tarjeta de Crédito', icon: 'bi bi-credit-card' },
-        { id: '2', name: 'Transferencia Bancaria', icon: 'bi bi-cash-coin' },
-        { id: '3', name: 'Efectivo', icon: 'bi bi-cash-stack' },
-        { id: '4', name: 'PayPal', icon: 'bi bi-paypal' }
+        { id: '1', name: 'Tarjeta de Crédito' },
+        { id: '2', name: 'Transferencia Bancaria' },
+        { id: '3', name: 'Efectivo' },
+        { id: '4', name: 'PayPal' }
     ];
 
     useEffect(() => {
@@ -83,12 +83,53 @@ function CardCreatePayment({ clients = [] }) {
         return clientName.toLowerCase().includes(search.toLowerCase());
     });
 
+    const validators = () => {
+        const errors = {}
+
+        if (!selected) {
+            errors.Client = 'Debe seleccionar un cliente.';
+        }
+
+        if (!formValues.Amount || formValues.Amount.trim() === '' || isNaN(formValues.Amount) || Number(formValues.Amount) <= 0) {
+            errors.Amount = 'El monto es obligatorio';
+        }
+
+        if (!formValues.Method || formValues.Method === paymentMethods[0].name) {
+            errors.Method = 'Selecciona un método de pago valido';
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const cleanedData = cleanData(data);
 
+        if (!validators()) {
+            setTimeout(() => {
+                setFormErrors({});
+            }, 1200);
+            return
+        }
+
         try {
             await makeRequest('/pay/new', 'POST', cleanedData);
+
+            if (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en el servidor!',
+                    text: error || 'Error desconocido',
+                    timer: 1200,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'bottom-end',
+                    background: '#e5e8e8'
+                });
+            }
+
             Swal.fire({
                 icon: 'success',
                 title: 'Creado exitosamente!',
@@ -100,16 +141,18 @@ function CardCreatePayment({ clients = [] }) {
                 background: '#e5e8e8'
             }).then(() => {
                 setFormValues({
-                    Method: paymentMethods.find((item) => item.id === '0').name,
+                    Method: paymentMethods[0].name,
                     Amount: '',
                     Note: '',
                 });
 
                 setSearch('');
             });
+
         } catch (error) {
             console.log(error);
         }
+
     }
 
     return (
@@ -123,7 +166,7 @@ function CardCreatePayment({ clients = [] }) {
             <div className={`card-body ${styleCreate['body']}`}>
                 <form onSubmit={handleSubmit}>
                     <label className="form-label">Cliente</label>
-                    <div className="input-group">
+                    <div className="input-group d-flex">
                         <input className={`form-control ${styleCreate['input']}`}
                             type="text"
                             value={search}
@@ -138,35 +181,33 @@ function CardCreatePayment({ clients = [] }) {
                             filteredOptions={filteredOptions}
                             onOptionClick={handleOptionClick} />
                     )}
-
+                    {formErrors.Client && <p className={styleCreate['error']}>{formErrors.Client}</p>}
                     <br />
 
                     {/* Selección de método de pago */}
                     <label className="form-label">Forma de Pago</label>
-                    <div className="input-group">
+                    <div className="input-group d-flex">
                         <select
                             className={`form-select ${styleCreate['select']}`}
                             name="Method"
                             onChange={handleChangue}
-                            value={formValues.Method}
-                        >
+                            value={formValues.Method || paymentMethods[0].name}>
                             {paymentMethods.map((method) => (
                                 <option
                                     key={method.id}
                                     value={method.name}
-                                    hidden={method.hide}
-                                    selected={method.selected}
-                                    className={styleCreate['option']}>
+                                    hidden={method.hide}>
 
                                     {method.name}
                                 </option>
                             ))}
                         </select>
                     </div>
+                    {formErrors.Method && <p className={styleCreate['error']}>{formErrors.Method}</p>}
                     <br />
 
                     <label className="form-label">Monto</label>
-                    <div className="input-group">
+                    <div className="input-group d-flex">
                         <span className="input-group-text">$</span>
                         <input type="number"
                             className={`form-control ${styleCreate['input']}`}
@@ -175,10 +216,11 @@ function CardCreatePayment({ clients = [] }) {
                             value={formValues.Amount}
                             placeholder='...' />
                     </div>
+                    {formErrors.Amount && <p className={styleCreate['error']}>{formErrors.Amount}</p>}
                     <br />
 
                     <label className="form-label">Nota</label>
-                    <div className="input-group">
+                    <div className="input-group d-flex">
                         <input className={`form-control ${styleCreate['input']}`}
                             onChange={handleChangue}
                             name="Note"
@@ -188,13 +230,14 @@ function CardCreatePayment({ clients = [] }) {
                     <br />
 
                     <div className="d-flex justify-content-end">
-                        <button className={styleCreate['button']} type="submit">
+                        <button className={styleCreate['button']} 
+                            type="submit"
+                            disabled={loading}>
                             {loading ? 'Creando...' : 'Crear'}
                         </button>
                     </div>
                 </form>
 
-                {error && <p>Error: {error}</p>}
             </div>
         </div>
     );

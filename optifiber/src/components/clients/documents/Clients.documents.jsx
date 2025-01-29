@@ -30,6 +30,9 @@ function ClientDocuments({ client }) {
             imageUrl: document,
             showCloseButton: true,
             showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cerrar',
+            cancelButtonColor: '#404040',
             background: '#ededed'
         })
     }

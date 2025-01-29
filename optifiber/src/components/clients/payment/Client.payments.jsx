@@ -5,6 +5,7 @@ import ApiRequest from '../../hooks/apiRequest.jsx';
 
 import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import CreatePay from './CreatePay.modal.jsx';
+import InfoPay from './Client.infoPay.jsx';
 
 function ClientPayments({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
@@ -26,7 +27,7 @@ function ClientPayments({ client }) {
 
     if (loading) return <LoadFragment />
 
-    if(error) return <p>Error!</p>
+    if (error) return <p>Error!</p>
 
     return (
         <>
@@ -52,7 +53,8 @@ function ClientPayments({ client }) {
                 <tbody className={`text-wrap ${stylePayment['body']}`}>
                     {
                         data.map((item) => (
-                            <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}>
+                            <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}
+                                data-bs-toggle="modal" data-bs-target="#PaymentClientModal">
                                 <td>{item.Folio}</td>
                                 <td>{item.Method}</td>
                                 <td>{item.Amount}</td>
@@ -62,6 +64,8 @@ function ClientPayments({ client }) {
                     }
                 </tbody>
             </table>
+
+            <InfoPay payment={select ? select : ''} />
         </>
     );
 }

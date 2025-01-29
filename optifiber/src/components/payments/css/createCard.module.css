@@ -94,8 +94,7 @@
     border-bottom: 2px solid #2a9d8f;
 }
 
-.select:focus {
-    background: transparent;
-    box-shadow: 0 0 5px rgb(0,180,216);
-    outline: none;
+.error {
+    font-family: 'Agdasima';
+    color: red;
 }

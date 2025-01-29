@@ -1,2 +1,0 @@
-import PDFDocument from 'pdfkit';
-
