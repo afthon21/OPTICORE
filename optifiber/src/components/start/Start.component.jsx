@@ -1,5 +1,5 @@
-import LoginComponent from '../login/Login.component.jsx'
-import RegisterComponent from '../register/Register.component.jsx';
+import LoginComponent from '../auth/login/Login.component.jsx';
+import RegisterComponent from '../auth/register/Register.component.jsx';
 
 function StartComponent() {
     return (

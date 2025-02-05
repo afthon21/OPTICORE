@@ -10,17 +10,16 @@ function ApiRequest(baseUrl) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const makeRequest = useCallback(async (endpoint, method = 'GET', body = null, isFormData = false) => {
+    const makeRequest = useCallback(async (endpoint, method = 'GET', body = null, { isFormData = false, requiresAuth = true } = {}) => {
         setLoading(true);
         setError(null);
 
         try {
             const token = sessionStorage.getItem('token');
-            const headers = isFormData ? { 'Authorization': `Bearer ${token}` } :
-                {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                }
+            const headers = {};
+
+            if (!isFormData) headers['Content-Type'] = 'application/json';
+            if (requiresAuth && token) headers['Authorization'] = `Bearer ${token}`;
 
             const res = await fetch(`${baseUrl}${endpoint}`, {
                 method,
@@ -39,9 +38,9 @@ function ApiRequest(baseUrl) {
             setError(error.message);
             return null;
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    }, [baseUrl]);
+    }, [baseUrl])
 
     return { makeRequest, loading, error };
 }

@@ -53,6 +53,11 @@ export const handlePackages = (navigate) => {
 }
 
 export const handleCreatePackages = (navigate) => {
-    const servicesUrl = `/packageService/create/${adminId}`;
+    const servicesUrl = `/packageServices/create/${adminId}`;
     navigate(servicesUrl);
+}
+
+export const handleRecoveryPassword = (navigate) => {
+    const recoveryUrl = '/reset-password';
+    navigate(recoveryUrl);
 }

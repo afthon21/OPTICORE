@@ -2,9 +2,9 @@ import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { cleanData } from "../fragments/js/cleanData.js";
-import ApiRequest from '../hooks/apiRequest.jsx';
-import { LoadFragment } from '../fragments/Load.fragment.jsx';
+import { cleanData } from "../../fragments/js/cleanData.js";
+import ApiRequest from '../../hooks/apiRequest.jsx';
+import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 
 function RegisterComponent() {
     /** Cambiar entre Modals */

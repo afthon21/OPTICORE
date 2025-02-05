@@ -6,6 +6,7 @@ import ClientPayments from './payment/Client.payments';
 import ClientData from './Client.data';
 import ClientDocuments from './documents/Clients.documents';
 import ClientTickets from './tickets/Client.tickets';
+import ClientNotes from './notes/client.notes';
 import Swal from 'sweetalert2';
 import ClientLocation from './location/location.map';
 
@@ -16,6 +17,7 @@ function ClientsInfo({ client }) {
         documents: false,
         location: false,
         tickets: false,
+        notes: false
     });
 
     const toggleData = (data) => {
@@ -37,6 +39,7 @@ function ClientsInfo({ client }) {
                 documents: false,
                 location: false,
                 tickets: false,
+                notes: false,
                 [data]: true
             })
         }
@@ -109,6 +112,14 @@ function ClientsInfo({ client }) {
                                     Tickets
                                 </a>
                             </li>
+
+                            <li className="nav-item">
+                                <a className="nav-link"
+                                    role="button"
+                                    onClick={() => toggleData('notes')}>
+                                        Notas
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -157,6 +168,11 @@ function ClientsInfo({ client }) {
                     {/** Ver tickets */}
                     {show.tickets && (
                         <ClientTickets client={client._id}/>
+                    )}
+
+                    {/** Ver notas */}
+                    {show.notes && (
+                        <ClientNotes client={client._id}/>
                     )}
 
                 </div>

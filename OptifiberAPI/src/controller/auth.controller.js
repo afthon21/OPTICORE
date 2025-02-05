@@ -1,7 +1,8 @@
 import admin from '../models/adminSchema.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import transporter from '../libs/nodemailer.js';
+import resetCode from '../models/resetCodeSchema.js';
+import { transporter, mailOptions } from '../libs/nodemailer.js'
 
 //Registrar nuevo Administrador
 export const registerUser = async (req, res) => {
@@ -113,70 +114,92 @@ export const getProfile = async (req, res, next) => {
     next();
 }
 
-//Recuperar contraseña
-const resetPassword = async (to, resetToken) => {
-    const mailOptions = {
-        from: 'fay.mayert@ethereal.email',
-        to,
-        subject: 'reset password',
-        html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Recuperación de contraseña</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f4f4;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .container {
-                        max-width: 600px;
-                        margin: 20px auto;
-                        background: #ffffff;
-                        padding: 20px;
-                        border-radius: 10px;
-                        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                        text-align: center;
-                    }
-                    h2 {
-                        color: #333;
-                    }
-                    p {
-                        color: #666;
-                    }
-                    .btn {
-                        display: inline-block;
-                        background: #007bff;
-                        color: #ffffff;
-                        padding: 12px 20px;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        font-size: 16px;
-                        margin-top: 20px;
-                    }
-                    .footer {
-                        margin-top: 20px;
-                        font-size: 12px;
-                        color: #888;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h2>Recuperación de Contraseña</h2>
-                    <p>Hemos recibido una solicitud para restablecer tu contraseña. Si no hiciste esta solicitud, puedes ignorar este mensaje.</p>
-                    <p>Para restablecer tu contraseña, haz clic en el siguiente botón:</p>
-                    <p>Código para restablecer contraseña</p>
-                    <p>{}</p>
-                    <p class="footer">Si tienes problemas con el botón, copia y pega el siguiente enlace en tu navegador:<br> <a href="#">https://example.com/reset-password</a></p>
-                    <p class="footer">Si no solicitaste este cambio, puedes ignorar este correo.</p>
-                </div>
-            </body>
-            </html>
-        `
+/**
+ * Recuperar contraseña
+ * @param {Email} req 
+ * @param {json, status, send} res 
+ * @returns *Messages
+ */
+export const sendMailRecovery = async (req, res) => {
+    const { Email } = req.body;
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expireAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    try {
+        /**
+         * Almacenar código
+         */
+        const user = await admin.findOne({ Email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Email doesnt exist' })
+        }
+
+        await resetCode.findOneAndUpdate(
+            { User: user._id },
+            { Email, Code: code, ExpireAt: expireAt },
+            { upsert: true, new: true }
+        )
+
+        /**
+         * Enviar coligo por correo
+         */
+        const createMail = mailOptions(Email, code);
+
+        await transporter.sendMail(createMail);
+
+        return res.status(201).json({ message: 'Code sent successfully' })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server Error!' });
+    }
+}
+
+export const verifyRecoveryCode = async (req, res) => {
+    const { Email, Code } = req.body;
+
+    try {
+        const exist = await resetCode.findOne({ Email });
+
+        if (!exist || exist.Code !== Code) {
+            return res.status(400).json({ message: 'Invalid Code' });
+        }
+
+        if (new Date() > exist.ExpireAt) {
+            return res.status(400).json({ message: 'Expired code' });
+        }
+
+        return res.status(204).send();
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
+    }
+}
+
+export const resetPassword = async (req, res) => {
+    const { Email, Code, newPassword } = req.body;
+
+    try {
+        const exist = await resetCode.findOne({ Email });
+
+        if (!exist || exist.Code !== Code) {
+            return res.status(400).json({ message: 'Code invalid' });
+        }
+
+        if (new Date() > exist.ExpireAt) {
+            return res.json(400).json({ message: 'Expired Code' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        await admin.findOneAndUpdate({ Email }, { Password: hashedPassword });
+
+        await resetCode.deleteOne({ Email });
+
+        return res.status(201).json({ message: 'Password changed'});
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
     }
 }

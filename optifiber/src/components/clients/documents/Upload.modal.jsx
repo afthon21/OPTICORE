@@ -106,22 +106,7 @@ export function UploadDoc({ client }) {
         }
 
         try {
-            await makeRequest(`/document/new/${client}`, 'POST', formData, true);
-
-            if (error) {
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    title: 'Error!',
-                    text: error,
-                    timer: 1200,
-                    showConfirmButton: false,
-                    timerProgressBar: true,
-                    position: 'top'
-                });
-
-                return;
-            }
+            await makeRequest(`/document/new/${client}`, 'POST', formData, { isFormData: true });
 
             Swal.fire({
                 toast: true,

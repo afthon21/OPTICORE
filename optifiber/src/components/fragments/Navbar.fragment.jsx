@@ -128,7 +128,7 @@ export function NavbarFragmentAll() {
                 <li className="nav-item item">
                     <a className="nav-link d-flex align-items-center item-link"
                         role="button">
-                        <i class="bi bi-box2-heart-fill me-2"></i>
+                        <i className="bi bi-box2-heart-fill me-2"></i>
                         <span className="item-title">Paquetes</span>
                     </a>
 

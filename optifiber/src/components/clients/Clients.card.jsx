@@ -64,6 +64,7 @@ function ClientsCard({ clients = [], onSelected }) {
             </div>
         </div>
     );
+
 }
 
 export default ClientsCard

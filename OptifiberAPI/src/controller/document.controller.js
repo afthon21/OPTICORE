@@ -43,14 +43,14 @@ export const viewDocuments = async (req, res) => {
 
         if (!exist) {
             return res.status(404).json({ message: 'Client does not exist yet' });
-        } else {
-            const documents = await document.find({ Client: exist._id })
-                .populate('Client', 'Name LastName')
-                .populate('Admin', 'UserName')
-                .exec();
-
-            return res.status(200).json(documents);
         }
+        const documents = await document.find({ Client: exist._id })
+            .populate('Client', 'Name LastName')
+            .populate('Admin', 'UserName')
+            .exec();
+
+        return res.status(200).json(documents);
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server error!' });

@@ -8,14 +8,14 @@ import { LoadFragment } from '../fragments/Load.fragment.jsx'
 function PaymentComponent() {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
-    const [select, setSelect] = useState(null)
+    const [select, setSelect] = useState(null);
 
     const handleLoad = async () => {
         try {
             const res = await makeRequest('/pay/all');
             setData(res);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     }
 

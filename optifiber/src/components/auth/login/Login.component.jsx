@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiRequest from '../hooks/apiRequest.jsx';
+import ApiRequest from '../../hooks/apiRequest.jsx';
 
 import Swal from "sweetalert2";
+import { handleHome, handleRecoveryPassword } from "../../fragments/js/Routes.js";
 
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -35,7 +36,7 @@ function LoginComponent() {
         Password: undefined
     });
     const [formErrors, setFormErrors] = useState({});
-    const nav = useNavigate();
+    const navigate = useNavigate();
 
     /** Modelo de datos */
     const data = {
@@ -104,7 +105,7 @@ function LoginComponent() {
                     position: 'top',
                     background: '#e5e8e8'
                 });
-                
+
             }
 
             // Guarda el token o datos importantes en el almacenamiento si es necesario
@@ -115,11 +116,11 @@ function LoginComponent() {
 
             // Guardamos el id del perfil
             const adminId = sessionStorage.getItem('adminId');
-            const homeUrl = `/home/${adminId}`;
+
 
             // Navegar a la siguiente vista
             handleCloseModal();
-            nav(homeUrl);
+            handleHome(navigate);
 
         } catch (error) {
             console.log('Error en la solicitud ', error);
@@ -160,6 +161,11 @@ function LoginComponent() {
                                     {formErrors?.Email && (<p style={{ color: 'red' }}>{formErrors.Email}</p>)}
 
                                 </div>
+                                <span>¿Olvidaste tu contraseña? <a href="#" onClick={(e) => {
+                                    e.preventDefault();
+                                    handleCloseModal();
+                                    handleRecoveryPassword(navigate);
+                                }}>Recupérala aquí</a></span>
                                 <div className="d-flex justify-content-center" >
                                     <button className="btn btn-primary" type="submit">{loading ? 'Iniciando...' : 'Iniciar Sesión'}</button>
                                 </div>
