@@ -31,7 +31,7 @@ const paymentSchema = new mongoose.Schema({
     }
 });
 
-paymentSchema.methods.setFolio = function setFolio(id,clientName,adminName,date) {
+paymentSchema.methods.setFolio = function setFolio(id,clientName,date) {
     const idString = id.toString();
     const identifier = idString.slice(0,2)+idString.slice(-2);
 

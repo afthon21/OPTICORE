@@ -24,13 +24,13 @@ function RegisterComponent() {
     /** Hooks */
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
-        FirstName: undefined,
-        SecondName: undefined,
-        FatherLastName: undefined,
-        MotherLastName: undefined,
-        Email: undefined,
-        Password: undefined,
-        ConfirmPassword: undefined
+        FirstName: '',
+        SecondName: '',
+        FatherLastName: '',
+        MotherLastName: '',
+        Email: '',
+        Password: '',
+        ConfirmPassword: ''
     });
     const [formErrors, setFormErrors] = useState({});
 

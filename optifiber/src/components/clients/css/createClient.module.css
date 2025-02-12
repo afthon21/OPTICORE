@@ -70,14 +70,41 @@
 }
 
 .btn-map {
+    background: transparent;
     border: none;
+    border-radius: 8px;
     font-family: 'Agdasima';
     color: #404040;
     font-size: 14pt;
     text-decoration: none;
-    transition: border-bottom 0.4s ease;
+    transition: border-bottom 0.3s ease;
 }
 
 .btn-map:hover {
-    border-bottom: 1px solid #2a9d8f;
+    border-bottom: solid 2px #2a9d8f;
+    color: #2a9d8f;
+}
+
+.btn-map:hover i {
+    color: #2a9d8f;
+}
+
+.error {
+    font-family: 'Agdasima';
+    color: red;
+}
+
+.btn-submit {
+    border-radius: 8px;
+    background: #2a9d8f;
+    font-size: 16pt;
+    font-family: 'Agdasima';
+    color: #ededed;
+    border: none;
+    width: 80px;
+    transition: width 0.4s ease;
+}
+
+.btn-submit:hover {
+    width: 100px;
 }

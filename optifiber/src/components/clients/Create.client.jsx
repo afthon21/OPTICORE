@@ -1,10 +1,11 @@
-import styleCreateCard from './css/createCard.module.css';
+import styleCreateCard from './css/createClient.module.css';
 
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { cleanData } from '../fragments/js/cleanData.js';
 import { getDate } from '../fragments/js/getDate.js';
 import ApiRequest from '../hooks/apiRequest.jsx';
+import ModalGoogleMap from './Modal.map.jsx';
 
 function CreateClient() {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
@@ -25,6 +26,8 @@ function CreateClient() {
         InNumber: ''
     });
     const [formErrors, setFormErrors] = useState({});
+    const [center, setCenter] = useState({ lat: 0, lng: 0 });
+    const [marker,setMarker] = useState({ lat: 0, lng: 0});
     const data = {
         Name: {
             FirstName: formValues.FirstName,
@@ -44,7 +47,9 @@ function CreateClient() {
             Cologne: formValues.Cologne,
             Locality: formValues.Locality,
             OutNumber: formValues.OutNumber,
-            InNumber: formValues.InNumber
+            InNumber: formValues.InNumber,
+            Latitude: marker.lat,
+            Length: marker.lng
         }
     }
 
@@ -65,6 +70,8 @@ function CreateClient() {
             OutNumber: '',
             InNumber: ''
         });
+        setCenter({ lat: 0, lng: 0});
+        setMarker({ lat: 0, lng: 0});
     }
 
     const handleChangue = (e) => {
@@ -80,17 +87,51 @@ function CreateClient() {
     const validators = () => {
         const errors = {};
 
-        const requiredFields = ['FirstName', 'SecondName', 'FatherLastName', 'MotherLastName', 'PhoneNumber',
-            'Email', 'State', 'Municipality', 'ZIP', 'Address', 'Cologne', 'Locality', 'OutNumber', 'InNumber'
+        // Campos requeridos
+        const requiredFields = [
+            'FirstName', 'FatherLastName', 'MotherLastName', 'PhoneNumber',
+            'Email', 'State', 'Municipality', 'ZIP', 'Address', 'Cologne',
+            'Locality', 'OutNumber'
         ];
-        requiredFields.forEach(item => {
-            if (!formValues[item]) {
-                errors[item] = 'Campo requerido';
+
+        requiredFields.forEach(field => {
+            if (!formValues[field] || (Array.isArray(formValues[field]) && formValues[field].length === 0)) {
+                errors[field] = 'Campo requerido';
             }
         });
 
+        // Validación de correo electrónico
+        if (formValues.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.Email)) {
+            errors.Email = 'Correo electrónico no válido';
+        }
+
+        // Validación de número de teléfono (asumiendo formato de 10 dígitos)
+        if (formValues.PhoneNumber && !/^\d{10}$/.test(formValues.PhoneNumber)) {
+            errors.PhoneNumber = 'Número de teléfono inválido (debe tener 10 dígitos)';
+        }
+
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
+    }
+
+    const handleSearchLocation = async () => {
+        const apiKey = import.meta.env.VITE_GOOGLE_MAP;
+        const address = `${formValues.Address}, ${formValues.Municipality}, ${formValues.State}, ${formValues.ZIP}`;
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (data.status === 'OK') {
+                const { lat, lng } = data.results[0].geometry.location;
+                setCenter({ lat, lng });
+            } else {
+                console.log('Ubicación no encontrada');
+            }
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -100,59 +141,47 @@ function CreateClient() {
             setTimeout(() => {
                 setFormErrors({})
             }, 1200);
-
             return;
         }
 
         const cleanedData = cleanData(data);
         try {
-            await makeRequest('/client/new', 'POST', cleanedData);
+            const res = await makeRequest('/client/new', 'POST', cleanedData);
+            Swal.fire({
+                icon: 'success',
+                title: 'Completado',
+                text: res.message,
+                toast: true,
+                position: 'top',
+                timer: 1200,
+                timerProgressBar: true,
+                showConfirmButton: false
+            }).then(() => {
+                handleClear();
+            })
 
-            if (error) {
+            if(error){
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
                     text: error,
+                    toast: true,
                     timer: 1200,
                     timerProgressBar: true,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top'
-                });
-
-                return;
-            }
-
-            if (loading) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Creando',
-                    text: 'Guardando...',
-                    timer: 1200,
-                    timerProgressBar: true,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top'
+                    position: 'top',
+                    showConfirmButton:false
                 });
             }
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Creado exitosamente!',
-                timer: 1200,
-                showConfirmButton: false,
-                timerProgressBar: true,
-                toast: true,
-                position: 'top',
-                background: '#e5e8e8'
-            }).then(() => {
-                handleClear();
-            })
         } catch (error) {
             console.log(error);
         }
 
     }
+
+    const saveMarker = (markerPosition) =>{
+        setMarker(markerPosition);
+    }
+
     return (
         <div className="container-fluid" style={{ paddingLeft: '65px' }}>
             <div className={`row align-items-center mt-4 ${styleCreateCard['header']}`}>
@@ -179,7 +208,7 @@ function CreateClient() {
                                 value={formValues.FirstName}
                                 placeholder="nombre..." />
                         </div>
-                        {formErrors.FirstName && <p>{formErrors.FirstName}</p>}
+                        {formErrors.FirstName && <p className={styleCreateCard['error']}>{formErrors.FirstName}</p>}
 
                         <div className="input-group mb-3">
                             <span className="input-group-text">Segundo Nombre</span>
@@ -200,6 +229,7 @@ function CreateClient() {
                                 value={formValues.FatherLastName}
                                 placeholder="apellido..." />
                         </div>
+                        {formErrors.FatherLastName && <p className={styleCreateCard['error']}>{formErrors.FatherLastName}</p>}
 
                         <div className="input-group mb-3">
                             <span className="input-group-text">Apellido Materno</span>
@@ -210,6 +240,7 @@ function CreateClient() {
                                 value={formValues.MotherLastName}
                                 placeholder="apellido..." />
                         </div>
+                        {formErrors.MotherLastName && <p className={styleCreateCard['error']}>{formErrors.MotherLastName}</p>}
 
                         <div className="input-group mb-3">
                             <span className="input-group-text">Teléfono</span>
@@ -220,6 +251,7 @@ function CreateClient() {
                                 value={formValues.PhoneNumber}
                                 placeholder="numero..." />
                         </div>
+                        {formErrors.PhoneNumber && <p className={styleCreateCard['error']}>{formErrors.PhoneNumber}</p>}
 
                         <div className="input-group mb-3|">
                             <span className="input-group-text">Correo Electrónico</span>
@@ -230,6 +262,7 @@ function CreateClient() {
                                 value={formValues.Email}
                                 placeholder="Email..." />
                         </div>
+                        {formErrors.Email && <p className={styleCreateCard['error']}>{formErrors.Email}</p>}
                     </div>
 
                     {/** Ubicación */}
@@ -243,6 +276,7 @@ function CreateClient() {
                                 value={formValues.Address}
                                 placeholder="calle..." />
                         </div>
+                        {formErrors.Address && <p className={styleCreateCard['error']}>{formErrors.Address}</p>}
 
                         <div className="d-flex justify-content-between">
                             <div className="input-group mb-3 me-3">
@@ -254,6 +288,8 @@ function CreateClient() {
                                     value={formValues.OutNumber}
                                     placeholder="#..." />
                             </div>
+                            {formErrors.OutNumber && <p className={styleCreateCard['error']}>{formErrors.OutNumber}</p>}
+
                             <div className="input-group mb-3">
                                 <span className="input-group-text">Numero Interior</span>
                                 <input type="text"
@@ -274,6 +310,7 @@ function CreateClient() {
                                 value={formValues.State}
                                 placeholder="estado..." />
                         </div>
+                        {formErrors.State && <p className={styleCreateCard['error']}>{formErrors.State}</p>}
 
                         <div className="d-flex justify-content-between">
                             <div className="input-group mb-3 me-1">
@@ -285,6 +322,8 @@ function CreateClient() {
                                     value={formValues.Cologne}
                                     placeholder="colonia..." />
                             </div>
+                            {formErrors.Cologne && <p className={styleCreateCard['error']}>{formErrors.Cologne}</p>}
+
                             <div className="input-group mb-3 me-1">
                                 <span className="input-group-text">Localidad</span>
                                 <input type="text"
@@ -294,6 +333,8 @@ function CreateClient() {
                                     value={formValues.Locality}
                                     placeholder="localidad..." />
                             </div>
+                            {formErrors.Locality && <p className={styleCreateCard['error']}>{formErrors.Locality}</p>}
+
                         </div>
 
                         <div className="d-flex justify-content-between">
@@ -306,6 +347,8 @@ function CreateClient() {
                                     value={formValues.Municipality}
                                     placeholder="municipio..." />
                             </div>
+                            {formErrors.Municipality && <p className={styleCreateCard['error']}>{formErrors.Municipality}</p>}
+
                             <div className="input-group mb-3">
                                 <span className="input-group-text">Código Postal</span>
                                 <input type="text"
@@ -315,9 +358,27 @@ function CreateClient() {
                                     value={formValues.ZIP}
                                     placeholder="c.p ..." />
                             </div>
+                            {formErrors.ZIP && <p className={styleCreateCard['error']}>{formErrors.ZIP}</p>}
+
                         </div>
 
-                        <button type="button">Colocar Marcador en el mapa<i className="bi bi-geo-alt-fill ms-2"></i></button>
+                        <button
+                            className={styleCreateCard['btn-map']}
+                            type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#GoogleMapModal"
+                            onClick={handleSearchLocation}>
+                            Colocar Marcador en el mapa
+                            <i className="bi bi-geo-alt-fill ms-2"></i>
+                        </button>
+
+                        <ModalGoogleMap center={center} handleMarker={saveMarker}/>
+                    </div>
+
+                    <div className="d-flex justify-content-end mt-3">
+                        <button
+                            className={styleCreateCard['btn-submit']}
+                            type="submit">{loading ? 'Guardando...' : 'Aceptar'}</button>
                     </div>
                 </form>
             </div>

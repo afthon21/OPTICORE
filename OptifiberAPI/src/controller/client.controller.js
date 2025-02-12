@@ -58,7 +58,7 @@ export const newClient = async (req, res) => {
         });
 
         await newClient.save();
-        return res.status(201).json(newClient);
+        return res.status(201).json({ message: 'Client created' });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error registering client' });
@@ -168,10 +168,10 @@ export const deleteClient = async (req, res) => {
         }
 
         await Promise.all([
-            notes.deleteMany({ Client: id}),
-            document.deleteMany({ Client: id}),
-            payment.deleteMany({ Client: id}),
-            ticket.deleteMany({ Client: id})
+            notes.deleteMany({ Client: id }),
+            document.deleteMany({ Client: id }),
+            payment.deleteMany({ Client: id }),
+            ticket.deleteMany({ Client: id })
         ]);
 
         await client.findByIdAndDelete(idClient);

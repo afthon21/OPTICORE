@@ -32,8 +32,8 @@ function LoginComponent() {
     /** Hooks */
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
-        Email: undefined,
-        Password: undefined
+        Email: '',
+        Password: ''
     });
     const [formErrors, setFormErrors] = useState({});
     const navigate = useNavigate();
@@ -91,7 +91,7 @@ function LoginComponent() {
         }
 
         try {
-            const res = await makeRequest('/auth/login', 'POST', data);
+            const res = await makeRequest('/auth/login', 'POST', data, { requiresAuth: false });
 
             if (error) {
                 Swal.fire({
@@ -117,10 +117,9 @@ function LoginComponent() {
             // Guardamos el id del perfil
             const adminId = sessionStorage.getItem('adminId');
 
-
             // Navegar a la siguiente vista
             handleCloseModal();
-            handleHome(navigate);
+            handleHome(navigate, res.adminId);
 
         } catch (error) {
             console.log('Error en la solicitud ', error);

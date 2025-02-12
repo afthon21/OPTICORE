@@ -28,13 +28,6 @@ export const createPayment = async (req, res) => {
         ${clientData.LastName.MotherLastName}`
             .replace(/\s+/g, ' ').trim();
 
-        const adminName = `${adminData.Name.FirstName} 
-        ${adminData.Name.SecondName || ''} 
-        ${adminData.LastName.FatherLastName} 
-        ${adminData.LastName.MotherLastName}`
-            .replace(/\s+/g, ' ').trim();
-
-
         const newPayment = payment({
             CreateDate,
             Client,
@@ -45,7 +38,7 @@ export const createPayment = async (req, res) => {
         });
 
         //Creamos el folio
-        newPayment.setFolio(newPayment._id, clientName, adminName, newPayment.CreateDate)
+        newPayment.setFolio(newPayment._id, clientName, newPayment.CreateDate)
 
         await newPayment.save();
         return res.status(201).json({ message: 'New payment created' });
@@ -117,12 +110,6 @@ export const createPaymentById = async (req, res) => {
         ${clientExist.LastName.MotherLastName}`
             .replace(/\s+/g, ' ').trim();
 
-        const adminName = `${adminData.Name.FirstName} 
-        ${adminData.Name.SecondName || ''} 
-        ${adminData.LastName.FatherLastName} 
-        ${adminData.LastName.MotherLastName}`
-            .replace(/\s+/g, ' ').trim();
-
         const newPayment = new payment({
             CreateDate,
             Client: clientExist._id,
@@ -133,7 +120,7 @@ export const createPaymentById = async (req, res) => {
         });
 
         //Creamos el folio
-        newPayment.setFolio(newPayment._id, clientName, adminName, newPayment.CreateDate)
+        newPayment.setFolio(newPayment._id, clientName, newPayment.CreateDate)
 
         await newPayment.save();
         return res.status(201).json({ message: 'New payment created' });

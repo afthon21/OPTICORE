@@ -25,6 +25,7 @@ import ServicePackagesComponent from './components/services packages/services.co
 import CreatePackage from './components/services packages/Create.Packages.jsx';
 
 import RecoveryPwdComponent from './components/auth/recoveryPwd/recovery.component.jsx';
+import ResetPwdComponent from './components/auth/recoveryPwd/resetPwd.components.jsx';
 
 import { NavbarFragmentAll } from './components/fragments/Navbar.fragment.jsx';
 
@@ -59,6 +60,7 @@ function App() {
 
           {/** Recuperar contraseña */}
           <Route path='/reset-password' element = {<RecoveryPwdComponent />}></Route>
+          <Route path='/reset-password-new' element={<ResetPwdComponent />}></Route>
         </Routes>
 
       </div>

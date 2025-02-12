@@ -6,11 +6,11 @@ import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest.jsx'
 
 function CreatePay({ client }) {
-    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE)
+    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
-        Method: undefined,
-        Amount: undefined,
-        Note: undefined
+        Method: '',
+        Amount: '',
+        Note: ''
     });
     const paymentMethods = [
         { id: '0', name: 'Método de pago...', hide: true, selected: true },
@@ -48,23 +48,12 @@ function CreatePay({ client }) {
         const cleanedData = cleanData(data);
 
         try {
-            await makeRequest(`/pay/new/${client}`, 'POST', cleanedData);
-
-            if (loading) {
-                await Swal.fire({
-                    icon: 'info',
-                    title: 'Espere!',
-                    text: 'creando...',
-                    toast: true,
-                    position: top,
-                    timer: 1200,
-                    timerProgressBar: true
-                });
-            }
+            const res = await makeRequest(`/pay/new/${client}`, 'POST', cleanedData);
 
             Swal.fire({
                 icon: 'success',
                 title: 'Creado exitosamente!',
+                text: res,
                 timer: 1200,
                 showConfirmButton: false,
                 timerProgressBar: true,

@@ -7,7 +7,7 @@ import ApiRequest from '../../hooks/apiRequest';
 export function UploadDoc({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [file, setFile] = useState(null);
-    const [value, setValue] = useState(undefined);
+    const [value, setValue] = useState('');
     const [formErrors, setFormErrors] = useState({});
 
     const documentName = [

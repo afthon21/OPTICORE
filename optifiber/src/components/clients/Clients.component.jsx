@@ -31,7 +31,7 @@ function ClientsComponent() {
         <div className="container-fluid d-flex mt-1 ms-4">
             <ClientsCard clients={data ? data : []} onSelected={setSelect} />
 
-            <ClientsInfo client={select} />
+            <ClientsInfo client={select ? select: ''} />
         </div>
     );
 }

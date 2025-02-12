@@ -75,8 +75,7 @@ const clientSchema = new mongoose.Schema ({
         }
     },
     Status: {
-        type: Number,
-        default: 1
+        type: String
     }
 });
 

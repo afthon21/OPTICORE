@@ -157,7 +157,7 @@ function ClientsInfo({ client }) {
 
                     {/** Ver Marcador */}
                     {show.location && (
-                        <ClientLocation />
+                        <ClientLocation client={client}/>
                     )}
 
                     {/** Ver pagos */}

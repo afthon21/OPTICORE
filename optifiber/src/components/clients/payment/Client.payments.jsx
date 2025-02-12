@@ -10,7 +10,7 @@ import InfoPay from './Client.infoPay.jsx';
 function ClientPayments({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
-    const [select, setSelect] = useState(null)
+    const [select, setSelect] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -39,7 +39,7 @@ function ClientPayments({ client }) {
                     <i class="bi bi-plus-square-fill"></i>
                 </button>
 
-                <CreatePay client={client} />
+                <CreatePay client={client ? client: ''} />
             </div>
             <table className={`table table-hover table-sm ${stylePayment['container']}`}>
                 <thead className={`${stylePayment['header']}`}>

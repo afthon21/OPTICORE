@@ -1,8 +1,18 @@
-import MapGoogle from "../../fragments/Map.fragment";
+import MapGoogle from "../../fragments/maps/Map.fragment";
 
-function ClientLocation() {
+import ApiRequest from "../../hooks/apiRequest";
+import { useState } from "react";
+
+function ClientLocation({ client }) {
+    const marker = {
+        lat: client.Location.Latitude,
+        lng: client.Location.Length
+    }
+
+    console.log(marker)
+
     return (
-        <MapGoogle />
+        <MapGoogle position={marker}/>
     );
 }
 
