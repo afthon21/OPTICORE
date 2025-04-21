@@ -155,7 +155,7 @@ export function UploadDoc({ client }) {
                         >
                             <span className={styleFormModal['form-title']}>Cargar archivo</span>
                             <p className={styleFormModal['form-paragraph']}>
-                                El archivo debe ser una imagen.
+                                El archivo debe ser una imagen o un PDF.
                             </p>
 
                             <div className="input-group">
@@ -188,7 +188,7 @@ export function UploadDoc({ client }) {
                                 <span>o</span>
                                 <input
                                     type="file"
-                                    accept="image/*"
+                                    accept="image/*,application/pdf"
                                     id="file-input"
                                     className={styleFormModal['file-input']}
                                     onChange={handleFileChange}
@@ -212,6 +212,17 @@ export function UploadDoc({ client }) {
                                             className={styleFormModal['preview']}
                                             onLoad={() => URL.revokeObjectURL(file)}
                                         />
+                                    )}
+                                    {/*Enlace para descargar PDF*/}
+                                    {file.type === 'application/pdf' &&(
+                                        <a
+                                            href={URL.createObjectURL(file)}
+                                            terget="_blank"
+                                            rel="noopener noreferrer"
+                                            className={styleFormModal['pdf-link']}
+                                        >
+                                            Ver PDF
+                                        </a>
                                     )}
                                 </div>
                             )}
