@@ -23,7 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.4",
     "nodemailer": "^6.9.15",
-    "nodemon": "^3.1.9",
+    "nodemon": "^3.1.10",
     "pdfkit": "^0.15.0",
     "pdfkit-table": "^0.1.99"
   }
