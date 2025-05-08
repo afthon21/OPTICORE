@@ -14,6 +14,9 @@
 
 1. Instala las dependencias:
     ### npm install
+    ### npm instal vite
+    ### npm install nodemon
+    
 2. crear archivos .env
   #### ruta: FIBERTRAC1/otifiber
    
@@ -31,7 +34,7 @@
       APPLICATION_PASSWORD=srxd vinf mwbw xwhr
          
 3. Inicia el servidor:
-   #### antes de iniciar el servidor abrir una terminar para cada proyecto
+   #### antes de iniciar el servidor abrir una terminal para cada proyecto
    #### ***Carpeta optifiber:***
      #### cd optifiber
      #### npm run dev
@@ -40,3 +43,4 @@
      ### cd optifiberAPI
      ### npm run dev
    
+
