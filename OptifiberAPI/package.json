@@ -14,7 +14,7 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.5.0",
     "express": "^4.19.2",
     "express-myconnection": "^1.0.4",
     "express-validator": "^7.2.0",
@@ -23,7 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.4",
     "nodemailer": "^6.9.15",
-    "nodemon": "^3.1.9",
+    "nodemon": "^3.1.10",
     "pdfkit": "^0.15.0",
     "pdfkit-table": "^0.1.99"
   }
