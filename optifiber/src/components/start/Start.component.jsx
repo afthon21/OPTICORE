@@ -4,25 +4,54 @@ import RegisterComponent from '../auth/register/Register.component.jsx';
 function StartComponent() {
     return (
         <>
-            <div className="d-flex flex-column align-items-center justify-content-start bg-light text-center pt-5">
-                <div className="mb-5">
-                    <h1 className="display-3 text-primary fw-bold">optifiberx</h1>
-                </div>
+            {/* Fondo con degradado y centrado total */}
+            <div
+                className="position-absolute top-50 start-50 translate-middle w-100 text-center px-3"
+                style={{
+                    minHeight: '100vh',
+                    background: 'linear-gradient(135deg, #1d2b64, #f8cdda)', // Degradado azul y rosa
+                    color: 'white',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+            >
+                {/* Título */}
+                <h1 className="display-2 fw-bold text-uppercase mb-4" style={{ letterSpacing: '2px' }}>
+                    FIBERTRACK
+                </h1>
 
-                <div className="mb-5">
-                    <h2 className="h3 mb-4 fw-semibold text-secondary">¡Bienvenido a OptiFiberX!</h2>
-                    <p className="lead text-muted mx-auto" style={{ maxWidth: '600px' }}>
-                        OptiFiberX, la solución integral para optimizar tus redes. Inicia
-                        sesión con tus credenciales o regístrate para descubrir nuestras herramientas avanzadas.
-                    </p>
+                {/* Subtítulo */}
+                <h2 className="h4 fw-semibold mb-3" style={{ color: '#f0f0f0' }}>
+                    ¡Bienvenido a FiberTrack!
+                </h2>
+
+                {/* Descripción */}
+                <p className="lead mb-5" style={{ maxWidth: '600px', color: '#e0e0e0' }}>
+                    Con <strong>FiberTrack</strong>, optimiza y gestiona tus redes de manera fácil y eficiente. Inicia sesión con tu cuenta o regístrate ahora y accede a nuestras herramientas avanzadas diseñadas para mejorar tu experiencia.
+                </p>
+
+                {/* Botones */}
+                <div className="d-flex flex-column align-items-center" style={{ width: '280px' }}>
+                    <button
+                        className="btn btn-light btn-lg w-100 mb-3"
+                        data-bs-toggle="modal"
+                        data-bs-target="#loginModal"
+                    >
+                        Iniciar Sesión
+                    </button>
+                    <button
+                        className="btn btn-outline-light btn-lg w-100"
+                        data-bs-toggle="modal"
+                        data-bs-target="#registerModal"
+                    >
+                        Regístrate
+                    </button>
                 </div>
             </div>
 
-            <div className="w-100 d-flex flex-column align-items-center">
-                <button className="btn btn-primary btn-lg w-50 mb-4" data-bs-toggle="modal" data-bs-target="#loginModal">Iniciar Sesión</button>
-                <button className="btn btn-secondary btn-lg w-50" data-bs-toggle="modal" data-bs-target="#registerModal">Regístrate</button>
-            </div>
-
+            {/* Modales */}
             <LoginComponent />
             <RegisterComponent />
         </>
