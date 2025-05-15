@@ -11,7 +11,7 @@
 ````
  4. Clona el repositorio:
 ```sh
-<https://github.com/EQUIPOFIBERTRACK/FIBERTRACK1.git>
+https://github.com/EQUIPOFIBERTRACK/FIBERTRACK1.git
 ````         
 ## INICIALIZACIÓN
 
