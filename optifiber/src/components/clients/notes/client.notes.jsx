@@ -11,23 +11,35 @@ function ClientNotes({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
+    const [sortOrder, setSortOrder] = useState('desc');
 
     const fetchData = async () => {
         try {
             const res = await makeRequest(`/note/all/${client}`);
-            setData(res)
+            setData(res);
         } catch (error) {
             console.log(error);
         }
-    }
+    };
 
     useEffect(() => {
-        fetchData()
-    }, [makeRequest]);
+        if (client) {
+            fetchData();
+        }
+    }, [client]);
 
-    if (loading) return <LoadFragment />
+    const handleSortByDate = () => {
+        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    };
 
-    if (error) return <p>Error!</p>
+    const sortedData = [...data].sort((a, b) => {
+        const dateA = new Date(a.CreateDate);
+        const dateB = new Date(b.CreateDate);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    if (loading) return <LoadFragment />;
+    if (error) return <p>Error!</p>;
 
     return (
         <>
@@ -36,24 +48,33 @@ function ClientNotes({ client }) {
                     data-bs-toggle="modal"
                     data-bs-target="#CreateNoteModal"
                     className={`${styleNotes['btn']}`}>
-                    <i class="bi bi-plus-square-fill"></i>
+                    <i className="bi bi-plus-square-fill"></i>
                 </button>
             </div>
 
-            <CreateNote client={client ? client: ''}/>
+            <CreateNote client={client ? client : ''} />
 
             <table className={`table table-hover table-sm ${styleNotes['container']}`}>
                 <thead className={`${styleNotes['header']}`}>
                     <tr>
                         <th>Nota</th>
-                        <th>Fecha</th>
+                        <th
+                            onClick={handleSortByDate}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            Fecha {sortOrder === 'asc' ? '↑' : '↓'}
+                        </th>
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${styleNotes['body']}`}>
                     {
-                        data.map((item) => (
-                            <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}
-                                data-bs-toggle="modal" data-bs-target="NoteModal">
+                        sortedData.map((item) => (
+                            <tr key={item._id}
+                                onClick={() => setSelect(item)}
+                                data-bs-toggle="modal"
+                                data-bs-target="#NoteModal"
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <td>{item.Description}</td>
                                 <td>{item.CreateDate.split("T")[0]}</td>
                             </tr>
@@ -62,7 +83,7 @@ function ClientNotes({ client }) {
                 </tbody>
             </table>
 
-            <ClientNoteInfo note={select ? select : ''} />
+            <ClientNoteInfo note={select} />
         </>
     );
 }

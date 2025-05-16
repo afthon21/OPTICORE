@@ -11,6 +11,8 @@ function ClientPayments({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
+    const [sortColumn, setSortColumn] = useState(null); // 'Folio', 'Method', 'CreateDate'
+    const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
 
     const fetchData = async () => {
         try {
@@ -23,11 +25,54 @@ function ClientPayments({ client }) {
 
     useEffect(() => {
         fetchData();
-    }, [makeRequest]);
+    }, [makeRequest, client]);
+    
+    const handleSort = (column) => {
+        if (sortColumn === column) {
+            setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortColumn(column);
+            setSortOrder('asc');
+        }
+    };
+
+    const getSortedData = () => {
+        const sorted = [...data];
+        if (!sortColumn) return sorted;
+
+        sorted.sort((a, b) => {
+            let valA = a[sortColumn];
+            let valB = b[sortColumn];
+
+            // For dates
+            if (sortColumn === 'CreateDate') {
+                valA = new Date(valA);
+                valB = new Date(valB);
+            }
+
+            // For strings: Method
+            if (typeof valA === 'string') {
+                return sortOrder === 'asc'
+                    ? valA.localeCompare(valB)
+                    : valB.localeCompare(valA);
+            }
+
+            // For numbers: Folio
+            return sortOrder === 'asc' ? valA - valB : valB - valA;
+        });
+
+        return sorted;
+    };
+
+    const sortedData = getSortedData();
 
     if (loading) return <LoadFragment />
-
     if (error) return <p>Error!</p>
+
+    const renderArrow = (column) => {
+        if (sortColumn !== column) return null;
+        return sortOrder === 'asc' ? ' ↑' : ' ↓';
+    };
 
     return (
         <>
@@ -36,23 +81,30 @@ function ClientPayments({ client }) {
                     data-bs-toggle="modal"
                     data-bs-target="#CreatePayModal"
                     className={`${stylePayment['btn']}`}>
-                    <i class="bi bi-plus-square-fill"></i>
+                    <i className="bi bi-plus-square-fill"></i>
                 </button>
 
-                <CreatePay client={client ? client: ''} />
+                <CreatePay client={client ? client : ''} onPaymentCreated={fetchData} />
             </div>
+
             <table className={`table table-hover table-sm ${stylePayment['container']}`}>
                 <thead className={`${stylePayment['header']}`}>
                     <tr>
-                        <th>Folio</th>
-                        <th>Método</th>
+                        <th onClick={() => handleSort('Folio')} style={{ cursor: 'pointer' }}>
+                            Folio{renderArrow('Folio')}
+                        </th>
+                        <th onClick={() => handleSort('Method')} style={{ cursor: 'pointer' }}>
+                            Método{renderArrow('Method')}
+                        </th>
                         <th>Monto</th>
-                        <th>Fecha</th>
+                        <th onClick={() => handleSort('CreateDate')} style={{ cursor: 'pointer' }}>
+                            Fecha{renderArrow('CreateDate')}
+                        </th>
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${stylePayment['body']}`}>
                     {
-                        data.map((item) => (
+                        sortedData.map((item) => (
                             <tr key={item._id} onClick={() => setSelect(item)} style={{ cursor: 'pointer' }}
                                 data-bs-toggle="modal" data-bs-target="#PaymentClientModal">
                                 <td>{item.Folio}</td>

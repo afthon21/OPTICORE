@@ -130,17 +130,6 @@ function ClientsInfo({ client }) {
                 <div className={`d-flex justify-content-between align-items-center mt-1 mx-3 ${styleCard['header']}`}>
                     <span className={styleCard['title']}><i className="bi bi-person-fill"></i> Client Details</span>
 
-                    <div className={styleCard['tools']}>
-                        <div className={styleCard['circle']}>
-                            <span className={`${styleCard['red']} ${styleCard['box']}`}></span>
-                        </div>
-                        <div className={styleCard['circle']}>
-                            <span className={`${styleCard['yellow']} ${styleCard['box']}`}></span>
-                        </div>
-                        <div className={styleCard['circle']}>
-                            <span className={`${styleCard['green']} ${styleCard['box']}`}></span>
-                        </div>
-                    </div>
                 </div>
 
                 <div className={`card-body ${styleCard['body']}`}>
