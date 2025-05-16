@@ -151,12 +151,16 @@ function TicketInfo({ ticket: ticketProp, onStatusChange }) {
                             Ticket Details
                         </span>
 
-                        <div className={styleInfo['tools']}>
+                        <div className="d-flex align-items-center gap-2 mb-3">
+                            <span classNAme="fw-bold">OPCIONES --</span>
                             <div className={`dropdown ${styleInfo['circle']}`}>
-                                <span className={`${styleInfo['red']} ${styleInfo['box']}`}
+                                <span 
+                                    className={`${styleInfo['red']} ${styleInfo['box']}`}
                                     role="button"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"></span>
+                                    aria-expanded="false"
+                                    title="Retener" //Aqui va el tooltip
+                                ></span>
 
                                 <ul className="dropdown-menu">
                                     <li>
@@ -170,10 +174,13 @@ function TicketInfo({ ticket: ticketProp, onStatusChange }) {
                             </div>
 
                             <div className={`dropdown ${styleInfo['circle']}`}>
-                                <span className={`${styleInfo['yellow']} ${styleInfo['box']}`}
+                                <span 
+                                    className={`${styleInfo['yellow']} ${styleInfo['box']}`}
                                     role="button"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"></span>
+                                    aria-expanded="false"
+                                    title="En espera - En progreso"
+                                    ></span>
 
                                 <ul className="dropdown-menu">
                                     <li>
@@ -194,10 +201,13 @@ function TicketInfo({ ticket: ticketProp, onStatusChange }) {
                             </div>
 
                             <div className={`dropdown ${styleInfo['circle']}`}>
-                                <span className={`${styleInfo['green']} ${styleInfo['box']}`}
+                                <span 
+                                    className={`${styleInfo['green']} ${styleInfo['box']}`}
                                     role="button"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"></span>
+                                    aria-expanded="false"
+                                    title="Cerrar ticket"
+                                    ></span>
 
                                 <ul className="dropdown-menu">
                                     <li>
