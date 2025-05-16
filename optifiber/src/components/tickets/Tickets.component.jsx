@@ -10,6 +10,7 @@ function TicketComponent() {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE)
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
+    const [tickets, setTickets] = useState([]);
 
     const handleLoad = async () => {
         try {
@@ -32,8 +33,18 @@ function TicketComponent() {
     return (
         <div className="container-fluid d-flex justify-content-center mt-1 ms-4">
             <TicketsCard tickets={data ? data : []}  onSelected={setSelect}/>
-
-            <TicketInfo ticket={select ? select: ''}/>
+fo
+           {select && (
+            <TicketInfo
+           ticket={select}
+           onStatusChange={(updatedTicket) => {
+            setData (prev =>
+                prev.map(t => t._id === updatedTicket._id ? updatedTicket : t)
+            );
+           }}
+           />
+           )}
+           
         </div>
     );
 }

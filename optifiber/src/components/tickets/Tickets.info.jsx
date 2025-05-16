@@ -2,8 +2,16 @@ import styleInfo from './css/ticketsInfo.module.css';
 
 import ApiRequest from '../hooks/apiRequest';
 import Swal from 'sweetalert2';
+import {useState, useEffect} from 'react';
 
-function TicketInfo({ ticket }) {
+function TicketInfo({ ticket: ticketProp, onStatusChange }) {
+    const [ticket, setTicket] = useState(ticketProp);
+
+    useEffect(() => {
+        setTicket(ticketProp);
+    }, [ticketProp]);
+
+
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     const states = [
@@ -92,6 +100,13 @@ function TicketInfo({ ticket }) {
             if (confirm.isConfirmed) {
                 try {
                     await makeRequest(`/ticket/edit/${ticket._id}`, 'POST', data);
+                    //Actualizar estado local
+                    const updated = { ...ticket, Status: value};
+                    setTicket(updated);
+                    //notificar a la tabla
+                    if (onStatusChange) {
+                        onStatusChange(updated);
+                    }
 
                     Swal.fire({
                         toast: true,
