@@ -54,7 +54,7 @@ function CreateNote({ client }) {
             if (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Erro!',
+                    title: 'Error!',
                     text: error,
                     toast: true,
                     position: 'top',
