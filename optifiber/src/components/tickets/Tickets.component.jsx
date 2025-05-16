@@ -27,13 +27,11 @@ function TicketComponent() {
     if (loading) return <LoadFragment />;
 
     if (error) {
-        
     }
     
     return (
         <div className="container-fluid d-flex justify-content-center mt-1 ms-4">
             <TicketsCard tickets={data ? data : []}  onSelected={setSelect}/>
-fo
            {select && (
             <TicketInfo
            ticket={select}
