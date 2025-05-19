@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+.container-card {
+    border: none;
+    background: transparent;
+    width: 35rem;
+}
+
+.header {
+    border: none;
+    border-bottom: 2px solid #404040;
+}
+
+.header span{
+    font-family: 'Kanit';
+    font-weight: bold;
+    font-size: 20pt;
+    color: #002b5b;
+}
+
+.title {
+    font-family: 'Kanit';
+    font-weight: bold;
+    color: #002b5b;
+    font-size: 14pt;
+}
+
+.item {
+    width: 80px;
+    font-family: 'Agdasima';
+    color: #404040;
+    background: transparent;
+    font-weight: bold;
+    border: none;
+    border-bottom: 2px solid #2a9d8f;
+}
+
+.input {
+    font-family: 'Agdasima';
+    color: #404040;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #2a9d8f;
+}
+
+.input:disabled {
+    background: transparent;
+}
+
+.input:enabled {
+    background-color: #ededed;
+}
+
+.btn-edit {
+    font-family: 'Kenit';
+    font-size: 12pt;
+    text-decoration: none;
+    color: #002b5b;
+    transition: transform 0.4s ease;
+}
+
+.btn-edit:hover {
+    transform: scale(1.1);
+}
+
+.btn-send {
+    border-top-right-radius: 13%;
+    border-bottom-right-radius: 13%;
+    border: none;
+    background: #2a9d8f;
+    transition: transform 0.4s ease;
+}
+
+.btn-send i {
+    color: #ededed;
+}
+
+.btn-send:hover {
+    animation: heartbeat 0.8s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.1);
+    }
+    60% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
