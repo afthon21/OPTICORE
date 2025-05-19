@@ -9,17 +9,28 @@ function TicketsCard({ tickets = [], onSelected }) {
     const handleInputSearch = (e) => {
         setSearch(e.target.value);
     }
-
+//Filtro por estado, folio y fecha
     const filteredName = tickets.filter(ticket => {
-        let clientName = `${ticket.Client.Name.FirstName} 
+    const folio = ticket.Folio?.toString().toLowerCase() || '';
+    const estado = ticket.Status?.toLowerCase() || '';
+    const fecha = ticket.CreateDate?.split("T")[0] || '';
+    
+    let clientName = `${ticket.Client.Name.FirstName} 
         ${ticket.Client.Name.SecondName || ''} 
         ${ticket.Client.LastName.FatherLastName}  
         ${ticket.Client.LastName.MotherLastName}`
-            .replace(/\s+/g, ' ').trim();
+        .replace(/\s+/g, ' ').trim()
+        .toLowerCase();
 
-        return clientName.toLowerCase().includes(search.toLowerCase())
-    });
+    const searchLower = search.toLowerCase();
 
+    return (
+        clientName.includes(searchLower) ||
+        folio.includes(searchLower) ||
+        estado.includes(searchLower) ||
+        fecha.includes(searchLower)
+    );
+});
 
     return (
         <div className="d-flex justify-content-center align-content-center row">
