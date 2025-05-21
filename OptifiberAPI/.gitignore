@@ -1,6 +1,0 @@
-# Ignorar directorios
-node_modules/
-.vscode/
-
-#Ignorar archivos de configuracion
-*.env
