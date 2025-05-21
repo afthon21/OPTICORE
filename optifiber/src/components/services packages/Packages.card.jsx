@@ -26,7 +26,7 @@ function PackageCard({ services = [], onSelected }) {
                     <span className={styleCard['bar']} />
                     <label className={styleCard['place-holder']}>
                         <i className="bi bi-search me-1"></i>
-                        Buscar...
+                       
                     </label>
                 </div>
             </div>
