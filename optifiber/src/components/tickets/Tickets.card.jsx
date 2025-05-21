@@ -1,0 +1,89 @@
+import styleCard from './css/ticketsCard.module.css';
+import styleTable from './css/ticketsCard.module.css';
+
+import { useState } from 'react';
+
+function TicketsCard({ tickets = [], onSelected }) {
+    const [search, setSearch] = useState('')
+
+    const handleInputSearch = (e) => {
+        setSearch(e.target.value);
+    }
+//Filtro por estado, folio y fecha
+    const filteredName = tickets.filter(ticket => {
+    const folio = ticket.Folio?.toString().toLowerCase() || '';
+    const estado = ticket.Status?.toLowerCase() || '';
+    const fecha = ticket.CreateDate?.split("T")[0] || '';
+    
+    let clientName = `${ticket.Client.Name.FirstName} 
+        ${ticket.Client.Name.SecondName || ''} 
+        ${ticket.Client.LastName.FatherLastName}  
+        ${ticket.Client.LastName.MotherLastName}`
+        .replace(/\s+/g, ' ').trim()
+        .toLowerCase();
+
+    const searchLower = search.toLowerCase();
+
+    return (
+        clientName.includes(searchLower) ||
+        folio.includes(searchLower) ||
+        estado.includes(searchLower) ||
+        fecha.includes(searchLower)
+    );
+});
+
+    return (
+        <div className="d-flex justify-content-center align-content-center row">
+
+            <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}>
+                <span className={`me-2 ${styleCard['title']}`}>Tickets</span>
+                <div className={styleCard['group']}>
+                    <input required type="text"
+                        className={styleCard['input']}
+                        onChange={handleInputSearch} />
+                    <span className={styleCard['highlight']} />
+                    <span className={styleCard['bar']} />
+                    <label className={styleCard['place-holder']}>
+                        <i className="bi bi-search me-1"></i>
+                        Buscar...
+                    </label>
+                </div>
+            </div>
+            
+            
+                <table className="table table-hover justify-content-center">
+                    <thead className={styleCard['head-table']}>
+                        <tr>
+                            <th>Folio</th>
+                            <th>Cliente</th>
+                            <th>Prioridad</th>
+                            <th>Asunto</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody className={`text-wrap ${styleCard['table-body']}`}>
+                        {filteredName.map((item) => (
+                            <tr className={`${styleTable['selected-row']}`}
+                                key={item._id} onClick={() => onSelected(item)}
+                                data-bs-toggle="modal" data-bs-target="#TicketModal">
+                                <td>{item.Folio}</td>
+                                <td>{`${item.Client.Name.FirstName} 
+                                        ${item.Client.Name.SecondName || ''} 
+                                        ${item.Client.LastName.FatherLastName} 
+                                        ${item.Client.LastName.MotherLastName}`}
+                                </td>
+                                <td>{item.Priority}</td>
+                                <td>{item.Issue}</td>
+                                <td>{item.Status}</td>
+                                <td>{item.CreateDate.split("T")[0]}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            
+        </div>
+    );
+}
+
+export default TicketsCard
