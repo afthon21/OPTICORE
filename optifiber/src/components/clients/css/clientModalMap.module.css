@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+.btn-submit {
+    border-radius: 8px;
+    background: #2a9d8f;
+    font-size: 16pt;
+    font-family: 'Agdasima';
+    color: #ededed;
+    border: none;
+    width: 170px;
+    transition: width 0.4s ease;
+}
+
+.btn-submit:hover {
+    width: 190px;
+}
+
+.btn-close {
+    border-radius: 8px;
+    background: #404040;
+    font-size: 16pt;
+    font-family: 'Agdasima';
+    color: #ededed;
+    border: none;
+    width: 80px;
+    transition: width 0.4s ease;
+}
+
+.btn-close:hover {
+    width: 100px;
+}

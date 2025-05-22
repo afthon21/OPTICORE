@@ -1,0 +1,7 @@
+body {
+  background-color: #F8F9FA;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select:none;
+  user-select: none;
+}
