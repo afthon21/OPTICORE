@@ -27,7 +27,7 @@ https://github.com/EQUIPOFIBERTRACK/FIBERTRACK1.git
       VITE_GOOGLE_MAP=AIzaSyAC2fSELr6Sd0xL1A2BN_y8wInwOe59gLo
       VITE_MAP_ID=92b1a70fec4902b3
      
-  ### ruta2: FIBERTRAC1/otifiberAPI (en el apartado de MONGO_URL va tu url de tu usuario de mongo compaz)
+  ### ruta2: FIBERTRAC1/otifiberAPI 
 
       MONGO_URI=mongodb+srv://adrianma:123456adrian@cluster0.wrgxm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
       PORT=3000
