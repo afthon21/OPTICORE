@@ -33,6 +33,7 @@ function TicketsCard({ tickets = [], onSelected }) {
         fecha.includes(searchLower)
     );
 });
+<<<<<<< HEAD
     //Realiza el filtro al dar click
     const handleSort=(field)=>{
         if (sortField===field){
@@ -58,6 +59,25 @@ function TicketsCard({ tickets = [], onSelected }) {
                 .replace(/\s+/g, ' ').trim().toLowerCase()
         );
             let valueA,ValueB;
+=======
+    //Realiza el ordenamiento
+    const handleSort=(field)=>{
+            if (sortField===field){
+                setSortOrder(sortOrder==='asc' ? 'desc' : 'asc');
+            }
+            else {
+                setSortField(field);
+                setSortOrder('asc');
+            }
+    };
+
+      const sortedTickets = [...filteredName].sort((a, b) => {
+        const getClientName = (client) => (
+            `${client.Name.FirstName} ${client.Name.SecondName || ''} ${client.LastName.FatherLastName} ${client.LastName.MotherLastName}`
+                .replace(/\s+/g, ' ').trim().toLowerCase()
+        );
+        let valueA,ValueB;
+>>>>>>> 1b98cfb924747e3e372f16d2ccb3f5a1760466ed
         switch (sortField){
             case 'cliente':
                 valueA=getClientName(a.Client);
@@ -78,11 +98,18 @@ function TicketsCard({ tickets = [], onSelected }) {
             default:
                 return 0;
         }
+<<<<<<< HEAD
         return sortOrder === 'asc'
         ? valueA.localeCompare(ValueB, 'es', { sensitivity: 'base' })
         : ValueB.localeCompare(valueA, 'es', { sensitivity: 'base' });
 });
 
+=======
+    return sortOrder === 'asc'
+        ? valueA.localeCompare(ValueB, 'es', { sensitivity: 'base' })
+        : ValueB.localeCompare(valueA, 'es', { sensitivity: 'base' });
+    });
+>>>>>>> 1b98cfb924747e3e372f16d2ccb3f5a1760466ed
 
     return (
         <div className="d-flex justify-content-center align-content-center row">
@@ -107,6 +134,7 @@ function TicketsCard({ tickets = [], onSelected }) {
                     <thead className={styleCard['head-table']}>
                         <tr>
                             <th onClick={()=>handleSort('folio')}style={{ cursor: 'pointer' }}
+<<<<<<< HEAD
                                 >Folio {getSortIcon('folio')}</th>
                             <th onClick={()=>handleSort('cliente')}style={{ cursor: 'pointer' }}
                                 >Cliente {getSortIcon('cliente')}</th>
@@ -116,6 +144,17 @@ function TicketsCard({ tickets = [], onSelected }) {
                                 >Estado {getSortIcon('estado')}</th>
                             <th onClick={()=>handleSort('fecha')}style={{ cursor: 'pointer' }}
                                 >Fecha {getSortIcon('fecha')}</th>
+=======
+                                >Folio</th>
+                            <th onClick={()=>handleSort('cliente')}style={{ cursor: 'pointer' }}
+                                >Cliente</th>
+                            <th>Prioridad</th>
+                            <th>Asunto</th>
+                            <th onClick={()=>handleSort('estado')}style={{ cursor: 'pointer' }}
+                                >Estado</th>
+                            <th onClick={()=>handleSort('fecha')}style={{ cursor: 'pointer' }}
+                                >Fecha</th>
+>>>>>>> 1b98cfb924747e3e372f16d2ccb3f5a1760466ed
                         </tr>
                     </thead>
                     
