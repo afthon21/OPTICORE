@@ -33,6 +33,56 @@ function TicketsCard({ tickets = [], onSelected }) {
         fecha.includes(searchLower)
     );
 });
+    //Realiza el filtro al dar click
+    const handleSort=(field)=>{
+        if (sortField===field){
+            setSortOrder(sortOrder==='asc' ? 'desc':'asc');
+        }
+        else {
+            setSortField(field);
+            setSortOrder('asc');
+        }
+        };
+        const getSortIcon=(field)=>{
+            if (sortField!==field) return null;
+            return sortOrder==='asc'
+            ? <i className="bi bi-arrow-up ms-1" />
+            : <i className="bi bi-arrow-down ms-1" />;
+        };
+        const sortedTickets = [...filteredName].sort((a, b) => {
+        const getClientName = (client) => (
+            `${client.Name.FirstName} 
+            ${client.Name.SecondName || ''} 
+            ${client.LastName.FatherLastName} 
+            ${client.LastName.MotherLastName}`
+                .replace(/\s+/g, ' ').trim().toLowerCase()
+        );
+            let valueA,ValueB;
+        switch (sortField){
+            case 'cliente':
+                valueA=getClientName(a.Client);
+                ValueB=getClientName(b.Client);
+                break;
+            case 'folio':
+                valueA=a.Folio?.toString().toLowerCase();
+                ValueB=b.Folio?.toString().toLowerCase();
+                break;
+            case 'estado':
+                valueA=a.Status?.toLowerCase();
+                ValueB=b.Status?.toLowerCase();
+                break;
+            case 'fecha':
+                valueA=a.CreateDate?.split("T")[0];
+                ValueB=b.CreateDate?.split("T")[0];
+                break;
+            default:
+                return 0;
+        }
+        return sortOrder === 'asc'
+        ? valueA.localeCompare(ValueB, 'es', { sensitivity: 'base' })
+        : ValueB.localeCompare(valueA, 'es', { sensitivity: 'base' });
+});
+
 
     return (
         <div className="d-flex justify-content-center align-content-center row">
@@ -56,12 +106,16 @@ function TicketsCard({ tickets = [], onSelected }) {
                 <table className="table table-hover justify-content-center">
                     <thead className={styleCard['head-table']}>
                         <tr>
-                            <th>Folio</th>
-                            <th>Cliente</th>
+                            <th onClick={()=>handleSort('folio')}style={{ cursor: 'pointer' }}
+                                >Folio {getSortIcon('folio')}</th>
+                            <th onClick={()=>handleSort('cliente')}style={{ cursor: 'pointer' }}
+                                >Cliente {getSortIcon('cliente')}</th>
                             <th>Prioridad</th>
                             <th>Asunto</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
+                            <th onClick={()=>handleSort('estado')}style={{ cursor: 'pointer' }}
+                                >Estado {getSortIcon('estado')}</th>
+                            <th onClick={()=>handleSort('fecha')}style={{ cursor: 'pointer' }}
+                                >Fecha {getSortIcon('fecha')}</th>
                         </tr>
                     </thead>
                     
