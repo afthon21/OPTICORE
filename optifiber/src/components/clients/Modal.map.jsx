@@ -34,7 +34,7 @@ function ModalGoogleMap({ center, handleMarker }) {
         const confirm = await Swal.fire({
             icon: 'warning',
             title: '¿Esta seguro?',
-            text: '¿Esta seguro de colocar dun marcador en esa posición?',
+            text: '¿Esta seguro de colocar el marcador en esa posición?',
             confirmButtonText: 'Aceptar',
             confirmButtonColor: '#2a9d8f',
             showCancelButton: true,
