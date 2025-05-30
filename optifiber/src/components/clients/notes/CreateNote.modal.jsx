@@ -1,44 +1,44 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ApiRequest from "../../hooks/apiRequest";
 
 import { cleanData } from "../../fragments/js/cleanData";
 import Swal from "sweetalert2";
+import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
-function CreateNote({ client }) {
-    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+function CreateNote({ client, onNoteCreated }) {
+    const { makeRequest, loading } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [description, setDescription] = useState('');
-    const data = { Description: description };
+    const modalRef = useRef(null);
 
-    const handleChangue = (e) => {
+    const handleChange = (e) => {
         setDescription(e.target.value);
-    }
+    };
 
     const handleClear = () => {
         setDescription('');
-    }
+    };
 
     useEffect(() => {
-        const modal = document.getElementById('CreateNoteModal');
+        const modal = modalRef.current;
+        if (!modal) return;
 
-        if (modal) {
-            modal.addEventListener("hidden.bs.modal", handleClear);
-        }
+        const instance = bootstrap.Modal.getOrCreateInstance(modal);
+        modal.addEventListener("hidden.bs.modal", handleClear);
 
         return () => {
-            if (modal) {
-                modal.removeEventListener("hidden.bs.modal", handleClear)
-            }
-        }
+            modal.removeEventListener("hidden.bs.modal", handleClear);
+        };
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const cleanedData = cleanData(data);
+        const cleanedData = cleanData({ Description: description });
+
         try {
             const res = await makeRequest(`/note/new/${client}`, 'POST', cleanedData);
-            
-            Swal.fire({
+
+            await Swal.fire({
                 icon: 'success',
                 title: 'Nota agregada',
                 text: res.message,
@@ -47,46 +47,59 @@ function CreateNote({ client }) {
                 showConfirmButton: false,
                 timer: 1200,
                 timerProgressBar: true
-            }).then(() => {
-                handleClear();
-            })
+            });
 
-            if (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: error,
-                    toast: true,
-                    position: 'top',
-                    showConfirmButton: false,
-                    timer: 1200,
-                    timerProgressBar: true
-                });
-
-                return;
+            // Cierra el modal
+            const modalElement = modalRef.current;
+            if (modalElement) {
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                modalInstance.hide();
             }
 
-            console.log(res);
+            // Limpia campo y actualiza tabla
+            setDescription('');
+            if (typeof onNoteCreated === 'function') {
+                onNoteCreated();
+            }
+
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al crear la nota',
+                text: 'Inténtalo de nuevo más tarde.',
+                toast: true,
+                position: 'top',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
         }
-    }
+    };
+
+    
     return (
-        <div className="modal fade" id="CreateNoteModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div className="modal fade" id="CreateNoteModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true" ref={modalRef}>
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="ModalLabel">Modal title</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h1 className="modal-title fs-5" id="ModalLabel">Agregar Nota</h1>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div className="modal-body">
-                        <form action="" onSubmit={handleSubmit}>
-                            <label htmlFor="">Agregar Nota</label>
-                            <textarea className="form-control"
+                        <form onSubmit={handleSubmit}>
+                            <label htmlFor="note">Descripción</label>
+                            <textarea
+                                id="note"
+                                className="form-control"
                                 value={description}
-                                onChange={handleChangue}></textarea>
+                                onChange={handleChange}
+                                required
+                            ></textarea>
 
-                            <button type="submit">{loading ? 'Creando...' : 'Aceptar'}</button>
+                            <button type="submit" className="btn btn-primary mt-3 w-100">
+                                {loading ? 'Creando...' : 'Aceptar'}
+                            </button>
                         </form>
                     </div>
                 </div>
