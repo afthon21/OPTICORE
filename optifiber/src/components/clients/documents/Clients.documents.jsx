@@ -69,6 +69,18 @@ function ClientDocuments({ client }) {
         if (confirm.isConfirmed) {
             try {
                 await makeRequest(`/document/delete/${document}`, 'DELETE');
+                //Refrescar la lista
+                fetchData();
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Documento Eliminado',
+                    timer: 1200,
+                    showConfirmButton: false,
+                    position: 'top',
+                    background: '#e5e8e8'
+                });
             } catch (error) {
                 console.log(error);
             }
@@ -153,7 +165,8 @@ function ClientDocuments({ client }) {
                     </span>
                 </button>
 
-                <UploadDoc client={client} />
+                <UploadDoc client={client} onUploadSuccess={fetchData}
+                />
             </div>
         </>
 

@@ -3,8 +3,9 @@ import styleFormModal from '../css/uploadModal.module.css'
 import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest';
+import { Modal } from 'bootstrap';
 
-export function UploadDoc({ client }) {
+export function UploadDoc({ client, onUploadSuccess }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [file, setFile] = useState(null);
     const [value, setValue] = useState('');
@@ -107,7 +108,11 @@ export function UploadDoc({ client }) {
 
         try {
             await makeRequest(`/document/new/${client}`, 'POST', formData, { isFormData: true });
-
+            //Actualizar la tabla antes de mostrar el mensaje
+            if (typeof onUploadSuccess === 'function') {
+                onUploadSuccess();
+            }
+            // Mostrar mensaje de éxito
             Swal.fire({
                 toast: true,
                 icon: 'success',
@@ -119,6 +124,19 @@ export function UploadDoc({ client }) {
                 background: '#e5e8e8'
             }).then(() => {
                 handleClear();
+
+                const modalElement = document.getElementById('uploadModal');
+                const modalInstance = Modal.getInstance(modalElement) || new Modal(modalElement);
+                modalInstance.hide();
+
+                //Limpieza manual del backdrop
+                const backdrops = document.getElementsByClassName('modal-backdrop');
+                while(backdrops.length > 0) {
+                    backdrops[0].parentNode.removeChild(backdrops[0]);
+                }
+                
+                //Remover clase modal-open para permitir scroll y quitar el fondo gris
+                document.body.classList.remove('modal-open');
             });
 
         } catch (error) {
