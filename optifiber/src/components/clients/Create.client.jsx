@@ -109,6 +109,10 @@ function CreateClient() {
         if (formValues.PhoneNumber && !/^\d{10}$/.test(formValues.PhoneNumber)) {
             errors.PhoneNumber = 'Número de teléfono inválido (debe tener 10 dígitos)';
         }
+        //Validación del código postal
+        if (formValues.ZIP && !/^\d{5}$/.test(formValues.ZP)){
+            errors.ZIP = 'El código postal debe tener 5 dígitos';
+        }
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -356,7 +360,9 @@ function CreateClient() {
                                     onChange={handleChangue}
                                     name="ZIP"
                                     value={formValues.ZIP}
-                                    placeholder="c.p ..." />
+                                    placeholder="c.p ..."
+                                    maxLength={5}
+                                />
                             </div>
                             {formErrors.ZIP && <p className={styleCreateCard['error']}>{formErrors.ZIP}</p>}
 
