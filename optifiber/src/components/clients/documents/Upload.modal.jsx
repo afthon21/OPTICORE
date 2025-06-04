@@ -3,9 +3,8 @@ import styleFormModal from '../css/uploadModal.module.css'
 import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest';
-import { Modal } from 'bootstrap';
 
-export function UploadDoc({ client, onUploadSuccess }) {
+export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [file, setFile] = useState(null);
     const [value, setValue] = useState('');
@@ -108,41 +107,32 @@ export function UploadDoc({ client, onUploadSuccess }) {
 
         try {
             await makeRequest(`/document/new/${client}`, 'POST', formData, { isFormData: true });
-            //Actualizar la tabla antes de mostrar el mensaje
-            if (typeof onUploadSuccess === 'function') {
-                onUploadSuccess();
-            }
-            // Mostrar mensaje de éxito
-            Swal.fire({
-                toast: true,
-                icon: 'success',
-                title: 'Creado exitosamente!',
-                timer: 1200,
-                showConfirmButton: false,
-                timerProgressBar: true,
-                position: 'top',
-                background: '#e5e8e8'
-            }).then(() => {
-                handleClear();
 
-                const modalElement = document.getElementById('uploadModal');
-                const modalInstance = Modal.getInstance(modalElement) || new Modal(modalElement);
-                modalInstance.hide();
+            // Simula click en el botón de cerrar del modal
+            const closeBtn = document.querySelector('#uploadModal .btn-close');
+            if (closeBtn) closeBtn.click();
 
-                //Limpieza manual del backdrop
-                const backdrops = document.getElementsByClassName('modal-backdrop');
-                while(backdrops.length > 0) {
-                    backdrops[0].parentNode.removeChild(backdrops[0]);
-                }
-                
-                //Remover clase modal-open para permitir scroll y quitar el fondo gris
-                document.body.classList.remove('modal-open');
-            });
+            // Espera un poco para que el backdrop desaparezca antes del SweetAlert
+            setTimeout(() => {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Creado exitosamente!',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    position: 'top',
+                    background: '#e5e8e8',
+                });
+            }, 300);
 
+            if (onUploadSuccess) onUploadSuccess();
+            handleClear();
+            
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
+    };
 
     return (
         <div className="modal fade"
@@ -248,14 +238,16 @@ export function UploadDoc({ client, onUploadSuccess }) {
                             <div className="d-flex justify-content-end">
                                 <button
                                     className={`mt-2 ${styleFormModal['btn-submit']}`}
-                                    type="submit">
+                                    type="submit">    
                                     Aceptar
                                 </button>
 
                                 <button className={`mt-2 ms-2 ${styleFormModal['btn-exit']}`}
                                     data-bs-dismiss="modal"
                                     type="button"
-                                    aria-label="Close">Cerrar</button>
+                                    aria-label="Close">
+                                    Cerrar
+                                </button>
                             </div>
                         </form>
                     </div>
