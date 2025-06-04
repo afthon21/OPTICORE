@@ -52,7 +52,8 @@ function ClientNotes({ client }) {
                 </button>
             </div>
 
-            <CreateNote client={client ? client : ''} />
+            {/* PASAMOS fetchData COMO PROP para recargar tabla */}
+            <CreateNote client={client} onNoteCreated={fetchData} />
 
             <table className={`table table-hover table-sm ${styleNotes['container']}`}>
                 <thead className={`${styleNotes['header']}`}>
