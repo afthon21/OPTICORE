@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest';
 
-export function UploadDoc({ client }) {
+export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [file, setFile] = useState(null);
     const [value, setValue] = useState('');
@@ -108,23 +108,31 @@ export function UploadDoc({ client }) {
         try {
             await makeRequest(`/document/new/${client}`, 'POST', formData, { isFormData: true });
 
-            Swal.fire({
-                toast: true,
-                icon: 'success',
-                title: 'Creado exitosamente!',
-                timer: 1200,
-                showConfirmButton: false,
-                timerProgressBar: true,
-                position: 'top',
-                background: '#e5e8e8'
-            }).then(() => {
-                handleClear();
-            });
+            // Simula click en el botón de cerrar del modal
+            const closeBtn = document.querySelector('#uploadModal .btn-close');
+            if (closeBtn) closeBtn.click();
 
+            // Espera un poco para que el backdrop desaparezca antes del SweetAlert
+            setTimeout(() => {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Creado exitosamente!',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    position: 'top',
+                    background: '#e5e8e8',
+                });
+            }, 300);
+
+            if (onUploadSuccess) onUploadSuccess();
+            handleClear();
+            
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
+    };
 
     return (
         <div className="modal fade"
@@ -230,14 +238,16 @@ export function UploadDoc({ client }) {
                             <div className="d-flex justify-content-end">
                                 <button
                                     className={`mt-2 ${styleFormModal['btn-submit']}`}
-                                    type="submit">
+                                    type="submit">    
                                     Aceptar
                                 </button>
 
                                 <button className={`mt-2 ms-2 ${styleFormModal['btn-exit']}`}
                                     data-bs-dismiss="modal"
                                     type="button"
-                                    aria-label="Close">Cerrar</button>
+                                    aria-label="Close">
+                                    Cerrar
+                                </button>
                             </div>
                         </form>
                     </div>

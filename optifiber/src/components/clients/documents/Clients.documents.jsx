@@ -69,6 +69,7 @@ function ClientDocuments({ client }) {
         if (confirm.isConfirmed) {
             try {
                 await makeRequest(`/document/delete/${document}`, 'DELETE');
+                fetchData(); //se agrego esta linea
             } catch (error) {
                 console.log(error);
             }
@@ -153,7 +154,7 @@ function ClientDocuments({ client }) {
                     </span>
                 </button>
 
-                <UploadDoc client={client} />
+                <UploadDoc client={client} onUploadSuccess={fetchData} />
             </div>
         </>
 
