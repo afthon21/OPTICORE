@@ -17,7 +17,7 @@ https://github.com/EQUIPOFIBERTRACK/FIBERTRACK1.git
 
 1. Instala las dependencias:
     ```sh
-    npm instal vite
+    npm install vite
     npm install nodemon
     
 3. crear archivos .env
