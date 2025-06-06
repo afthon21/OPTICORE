@@ -17,17 +17,17 @@ https://github.com/EQUIPOFIBERTRACK/FIBERTRACK1.git
 
 1. Instala las dependencias:
     ```sh
-    npm instal vite
+    npm install vite
     npm install nodemon
     
 3. crear archivos .env
-  #### ruta 1: FIBERTRAC1/otifiber
+  #### ruta 1: FIBERTRAC1/obtifiber
   
       VITE_API_BASE=http://localhost:3000/api
       VITE_GOOGLE_MAP=AIzaSyAC2fSELr6Sd0xL1A2BN_y8wInwOe59gLo
       VITE_MAP_ID=92b1a70fec4902b3
      
-  ### ruta2: FIBERTRAC1/otifiberAPI 
+  ### ruta2: FIBERTRAC1/obtifiberAPI 
 
       MONGO_URI=mongodb+srv://adrianma:123456adrian@cluster0.wrgxm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
       PORT=3000
