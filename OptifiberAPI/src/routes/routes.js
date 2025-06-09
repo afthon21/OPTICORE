@@ -8,9 +8,10 @@ import documentRoutes from '../middlewares/document.routes.js';
 import profileRoute from '../middlewares/profile.routes.js';
 import notesRoutes from '../middlewares/notes.routes.js';
 import serviceRoutes from '../middlewares/servicesPackage.routes.js';
+import packageRoutes from '../middlewares/packages.routes.js';
+
 //RUTA NETWORK
 import networkRoutes from '../middlewares/network.routes.js';
-
 
 
 const configureRoutes = (app) => {
