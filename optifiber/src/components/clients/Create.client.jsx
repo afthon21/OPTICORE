@@ -77,12 +77,18 @@ function CreateClient() {
     const handleChangue = (e) => {
         const { name, value } = e.target;
 
+        let newValue = value;
+
+        if (name === 'ZIP') {
+            newValue = value.replace(/\D/g, '').slice(0, 5);
+        }
+
         setFormValues((prevValue) => ({
             ...prevValue,
-            [name]: value
+            [name]: newValue
         }));
 
-    }
+    };
 
     const validators = () => {
         const errors = {};
@@ -109,7 +115,10 @@ function CreateClient() {
         if (formValues.PhoneNumber && !/^\d{10}$/.test(formValues.PhoneNumber)) {
             errors.PhoneNumber = 'Número de teléfono inválido (debe tener 10 dígitos)';
         }
-
+        //Validación del código postal
+        if (!formValues.ZIP || formValues.ZIP.length !== 5 || !/^\d{5}$/.test(formValues.ZIP)) {
+            errors.ZIP = 'Solo 5 digitos'
+        }
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     }
@@ -356,7 +365,9 @@ function CreateClient() {
                                     onChange={handleChangue}
                                     name="ZIP"
                                     value={formValues.ZIP}
-                                    placeholder="c.p ..." />
+                                    placeholder="c.p ..."
+                                    maxLength={5}
+                                />
                             </div>
                             {formErrors.ZIP && <p className={styleCreateCard['error']}>{formErrors.ZIP}</p>}
 
