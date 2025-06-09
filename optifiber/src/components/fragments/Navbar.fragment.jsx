@@ -16,7 +16,6 @@ export function NavbarFragmentAll() {
     });
 
     return (
-
         <nav className="d-flex flex-column position-fixed shadow top-0 left-0 vh-100 px-2 py-3 main-menu">
             <div className="d-flex justify-content-between align-items-center mb-3 header-content">
                 <i className="bi bi-list fs-3"></i>
@@ -146,6 +145,7 @@ export function NavbarFragmentAll() {
                         </li>
                     </ul>
                 </li>
+                {/* NetWork con submenú */}
                 <li className="nav-item item">
                     <a
                         className="nav-link d-flex align-items-center item-link"
@@ -153,6 +153,17 @@ export function NavbarFragmentAll() {
                         <i className="bi bi-wifi me-2"></i>
                         <span className="item-title">NetWork</span>
                     </a>
+                    <ul className="list-unstyled ps-3 sub-menu">
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => navigate(`/network/ver/${adminId}`)}
+                                role="button"
+                            >
+                                Ver
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
 
@@ -181,6 +192,5 @@ export function NavbarFragmentAll() {
                 </ul>
             </div>
         </nav>
-
     );
 }
