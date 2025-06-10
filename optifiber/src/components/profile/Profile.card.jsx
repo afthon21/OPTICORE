@@ -84,9 +84,46 @@ function ProfileCard({ profile }) {
         }));
     }
 
-    const handleSubmit = async (e, fieldName) => {
-        e.preventDefault();       
+    const handleSubmit = async (e, fieldGroup) => {
+    e.preventDefault();
+    if (fieldGroup === 'inputGroupA') {
+        const updatedData = {
+            FirstName: values.FirstName,
+            SecondName: values.SecondName,
+            FatherLastName: values.FatherLastName,
+            MotherLastName: values.MotherLastName
+        };
+
+        // Se llama al back para hacer la actualizacion
+        Swal.fire('Datos personales actualizados', '', 'success');
+    } else if (fieldGroup === 'inputGroupB') {
+        if (values.Email || (!values.Password && !values.ConfirmPassword)) {
+            Swal.fire('Correo actualizado', '', 'success');
+        }
+
+        if (values.Password || values.ConfirmPassword) {
+            const isValid = validators('Password');
+            if (!isValid) {
+                return; 
+            }
+
+            Swal.fire('Contraseña actualizada', '', 'success');
+        }
     }
+
+    setDisable((prevState) => ({
+        ...prevState,
+        [fieldGroup]: true
+    }));
+    setShowSend((prevShowButton) => ({
+        ...prevShowButton,
+        [fieldGroup]: false
+    }));
+    setInput((prevInput) => ({
+        ...prevInput,
+        [fieldGroup]: false
+    }));
+};
 
     return (
         <div className={`card mx-auto ${styleCard['container-card']}`}>
@@ -94,20 +131,45 @@ function ProfileCard({ profile }) {
                 <span className="ms-3 me-auto">Perfil</span>
                 <span className="ms-auto me-3">{profile.UserName}</span>
             </div>
+        
+        <div className="mt-4">
+            <div className="d-flex justify-content-between align-items-center">
+            <label className={`form-label m-0 ${styleCard['title']}`}>
+                <i className="bi bi-person-fill me-1"></i>
+                Datos Personales
+            </label>
+        <a role="button" onClick={() => toggleInput('inputGroupA')}
+            className={styleCard['btn-edit']}>
+            Editar <i className="bi bi-pencil-square ms-1"></i>
+        </a>
+        </div>
 
-            <div className="card-body">
-                <label className={`form-label ${styleCard['title']}`}>
-                    <i class="bi bi-person-fill me-1"></i>
-                    Datos Personales
-                </label>
-                
+            
                 <div className="input-group mb-3">
                     <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Nombre(s):</span>
                     <input
                         type="text"
                         className={`form-control ${styleCard['input']}`}
+                        onChange={handleChangue}
                         disabled={disable.inputGroupA}
-                        value={`${values.FirstName} ${values.SecondName}`} />
+                        name='FirstName'
+                        value={`${values.FirstName}`} />
+                    <input
+                        type="text"
+                        className={`form-control ${styleCard['input']}`}
+                        onChange={handleChangue}
+                        disabled={disable.inputGroupA}
+                        name='SecondName'
+                        value={`${values.SecondName}`} />
+
+                            {showSend.inputGroupA && (
+                            <button
+                            type="submit"
+                            className={styleCard['btn-send']}
+                            onClick={(e)=>handleSubmit(e,'inputGroupA')}>
+                            <i className="bi bi-send-fill"></i>
+                            </button>
+                        )}
                 </div>
 
                 <div className="input-group mb-3">
@@ -115,8 +177,25 @@ function ProfileCard({ profile }) {
                     <input
                         type="text"
                         className={`form-control ${styleCard['input']}`}
+                        onChange={handleChangue}
                         disabled={disable.inputGroupA}
-                        value={`${values.FatherLastName} ${values.MotherLastName}`} />
+                        name='FatherLastName'
+                        value={`${values.FatherLastName}`} />
+                        <input 
+                        type="text"
+                        className={`form-control ${styleCard['input']}`}
+                        onChange={handleChangue}
+                        disabled={disable.inputGroupA}
+                        name='MotherLastName'
+                        value={`${values.MotherLastName}`} />
+                            {showSend.inputGroupA && (
+                            <button
+                            type="submit"
+                            className={styleCard['btn-send']}
+                            onClick={(e)=>handleSubmit(e,'inputGroupA')}>
+                            <i className="bi bi-send-fill"></i>
+                            </button>
+                    )}
                 </div>
 
 
@@ -147,7 +226,8 @@ function ProfileCard({ profile }) {
                     {showSend.inputGroupB && (
                         <button
                             type="submit"
-                            className={styleCard['btn-send']}>
+                            className={styleCard['btn-send']}
+                            onClick={(e)=>handleSubmit(e,'inputGroupB')}>
                             <i className="bi bi-send-fill"></i>
                         </button>
                     )}
@@ -164,14 +244,7 @@ function ProfileCard({ profile }) {
                         onChange={handleChangue}
                         name='Password'
                         value={`${values.Password}`} />
-
-                    {showSend.inputGroupB && (
-                        <button
-                            type="submit"
-                            className={styleCard['btn-send']}>
-                            <i className="bi bi-send-fill"></i>
-                        </button>
-                    )}
+                        
                 </div>
                 {formErrors?.Password && (<p style={{ color: 'red', backgroundColor: 'red' }}>{formErrors.Password}</p>)}
 
@@ -185,6 +258,14 @@ function ProfileCard({ profile }) {
                             onChange={handleChangue}
                             name='ConfirmPassword'
                             value={values.ConfirmPassword} />
+                        {showSend.inputGroupB && (
+                            <button
+                            type="submit"
+                            className={styleCard['btn-send']}
+                            onClick={(e)=>handleSubmit(e,'inputGroupB')}>
+                            <i className="bi bi-send-fill"></i>
+                            </button>
+                         )}
                     </div>
                 )}
             </div>
