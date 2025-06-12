@@ -47,33 +47,43 @@ function ProfileCard({ profile }) {
     const [formErrors, setFormErrors] = useState({});
 
 
-    const validators = (field) => {
-        const errors = {};
-        const requiredFields = ['Password', 'ConfirmPassword', 'Email'];
-
-        if (field !== 'Password' && field !== 'ConfirmPassword') {
-            setFormErrors({});
-            return true;
-        }
-
-        requiredFields.forEach(fields => {
-            if (!values[fields]) {
-                errors[fields] = 'Campo Requerido';
-            }
-        });
-
-        if (values.Password && values.Password.length < 8) {
-            errors.Password = 'La contraseña debe tener al menos 8 caracteres';
-        }
-
-        // Validación de coincidencia de contraseñas
-        if (values.Password && values.ConfirmPassword && values.Password !== values.ConfirmPassword) {
-            errors.ConfirmPassword = 'Las contraseñas no coinciden';
-        }
-
-        setFormErrors(errors)
-        return Object.keys(errors).length === 0;
+  const validators = (fieldGroup) => {
+  const errors = {};
+  if (fieldGroup === 'inputGroupA') {
+    if (!values.FirstName || values.FirstName.trim() === '') {
+      errors.FirstName = 'El nombre es obligatorio';
     }
+    if (!values.SecondName || values.SecondName.trim() === '') {
+      errors.SecondName = 'El segundo nombre es obligatorio';
+    }
+    if (!values.FatherLastName || values.FatherLastName.trim() === '') {
+      errors.FatherLastName = 'El apellido paterno es obligatorio';
+    }
+    if (!values.MotherLastName || values.MotherLastName.trim() === '') {
+      errors.MotherLastName = 'El apellido materno es obligatorio';
+    }
+    if (!values.Email || values.Email.trim() === '') {
+      errors.Email = 'El correo es obligatorio';
+    } else if (!/\S+@\S+\.\S+/.test(values.Email)) {
+      errors.Email = 'El correo no es válido';
+    }
+  }
+  if (fieldGroup === 'inputGroupB') {
+    if (!values.Password || values.Password.trim() === '') {
+      errors.Password = 'La contraseña es obligatoria';
+    } else if (values.Password.length < 6) {
+      errors.Password = 'La contraseña debe tener al menos 6 caracteres';
+    }
+    if (!values.ConfirmPassword || values.ConfirmPassword.trim() === '') {
+      errors.ConfirmPassword = 'Confirma tu contraseña';
+    } else if (values.Password !== values.ConfirmPassword) {
+      errors.ConfirmPassword = 'Las contraseñas no coinciden';
+    }
+  }
+  return errors;
+};
+
+
 
     const handleChangue = (e) => {
         const { name, value } = e.target;
@@ -84,46 +94,84 @@ function ProfileCard({ profile }) {
         }));
     }
 
-    const handleSubmit = async (e, fieldGroup) => {
-    e.preventDefault();
-    if (fieldGroup === 'inputGroupA') {
-        const updatedData = {
-            FirstName: values.FirstName,
-            SecondName: values.SecondName,
-            FatherLastName: values.FatherLastName,
-            MotherLastName: values.MotherLastName
-        };
-
-        // Se llama al back para hacer la actualizacion
-        Swal.fire('Datos personales actualizados', '', 'success');
-    } else if (fieldGroup === 'inputGroupB') {
-        if (values.Email || (!values.Password && !values.ConfirmPassword)) {
-            Swal.fire('Correo actualizado', '', 'success');
+   const handleSubmit = async (e, fieldGroup) => {
+        e.preventDefault();
+        const errors = validators(fieldGroup);
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Por favor revisa los campos marcados.',
+            });
+            return;
+        }
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No autorizado',
+                text: 'No se encontró el token. Por favor inicia sesión nuevamente.',
+            });
+            return;
         }
 
-        if (values.Password || values.ConfirmPassword) {
-            const isValid = validators('Password');
-            if (!isValid) {
-                return; 
+        try {
+            const updatedData =
+                fieldGroup === 'inputGroupA'
+                    ? {
+                        FirstName: values.FirstName,
+                        SecondName: values.SecondName,
+                        FatherLastName: values.FatherLastName,
+                        MotherLastName: values.MotherLastName,
+                        Email: values.Email,
+                    }
+                    : {
+                        Password: values.Password,
+                        ConfirmPassword: values.ConfirmPassword,
+                    };
+
+            const res = await fetch(`http://localhost:3000/api/profile/edit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updatedData),
+            });
+
+            console.log('Fetch status:', res.status);
+
+            if (res.status === 401) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No autorizado',
+                    text: 'Token inválido o expirado. Por favor inicia sesión nuevamente.',
+                });
+                return;
+            }
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('Error response:', errorText);
+                throw new Error('Error en la actualización');
             }
 
-            Swal.fire('Contraseña actualizada', '', 'success');
-        }
-    }
+            Swal.fire({
+                icon: 'success',
+                title: 'Actualizado',
+                text: 'Tus datos se han guardado correctamente.',
+            });
 
-    setDisable((prevState) => ({
-        ...prevState,
-        [fieldGroup]: true
-    }));
-    setShowSend((prevShowButton) => ({
-        ...prevShowButton,
-        [fieldGroup]: false
-    }));
-    setInput((prevInput) => ({
-        ...prevInput,
-        [fieldGroup]: false
-    }));
-};
+            toggleInput(fieldGroup);
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al guardar',
+                text: 'Hubo un problema al actualizar los datos.',
+            });
+        }
+    };
 
     return (
         <div className={`card mx-auto ${styleCard['container-card']}`}>
@@ -138,37 +186,35 @@ function ProfileCard({ profile }) {
                 <i className="bi bi-person-fill me-1"></i>
                 Datos Personales
             </label>
-        <a role="button" onClick={() => toggleInput('inputGroupA')}
+            <a role="button" onClick={() => toggleInput('inputGroupA')}
             className={styleCard['btn-edit']}>
             Editar <i className="bi bi-pencil-square ms-1"></i>
-        </a>
-        </div>
+            </a>
+            </div>
 
-            
-                <div className="input-group mb-3">
-                    <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Nombre(s):</span>
-                    <input
-                        type="text"
-                        className={`form-control ${styleCard['input']}`}
-                        onChange={handleChangue}
-                        disabled={disable.inputGroupA}
-                        name='FirstName'
-                        value={`${values.FirstName}`} />
-                    <input
-                        type="text"
-                        className={`form-control ${styleCard['input']}`}
-                        onChange={handleChangue}
-                        disabled={disable.inputGroupA}
-                        name='SecondName'
-                        value={`${values.SecondName}`} />
-
-                            {showSend.inputGroupA && (
-                            <button
-                            type="submit"
-                            className={styleCard['btn-send']}
-                            onClick={(e)=>handleSubmit(e,'inputGroupA')}>
-                            <i className="bi bi-send-fill"></i>
-                            </button>
+            <div className="input-group mb-3">
+                <span className={`input-group-text text-wrap d-flex ${styleCard['item']}`}>Nombre(s):</span>
+                <input
+                    type="text"
+                    className={`form-control ${styleCard['input']}`}
+                    onChange={handleChangue}
+                    disabled={disable.inputGroupA}
+                    name='FirstName'
+                    value={`${values.FirstName}`} />
+                <input
+                    type="text"
+                    className={`form-control ${styleCard['input']}`}
+                    onChange={handleChangue}
+                    disabled={disable.inputGroupA}
+                    name='SecondName'
+                    value={`${values.SecondName}`} />
+                        {showSend.inputGroupA && (
+                        <button
+                        type="submit"
+                        className={styleCard['btn-send']}
+                        onClick={(e)=>handleSubmit(e,'inputGroupA')}>
+                        <i className="bi bi-send-fill"></i>
+                        </button>
                         )}
                 </div>
 
@@ -202,7 +248,7 @@ function ProfileCard({ profile }) {
                 {/** Formulario para editar correo o contraseña */}
                 <div className="d-flex justify-content-between mt-4">
                     <label className={`form-label ${styleCard['title']}`}>
-                        <i class="bi bi-envelope-at-fill me-1"></i>
+                        <i className="bi bi-envelope-at-fill me-1"></i>
                         Datos de Inicio
                     </label>
 
