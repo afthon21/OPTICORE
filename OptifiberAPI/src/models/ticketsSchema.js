@@ -35,7 +35,12 @@ const ticketSchema = new mongoose.Schema({
     Priority: {
         require: true,
         type: String
-    }
+    },
+
+    tecnico: { 
+        type:  String, 
+        
+        required: true },
 });
 
 ticketSchema.methods.setFolio = function setFolio(id,clientName,date) {

@@ -7,7 +7,8 @@ export const createTicket = async (req, res) => {
         Issue,
         Description,
         Client,
-        Priority
+        Priority,
+        tecnico
     } = req.body;
 
     const Admin = req.adminId;
@@ -32,6 +33,7 @@ export const createTicket = async (req, res) => {
             Priority,
             Client,
             Admin,
+            tecnico
         });
 
         //Creamos el folio
@@ -52,6 +54,7 @@ export const viewAllTickets = async (req, res) => {
         const allTickets = await ticket.find()
             .populate('Client', 'Name LastName')
             .populate('Admin', 'UserName')
+            .populate('tecnico')
             .exec();
 
         return res.status(200).json(allTickets);
@@ -87,7 +90,8 @@ export const createTicketById = async (req, res) => {
     const {
         Issue,
         Description,
-        Priority
+        Priority,
+        tecnico
     } = req.body;
 
     const Client = req.params.id;
@@ -110,6 +114,7 @@ export const createTicketById = async (req, res) => {
             Issue,
             Description,
             Priority,
+            tecnico,
             Client: clientExist._id,
             Admin
         });
