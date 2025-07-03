@@ -78,7 +78,7 @@ export const viewAllClient = async (req, res) => {
 
 //View id Client
 export const viewIdClient = async (req, res) => {
-    const id = req.params;
+    const id = req.params.id;
 
     try {
         const idClient = await client.findById(id);
@@ -95,8 +95,7 @@ export const viewIdClient = async (req, res) => {
 
 //Editar el cliente
 export const editClient = async (req, res) => {
-    const { PhoneNumberIndex } = req.body;
-    const id = req.params;
+    const id = req.params.id;
 
     try {
         const idClient = await client.findById(id);
@@ -107,8 +106,7 @@ export const editClient = async (req, res) => {
 
         const UpdateQuery = {};
 
-        const fields = { // Mapeo de los campos
-            //PhoneNumber: (value) => { UpdateQuery['Pho neNumber'] = { $push: { PhoneNumber:value } } },
+        const fields = {
             FirstName: (value) => { UpdateQuery['Name.FirstName'] = value },
             SecondName: (value) => { UpdateQuery['Name.SecondName'] = value },
             FatherLastName: (value) => { UpdateQuery['LastName.FatherLastName'] = value },
@@ -124,31 +122,17 @@ export const editClient = async (req, res) => {
             InNumber: (value) => { UpdateQuery['Location.InNumber'] = value },
             Latitude: (value) => { UpdateQuery['Location.Latitude'] = value },
             Length: (value) => { UpdateQuery['Location.Length'] = value },
-            PhoneNumber: (value) => {
-                if (PhoneNumberIndex !== undefined) {
-                    UpdateQuery[`PhoneNumber.${PhoneNumberIndex}`] = value; // Modificar el elemento en un índice específico
-                } else {
-                    UpdateQuery['PhoneNumber'] = { $push: { PhoneNumber: value } }; // Agregar un nuevo número
-                }
-            }
+            PhoneNumber: (value) => { UpdateQuery['PhoneNumber'] = value }
         }
 
         for (const [key, updateFunction] of Object.entries(fields)) {
-            if (req.body[key]) {
-                await updateFunction(req.body[key]);
+            if (req.body[key] !== undefined) {
+                updateFunction(req.body[key]);
             }
         }
 
-        const update = await client.findByIdAndUpdate(idClient, { $set: UpdateQuery }, { new: true });
-        return res.status(200).json(update)
-
-        /*if(PhoneNumber) {
-            UpdateQuery.$push = { PhoneNumber:{ $each:PhoneNumber} };
-        }
-
-        const updateClient = await client.findByIdAndUpdate(id,UpdateQuery,{ new:true });
-
-        return res.status(200).json( updateClient );*/
+        const update = await client.findByIdAndUpdate(id, { $set: UpdateQuery }, { new: true });
+        return res.status(200).json(update);
 
     } catch (error) {
         console.log(error);
@@ -174,7 +158,7 @@ export const deleteClient = async (req, res) => {
             ticket.deleteMany({ Client: id })
         ]);
 
-        await client.findByIdAndDelete(idClient);
+        await client.findByIdAndDelete(id);
         return res.status(200).json({ message: 'Client deleted' });
     } catch (error) {
         console.log(error);
