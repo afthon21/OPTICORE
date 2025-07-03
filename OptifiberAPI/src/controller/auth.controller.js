@@ -99,7 +99,7 @@ export const protectRoute = async (req, res, next) => {
     const token = authHeader.replace('Bearer ', '');
     try {
         const decode = jwt.verify(token, process.env.JWT_SECRET);
-        req.User = decode;
+        req.user = decode;
         next();
     } catch (error) {
         console.log(error);
@@ -110,7 +110,7 @@ export const protectRoute = async (req, res, next) => {
 
 //Extraer datos de usuario logeado
 export const getProfile = async (req, res, next) => {
-    req.adminId = req.User.id;
+    req.adminId = req.user.id;
     next();
 }
 
