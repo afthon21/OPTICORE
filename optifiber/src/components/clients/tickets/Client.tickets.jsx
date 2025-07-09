@@ -53,7 +53,7 @@ useEffect(() => {
                     <i className="bi bi-plus-square-fill"></i>
                 </button>
 
-                <CreateTicket client={client} technicians={technicians} />
+                <CreateTicket client={client} technicians={technicians} onTicketCreated={fetchData} />
             </div>
             <table className={`table table-hover table-sm ${styleTickets['container']}`}>
                 <thead className={`${styleTickets['header']}`}>
