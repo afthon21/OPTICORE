@@ -7,7 +7,7 @@ import ApiRequest from '../../hooks/apiRequest';
 import { DropdownTechnicians } from '../../fragments/Dropdown.technician.jsx';
 
 
-function CreateTicket({ client, technicians = [] }) {
+function CreateTicket({ client, technicians = [], onTicketCreated }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [searchTech, setSearchTech] = useState('');
     const [isTechOpen, setIsTechOpen] = useState(false);
@@ -46,11 +46,13 @@ function CreateTicket({ client, technicians = [] }) {
         setFormValues({
             Issue: '',
             Description: '',
-            
             Priority: priority.find((item) => item.id === '0').name,
             tecnico: ''
-            
-        })
+        });
+        setSearchTech('');
+        setSelectedTech('');
+        setIsTechOpen(false);
+        setFormErrors({});
     }
 
     useEffect(() => {
@@ -138,6 +140,15 @@ function CreateTicket({ client, technicians = [] }) {
                 background: '#e5e8e8'
             }).then(() => {
                 handleClear();
+                // Actualizar la tabla de tickets en el componente padre
+                if (onTicketCreated) {
+                    onTicketCreated();
+                }
+                // Cerrar el modal usando el botón oculto
+                const closeButton = document.getElementById('closeModalButton');
+                if (closeButton) {
+                    closeButton.click();
+                }
             });
 
             if (error) {
@@ -164,8 +175,16 @@ function CreateTicket({ client, technicians = [] }) {
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="ModalLabel">TIcket</h1>
+                        <h1 className="modal-title fs-5" id="ModalLabel">Ticket</h1>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        {/* Botón oculto para cerrar el modal programáticamente */}
+                        <button 
+                            id="closeModalButton" 
+                            type="button" 
+                            className="d-none" 
+                            data-bs-dismiss="modal" 
+                            aria-label="Close">
+                        </button>
                     </div>
                     <div className={`modal-body ${styleFormTIcket['body']}`}>
 
