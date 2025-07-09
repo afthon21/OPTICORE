@@ -4,20 +4,23 @@ import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { cleanData } from '../../fragments/js/cleanData';
 import ApiRequest from '../../hooks/apiRequest';
+import { DropdownTechnicians } from '../../fragments/Dropdown.technician.jsx';
 
-function CreateTicket({ client }) {
+
+function CreateTicket({ client, technicians = [], onTicketCreated }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const [searchTech, setSearchTech] = useState('');
+    const [isTechOpen, setIsTechOpen] = useState(false);
+    const [selectedTech, setSelectedTech] = useState('');
     const [formValues, setFormValues] = useState({
         Issue: '',
         Description: '',
-        Priority: ''
+        Priority: '',
+        tecnico: ''
     });
+    
     const [formErrors, setFormErrors] = useState({});
-    const data = {
-        Issue: formValues.Issue,
-        Description: formValues.Description,
-        Priority: formValues.Priority
-    }
+    
     const priority = [
         { id: '0', name: 'Seleccione la prioridad...', hide: true, selected: true },
         { id: '1', name: 'Urgente' },
@@ -25,6 +28,10 @@ function CreateTicket({ client }) {
         { id: '3', name: 'Media' },
         { id: '4', name: 'Baja' }
     ];
+    const filteredTechOptions = technicians.filter(option => {
+    const fullName = `${option.nombre} ${option.apellidoP || ''} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim();
+    return fullName.toLowerCase().includes(searchTech.toLowerCase());
+});
 
     const handleChangue = (e) => {
         const { name, value } = e.target;
@@ -39,8 +46,13 @@ function CreateTicket({ client }) {
         setFormValues({
             Issue: '',
             Description: '',
-            Priority: priority.find((item) => item.id === '0').name
-        })
+            Priority: priority.find((item) => item.id === '0').name,
+            tecnico: ''
+        });
+        setSearchTech('');
+        setSelectedTech('');
+        setIsTechOpen(false);
+        setFormErrors({});
     }
 
     useEffect(() => {
@@ -73,13 +85,26 @@ function CreateTicket({ client }) {
         if (!formValues.Priority || formValues.Priority === priority[0].name){
             errors.Priority = 'Selecciona la prioridad';
         }
+        if (!formValues.tecnico || formValues.tecnico.trim() === '') {
+            errors.tecnico = 'Selecciona un técnico';
+        }
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (e) => {
+        
         e.preventDefault();
+        const data = {
+        Issue: formValues.Issue,
+        Description: formValues.Description,
+        Priority: formValues.Priority,
+        tecnico: formValues.tecnico
+    };
+
+
+
         const cleanedData = cleanData(data);
 
         if (!validators()) {
@@ -115,6 +140,15 @@ function CreateTicket({ client }) {
                 background: '#e5e8e8'
             }).then(() => {
                 handleClear();
+                // Actualizar la tabla de tickets en el componente padre
+                if (onTicketCreated) {
+                    onTicketCreated();
+                }
+                // Cerrar el modal usando el botón oculto
+                const closeButton = document.getElementById('closeModalButton');
+                if (closeButton) {
+                    closeButton.click();
+                }
             });
 
             if (error) {
@@ -141,8 +175,16 @@ function CreateTicket({ client }) {
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="ModalLabel">TIcket</h1>
+                        <h1 className="modal-title fs-5" id="ModalLabel">Ticket</h1>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        {/* Botón oculto para cerrar el modal programáticamente */}
+                        <button 
+                            id="closeModalButton" 
+                            type="button" 
+                            className="d-none" 
+                            data-bs-dismiss="modal" 
+                            aria-label="Close">
+                        </button>
                     </div>
                     <div className={`modal-body ${styleFormTIcket['body']}`}>
 
@@ -190,6 +232,34 @@ function CreateTicket({ client }) {
                             </div>
                             {formErrors.Description && <p className={styleFormTIcket['error']}>{formErrors.Description}</p>}
                             <br />
+                            <label className="form-label">Técnico</label>
+<div className="d-flex input-group">
+    <input
+        className={`form-control ${styleFormTIcket['input']}`}
+        type="text"
+        value={searchTech}
+        
+        onFocus={() => setIsTechOpen(true)}
+        onBlur={() => setTimeout(() => setIsTechOpen(false), 100)}
+        placeholder="Seleccionar Técnico"
+        name="tecnico"
+        autoComplete="off"
+        readOnly
+    />
+</div>
+{formErrors.tecnico && <p className={styleFormTIcket['error']}>{formErrors.tecnico}</p>}
+{isTechOpen && (
+    <DropdownTechnicians
+        filteredOptions={filteredTechOptions}
+        onOptionClick={option => {
+            const techName = `${option.nombre} ${option.apellidoP || ''} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim();
+            setSelectedTech(techName);
+            setSearchTech(techName);
+            setIsTechOpen(false);
+            setFormValues(prev => ({ ...prev, tecnico: techName }));
+        }}
+    />
+)}
 
                             <div className="d-flex justify-content-end mt-4">
                                 <button

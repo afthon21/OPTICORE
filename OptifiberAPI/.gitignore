@@ -4,3 +4,4 @@ node_modules/
 
 #Ignorar archivos de configuracion
 *.env
+.vite/
