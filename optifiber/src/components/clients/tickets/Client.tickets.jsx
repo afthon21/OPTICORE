@@ -10,6 +10,9 @@ function ClientTickets({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
+    const [technicians, setTechnicians] = useState([]); 
+
+    
 
     const fetchData = async () => {
         try {
@@ -19,11 +22,23 @@ function ClientTickets({ client }) {
             console.log(error);
         }
     }
+   
 
-    useEffect(() => {
-        fetchData()
-    }, [makeRequest])
+const fetchTechnicians = async () => {
+    try {
+        const res = await makeRequest('/technician/all');
+        setTechnicians(res);
+    } catch (error) {
+        console.log(error);
+    }
+};
 
+useEffect(() => {
+    fetchData();
+    fetchTechnicians();
+}, [makeRequest]);
+
+    
     if (loading) return <LoadFragment />
 
     if (error) return <p>Error!</p>
@@ -38,7 +53,7 @@ function ClientTickets({ client }) {
                     <i className="bi bi-plus-square-fill"></i>
                 </button>
 
-                <CreateTicket client={client} />
+                <CreateTicket client={client} technicians={technicians} />
             </div>
             <table className={`table table-hover table-sm ${styleTickets['container']}`}>
                 <thead className={`${styleTickets['header']}`}>
@@ -46,6 +61,7 @@ function ClientTickets({ client }) {
                         <th>Folio</th>
                         <th>Prioridad</th>
                         <th>Asunto</th>
+                        <th>Técnico</th>
                         <th>Estado</th>
                         <th>Fecha</th>
                     </tr>
@@ -58,6 +74,7 @@ function ClientTickets({ client }) {
                                 <td>{item.Folio}</td>
                                 <td>{item.Priority}</td>
                                 <td>{item.Issue}</td>
+                                <td>{item.tecnico || ''}</td>
                                 <td>{item.Status}</td>
                                 <td>{item.CreateDate.split("T")[0]}</td>
                             </tr>

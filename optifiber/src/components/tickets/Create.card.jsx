@@ -8,17 +8,23 @@ import { cleanData } from '../fragments/js/cleanData.js';
 import Swal from 'sweetalert2';
 
 import { DropdownClients } from '../fragments/Dropdown.clients.jsx';
+import { DropdownTechnicians } from '../fragments/Dropdown.technician.jsx';
 
-export function CardCreateTicket({ clients = [] }) {
+
+export function CardCreateTicket({ clients = [], technician = [] }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState('');
+    const [isTechOpen, setIsTechOpen] = useState(false);
+    const [searchTech, setSearchTech] = useState('');
+  
     const [formErrors, setFormErrors] = useState({});
     const [formValues, setFormValues] = useState({
         Issue: '',
         Priority: '',
-        Description: ''
+        Description: '',
+        tecnico: ''
     });
 
     const data = {
@@ -26,7 +32,11 @@ export function CardCreateTicket({ clients = [] }) {
         Description: formValues.Description,
         Priority: formValues.Priority,
         Client: selected,
+        tecnico: formValues.tecnico
     };
+    
+    
+    
 
     const priority = [
         { id: '0', name: 'Seleccione la prioridad...', hide: true, selected: true },
@@ -80,6 +90,22 @@ export function CardCreateTicket({ clients = [] }) {
             .replace(/\s+/g, ' ')
             .trim();
         return clientName.toLowerCase().includes(search.toLowerCase());
+    });
+    const handleTechInputChange = (e) => {
+    setSearchTech(e.target.value);
+    setIsTechOpen(true);
+};
+const handleTechOptionClick = (option) => {
+    const techName = `${option.nombre} ${option.apellidoP || ''} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim();
+    // setSelectedTech(techName); // <-- Elimina esta línea
+    setFormValues((prev) => ({ ...prev, tecnico: techName }));
+    setSearchTech(techName);
+    setIsTechOpen(false);
+};
+
+    const filteredTechOptions = technician.filter((option) => {
+    const techName = `${option.nombre} ${option.apellidoP || ''} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim();
+    return techName.toLowerCase().includes(searchTech.toLowerCase());
     });
 
     const validators = () => {
@@ -232,6 +258,29 @@ export function CardCreateTicket({ clients = [] }) {
                     </div>
                     {formErrors.Description && <p className={styleCreate['error']}>{formErrors.Description}</p>}
                     <br />
+
+                    <label className="form-label">Técnico</label>
+                    <div className="d-flex input-group">
+                        <input
+                            className={`form-control ${styleCreate['input']}`}
+                            type="text"
+                            value={searchTech}
+                             onChange={handleTechInputChange}
+                              onFocus={() => setIsTechOpen(true)}
+                             onBlur={() => setTimeout(() => setIsTechOpen(false), 100)}
+                             placeholder="Seleccionar Técnico"
+                             name="tecnico"
+                            autoComplete="off"
+                         />
+                    </div>
+                    {formErrors.tecnico && <p className={styleCreate['error']}>{formErrors.tecnico}</p>}
+                    {isTechOpen && (
+                     <DropdownTechnicians
+                         filteredOptions={filteredTechOptions}
+                          onOptionClick={handleTechOptionClick}
+                        />
+                    )}
+                    
 
                     <div className="d-flex justify-content-end">
                         <button className={styleCreate['button']} 
