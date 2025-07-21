@@ -1,7 +1,7 @@
 import styleCard from './css/clientInfo.module.css';
 import styleNav from './css/navbar.module.css';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ClientPayments from './payment/Client.payments';
 import ClientData from './Client.data';
 import ClientDocuments from './documents/Clients.documents';
@@ -20,8 +20,16 @@ function ClientsInfo({ client }) {
         notes: false
     });
 
+    // Estado local para el cliente seleccionado
+    const [currentClient, setCurrentClient] = useState(client);
+
+    // Si el prop client cambia (por ejemplo, seleccionas otro cliente), actualiza el estado local
+    useEffect(() => {
+        setCurrentClient(client);
+    }, [client]);
+
     const toggleData = (data) => {
-        if (!client) {
+        if (!currentClient) {
             Swal.fire({
                 icon: 'warning',
                 iconColor: 'red',
@@ -72,7 +80,6 @@ function ClientsInfo({ client }) {
                                     Datos personales
                                 </a>
                             </li>
-
                             <li className="nav-item">
                                 <a
                                     className="nav-link"
@@ -82,7 +89,6 @@ function ClientsInfo({ client }) {
                                     Documentos
                                 </a>
                             </li>
-
                             <li className="nav-item">
                                 <a
                                     className="nav-link"
@@ -92,7 +98,6 @@ function ClientsInfo({ client }) {
                                     Ubicación
                                 </a>
                             </li>
-
                             <li className="nav-item">
                                 <a
                                     className="nav-link"
@@ -102,7 +107,6 @@ function ClientsInfo({ client }) {
                                     Pagos
                                 </a>
                             </li>
-
                             <li className="nav-item">
                                 <a
                                     className="nav-link"
@@ -112,7 +116,6 @@ function ClientsInfo({ client }) {
                                     Tickets
                                 </a>
                             </li>
-
                             <li className="nav-item">
                                 <a className="nav-link"
                                     role="button"
@@ -129,41 +132,41 @@ function ClientsInfo({ client }) {
 
                 <div className={`d-flex justify-content-between align-items-center mt-1 mx-3 ${styleCard['header']}`}>
                     <span className={styleCard['title']}><i className="bi bi-person-fill"></i> Client Details</span>
-
                 </div>
 
                 <div className={`card-body ${styleCard['body']}`}>
-
-                    {/** datos personales  */}
+                    {/* datos personales */}
                     {show.personal && (
-                        <ClientData client={client} />
+                        <ClientData
+                            client={currentClient}
+                            onUpdateClient={setCurrentClient}
+                        />
                     )}
 
-                    {/** Ver Documentos */}
+                    {/* Ver Documentos */}
                     {show.documents && (
-                        <ClientDocuments client={client._id} />
+                        <ClientDocuments client={currentClient?._id} />
                     )}
 
-                    {/** Ver Marcador */}
+                    {/* Ver Marcador */}
                     {show.location && (
-                        <ClientLocation client={client}/>
+                        <ClientLocation client={currentClient}/>
                     )}
 
-                    {/** Ver pagos */}
+                    {/* Ver pagos */}
                     {show.payments && (
-                        <ClientPayments client={client._id} />
+                        <ClientPayments client={currentClient?._id} />
                     )}
 
-                    {/** Ver tickets */}
+                    {/* Ver tickets */}
                     {show.tickets && (
-                        <ClientTickets client={client._id}/>
+                        <ClientTickets client={currentClient?._id}/>
                     )}
 
-                    {/** Ver notas */}
+                    {/* Ver notas */}
                     {show.notes && (
-                        <ClientNotes client={client._id}/>
+                        <ClientNotes client={currentClient?._id}/>
                     )}
-
                 </div>
             </div>
         </div>
