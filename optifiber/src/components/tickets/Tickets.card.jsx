@@ -128,6 +128,7 @@ function TicketsCard({ tickets = [], onSelected }) {
                         <th>Prioridad</th>
                         <th>Asunto</th>
                         <th>Técnico</th>
+                        <th>Creado por</th>
                         <th 
                             onClick={() => handleSort('estado')} 
                             style={{ cursor: 'pointer' }}
@@ -160,6 +161,9 @@ function TicketsCard({ tickets = [], onSelected }) {
                             <td>{item.Priority}</td>
                             <td>{item.Issue}</td>
                             <td>{item.tecnico || ''}</td>
+                            <td>
+                                {item.Admin?.UserName ?? 'Sin asignar'}
+                            </td>
                             <td>{item.Status}</td>
                             <td>{item.CreateDate.split("T")[0]}</td>
                         </tr>
