@@ -24,13 +24,25 @@ function PaymentCard({ payments = [], onSelected }) {
     };
 
     const filteredData = payments.filter(payment => {
-        const folio = payment.Folio?.toString() ?? '';
-        const method = payment.Method ?? '';
+        const folio = payment.Folio?.toString().toLowerCase() || '';
+        const method = payment.Method?.toString().toLowerCase() || '';
+        const amount =(payment.Amount ?? '').toString().toLowerCase();
         const date = payment.CreateDate?.split("T")[0] ?? '';
-        const clientName = `${payment.Client?.Name?.FirstName ?? ''} ${payment.Client?.Name?.SecondName ?? ''} ${payment.Client?.LastName?.FatherLastName ?? ''} ${payment.Client?.LastName?.MotherLastName ?? ''}`.trim();
+        const clientName = `${payment.Client?.Name.FirstName} 
+        ${payment.Client.Name.SecondName || ''} 
+        ${payment.Client.LastName.FatherLastName} 
+        ${payment.Client?.LastName.MotherLastName}`
+        .replace(/\s+/g, ' ').trim()
+        .toLowerCase();
 
-        const combined = `${folio} ${method} ${date} ${clientName}`.toLowerCase();
-        return combined.includes(search.toLowerCase());
+        const searchLower = search.toLowerCase();
+        return (
+            clientName.includes(searchLower) || 
+            folio.includes(searchLower) ||
+            method.includes(searchLower) ||
+            date.includes(searchLower) ||
+            amount.includes(searchLower)
+        );
     });
 
     const sortedData = [...filteredData].sort((a, b) => {
