@@ -9,6 +9,12 @@ import profileRoute from '../middlewares/profile.routes.js';
 import notesRoutes from '../middlewares/notes.routes.js';
 import serviceRoutes from '../middlewares/servicesPackage.routes.js';
 import packageRoutes from '../middlewares/packages.routes.js';
+import technicianRoutes from '../middlewares/technician.routes.js';
+
+
+//RUTA NETWORK
+import networkRoutes from '../middlewares/network.routes.js';
+
 
 const configureRoutes = (app) => {
 
@@ -23,6 +29,11 @@ const configureRoutes = (app) => {
     app.use(`${principal}/profile`, profileRoute);
     app.use(`${principal}/note`, notesRoutes);
     app.use(`${principal}/packages`, serviceRoutes);
+
+    app.use(`${principal}/network`, networkRoutes);
+
+    app.use(`${principal}/technician`, technicianRoutes);
+
 }
 
 export default configureRoutes;

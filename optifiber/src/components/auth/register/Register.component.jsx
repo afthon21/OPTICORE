@@ -236,7 +236,7 @@ function RegisterComponent() {
                             </form>
                         </div>
                         <div className="modal-footer">
-                            <span>¿Ya tienes cuneta? <a href="#" onClick={handleSwitchToLogin}>Inicia Sesión</a></span>
+                            <span>¿Ya tienes cuenta? <a href="#" onClick={handleSwitchToLogin}>Inicia Sesión</a></span>
                         </div>
                     </div>
                 </div>

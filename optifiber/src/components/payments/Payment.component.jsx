@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import ApiRequest from '../hooks/apiRequest';
+import ApiRequest from '../hooks/apiRequest.jsx';
 
-import PaymentCard from './Payment.card';
-import PaymentInfo from './Payment.info';
+import PaymentCard from './Payment.card.jsx';
+import PaymentInfo from './Payment.info.jsx';
 import { LoadFragment } from '../fragments/Load.fragment.jsx'
 
 function PaymentComponent() {

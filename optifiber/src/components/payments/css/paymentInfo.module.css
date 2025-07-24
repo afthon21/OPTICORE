@@ -32,7 +32,7 @@
     background-color: #00ca4e;
 }
 
-.circle:hover {
+.box:hover {
     transform: scale(1.2);
 }
 
@@ -40,7 +40,7 @@
 .input {
     border: 0;
     width: 100%;
-    background: transparent;
+    background: none;
     font-family: 'Agdasima';
     font-size: 14pt;
     color: black;
@@ -51,13 +51,27 @@
     background: transparent;
 }
 
+.textarea {
+    overflow-y: auto;
+}
+
 .body {
     background: #f8f9fa;
 }
 
+.title {
+    font-family: 'Kanit';
+    font-size: 16pt;
+    color: #002b5b;
+}
+
 .body p {
     font-family: 'Kanit';
+    font-size: 16pt;
+    color: #404040;
 }
+
+
 
 .btn-exit {
     border-radius: 10%;
