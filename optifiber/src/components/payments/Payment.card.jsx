@@ -113,6 +113,8 @@ function PaymentCard({ payments = [], onSelected }) {
                             Método {sortField === 'Método' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
                         <th>Monto</th>
+                        {/* Nuevo encabezado */}
+                        <th>Creado por</th>
                         <th onClick={() => handleHeaderClick('Fecha')} style={{ cursor: 'pointer' }}>
                             Fecha {sortField === 'Fecha' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
@@ -128,6 +130,8 @@ function PaymentCard({ payments = [], onSelected }) {
                             <td>{`${item.Client?.Name?.FirstName ?? ''} ${item.Client?.Name?.SecondName ?? ''} ${item.Client?.LastName?.FatherLastName ?? ''} ${item.Client?.LastName?.MotherLastName ?? ''}`}</td>
                             <td>{item.Method}</td>
                             <td>{item.Amount}</td>
+                            {/* Mostrar el administrador */}
+                            <td>{item.Admin?.UserName ?? 'Sin asignar'}</td>
                             <td>{item.CreateDate?.split("T")[0]}</td>
                         </tr>
                     ))}
