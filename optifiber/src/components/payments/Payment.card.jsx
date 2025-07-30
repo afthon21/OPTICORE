@@ -103,6 +103,9 @@ function PaymentCard({ payments = [], onSelected }) {
                         <th onClick={() => handleHeaderClick('Folio')} style={{ cursor: 'pointer' }}>
                             Folio {sortField === 'Folio' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
+
+                        <th>Estado</th>
+
                         <th onClick={() => handleHeaderClick('Cliente')} style={{ cursor: 'pointer' }}>
                             Cliente {sortField === 'Cliente' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
@@ -121,6 +124,7 @@ function PaymentCard({ payments = [], onSelected }) {
                             key={item._id} onClick={() => onSelected(item)}
                             data-bs-toggle="modal" data-bs-target="#PaymentModal">
                             <td>{item.Folio}</td>
+                            <td>{item.Status}</td>
                             <td>{`${item.Client?.Name?.FirstName ?? ''} ${item.Client?.Name?.SecondName ?? ''} ${item.Client?.LastName?.FatherLastName ?? ''} ${item.Client?.LastName?.MotherLastName ?? ''}`}</td>
                             <td>{item.Method}</td>
                             <td>{item.Amount}</td>
