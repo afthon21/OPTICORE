@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function NetworkDevices() {
+function Radiofrecuencia() {
     const [devices, setDevices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -59,4 +59,4 @@ function NetworkDevices() {
     );
 }
 
-export default NetworkDevices;
+export default Radiofrecuencia;
