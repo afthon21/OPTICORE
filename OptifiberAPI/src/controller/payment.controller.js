@@ -170,7 +170,8 @@ export const editPayment = async (req, res) => {
             Method: (value) => { UpdateQuery['Method'] = value },
             Amount: (value) => { UpdateQuery['Amount'] = value },
             Note: (value) => { UpdateQuery['Note'] = value },
-        }
+            Status: (value) => { UpdateQuery['Status']=value}
+        };
 
         for (const [key, updateFunction] of Object.entries(fields)) {
             if (req.body[key]) {
