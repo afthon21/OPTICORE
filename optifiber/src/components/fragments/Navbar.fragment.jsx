@@ -166,6 +166,7 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
+                                onClick={() => navigate(`/network/fibra-optica/${adminId}`)}
                                 role="button"
                             >
                                 Fibra Óptica
