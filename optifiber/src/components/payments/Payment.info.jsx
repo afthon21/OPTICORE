@@ -70,7 +70,7 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
 
         if (confirm.isConfirmed) {
             try {
-                await makeRequest(`/payment/edit/${payment._id}`, 'POST', data);
+                await makeRequest(`/pay/edit/${payment._id}`, 'POST', data);
 
                 const updated = { ...payment, Status: value };
                 setPayment(updated);

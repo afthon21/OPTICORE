@@ -21,6 +21,11 @@ const paymentSchema = new mongoose.Schema({
         type: String,
         require: false
     },
+    Status: {
+        require: true,
+        default: ' ',
+        type: String
+    }, 
     Admin: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'admin'
