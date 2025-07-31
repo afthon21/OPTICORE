@@ -87,7 +87,7 @@
 
 .item:focus-within .sub-menu,
 .item:hover .sub-menu {
-    max-height: 200px;
+    max-height: 400px;
     opacity: 1;
     transform: translateY(0);
     transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
