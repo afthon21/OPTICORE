@@ -28,6 +28,8 @@ import Mapa from './components/network/Mapa.jsx';
 import Topologia from './components/network/Topologia.jsx';
 import Dispositivos from './components/network/Dispositivos.jsx';
 import Logs from './components/network/Logs.jsx';
+import OltPorts from './components/network/OltPorts';
+import NetworkHealth from './components/network/NetworkHealth';
 
 function App() {
   return (
