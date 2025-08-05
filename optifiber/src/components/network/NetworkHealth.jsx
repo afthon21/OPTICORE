@@ -24,14 +24,14 @@ export default function NetworkHealth() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/device-info')
+    fetch('http://localhost:3000/api/network/device-info')
       .then(res => res.json())
       .then(data => setDeviceInfo(data));
   }, []);
 
   useEffect(() => {
     const fetchHealth = () => {
-      fetch('http://localhost:4000/api/network-health-history')
+      fetch('http://localhost:3000/api/network/network-health-history')
         .then(res => res.json())
         .then(data => setHealthHistory(data));
     };

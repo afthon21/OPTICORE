@@ -37,7 +37,7 @@ export default function OltPorts() {
 
   useEffect(() => {
     const fetchData = () => {
-      fetch(`http://localhost:4000/api/olt-ports-snmp?type=${portType}`)
+      fetch(`http://localhost:3000/api/network/olt-ports-snmp?type=${portType}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
