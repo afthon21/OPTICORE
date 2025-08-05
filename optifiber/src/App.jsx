@@ -28,6 +28,8 @@ import Mapa from './components/network/Mapa.jsx';
 import Topologia from './components/network/Topologia.jsx';
 import Dispositivos from './components/network/Dispositivos.jsx';
 import Logs from './components/network/Logs.jsx';
+import OltPorts from './components/network/OltPorts';
+import NetworkHealth from './components/network/NetworkHealth';
 
 function App() {
   return (
@@ -53,6 +55,8 @@ function App() {
           {/* Monitoreo de red */}
           <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
           <Route path='/network/fibra-optica/:adminId' element={<FibraOptica />}></Route>
+          <Route path='/network/fibra-optica/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
+          <Route path='/network/fibra-optica/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>
           <Route path='/network/fibra-optica/mapa/:adminId' element={<ProtectedRoute><Mapa /></ProtectedRoute>}></Route>
           <Route path='/network/fibra-optica/topologia/:adminId' element={<ProtectedRoute><Topologia /></ProtectedRoute>}></Route>
           <Route path='/network/fibra-optica/dispositivos/:adminId' element={<ProtectedRoute><Dispositivos /></ProtectedRoute>}></Route>
