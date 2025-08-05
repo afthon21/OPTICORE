@@ -52,7 +52,21 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
             });
             return;
         }
+        if (value===states[4].name){
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Precaución!',
+                text: 'No sera posible cambiar el estado después de que el ticket haya sido cerrado.',
+                toast: true,
+                position: 'top',
+                iconColor: '#002b5b',
+                timer: 1400,
+                timerProgressBar: true,
+                showConfirmButton: false
 
+        });
+        }
+        if (value !== payment.Status){
         const confirm = await Swal.fire({
             icon: 'warning',
             iconColor: '#002b5b',
@@ -75,8 +89,9 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
                 const updated = { ...payment, Status: value };
                 setPayment(updated);
 
-                if (onStatusChange) onStatusChange(updated);
-
+                if (onStatusChange) {
+                    onStatusChange(updated);
+                }
                 Swal.fire({
                     toast: true,
                     position: 'top',
@@ -89,19 +104,24 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
                     timerProgressBar: true,
                     showConfirmButton: false
                 });
-            } catch (err) {
-                console.error(err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: error || 'Hubo un problema al actualizar el estado.',
-                    toast: true,
-                    position: 'top',
-                    width: '30rem'
+                if (error){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error || 'Hubo un problema al actualizar el estado.',
+                        toast: true,
+                        position: 'top',
+                        width: '30rem'
                 });
+                return;
+
+                }
+            } catch (error) {
+                console.log(error);
+                }
             }
         }
-    };
+    }
 
     return (
         <div className="modal fade" id="PaymentModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
