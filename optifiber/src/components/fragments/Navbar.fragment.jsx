@@ -171,6 +171,28 @@ export function NavbarFragmentAll() {
                             >
                                 Fibra Óptica
                             </a>
+                            <ul className="list-unstyled ps-3 sub-menu">
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/fibra-optica/mapa/${adminId}`)} role="button">
+                                        Mapa
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/fibra-optica/topologia/${adminId}`)} role="button">
+                                        Topología
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/fibra-optica/dispositivos/${adminId}`)} role="button">
+                                        Dispositivos
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/fibra-optica/logs/${adminId}`)} role="button">
+                                        Logs
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </li>
