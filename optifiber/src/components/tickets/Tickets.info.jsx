@@ -1,5 +1,4 @@
 import styleInfo from './css/ticketsInfo.module.css';
-
 import ApiRequest from '../hooks/apiRequest';
 import Swal from 'sweetalert2';
 import {useState, useEffect} from 'react';
