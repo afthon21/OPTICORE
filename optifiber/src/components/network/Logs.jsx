@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import api from '../../../hooks/apiRequest';
+import ApiRequest from '../hooks/apiRequest';
 
 function Logs() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const response = await api.get('/logs');
-                setLogs(response.data);
+                const response = await makeRequest('/logs');
+                setLogs(response);
             } catch (err) {
                 setError('Error al cargar los logs');
                 console.error(err);
