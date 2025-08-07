@@ -1,4 +1,5 @@
 {
+
     "name": "optifiber",
     "private": true,
     "version": "0.0.1",
@@ -42,3 +43,4 @@
         "vite": "^5.4.19"
     }
 }
+
