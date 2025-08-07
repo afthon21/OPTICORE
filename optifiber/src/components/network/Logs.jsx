@@ -11,7 +11,7 @@ function Logs() {
         const fetchLogs = async () => {
             try {
                 const response = await makeRequest('/logs');
-                setLogs(response);
+                setLogs(response || []);
             } catch (err) {
                 setError('Error al cargar los logs');
                 console.error(err);

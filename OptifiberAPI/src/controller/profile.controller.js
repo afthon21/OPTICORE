@@ -1,5 +1,5 @@
 import admin from '../models/adminSchema.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 //Ver perfil de usuario
 export const viewProfile = async (req, res) => {
