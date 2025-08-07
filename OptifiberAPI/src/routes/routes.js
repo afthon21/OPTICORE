@@ -10,6 +10,7 @@ import notesRoutes from '../middlewares/notes.routes.js';
 import serviceRoutes from '../middlewares/servicesPackage.routes.js';
 import packageRoutes from '../middlewares/packages.routes.js';
 import technicianRoutes from '../middlewares/technician.routes.js';
+import logRoutes from '../middlewares/log.routes.js';
 
 
 //RUTA NETWORK
@@ -28,7 +29,9 @@ const configureRoutes = (app) => {
     app.use(`${principal}/public/`, express.static('./storage/img'));
     app.use(`${principal}/profile`, profileRoute);
     app.use(`${principal}/note`, notesRoutes);
-    app.use(`${principal}/packages`, serviceRoutes);
+    app.use(`${principal}/packages`, packageRoutes);
+    app.use(`${principal}/service`, serviceRoutes);
+    app.use(`${principal}/logs`, logRoutes);
 
     app.use(`${principal}/network`, networkRoutes);
 
