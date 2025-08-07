@@ -13,9 +13,7 @@ export default function FibraOptica() {
         return <NetworkHealth />;
       case 'trafico':
         return <OltPorts />;
-      case 'logs':
-        return <Logs />;
-      default:
+         default:
         return <NetworkHealth />;
     }
   };
@@ -41,12 +39,7 @@ export default function FibraOptica() {
           >
             Tráfico de Red
           </Button>
-          <Button
-            onClick={() => setView('logs')}
-            color={view === 'logs' ? 'primary' : 'inherit'}
-          >
-            Logs
-          </Button>
+        
         </ButtonGroup>
       </Box>
 
