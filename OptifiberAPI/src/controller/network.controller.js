@@ -174,3 +174,61 @@ export function iniciarMonitoreoSalud() {
     }
   }, 5 * 60 * 1000);
 }
+
+export function getONUs(req, res) {
+  const session = snmp.createSession(host, community, sessionOptions);
+  const onus = {};
+  
+  session.subtree(ifDescrBase, (varbinds) => {
+    varbinds.forEach(vb => {
+      if (!vb || !vb.value || vb.type === snmp.ObjectType.NoSuchInstance) return;
+
+      const descr = vb.value.toString().toLowerCase();
+      const index = parseInt(vb.oid.split('.').pop());
+
+      if (/onu\d+/i.test(descr)) {
+      onus[index] = { index, name: vb.value.toString() };
+    }
+    });
+  }, (error) => {
+    if (error) {
+      session.close();
+      return res.status(500).json({ error: error.toString() });
+    }
+
+    const indices = Object.keys(onus);
+    if (indices.length === 0) {
+      session.close();
+      return res.json([]);
+    }
+
+    const oids = [];
+    indices.forEach(idx => {
+      oids.push(`${ifOperStatusBase}.${idx}`);
+      oids.push(`${ifInOctetsBase}.${idx}`);
+      oids.push(`${ifOutOctetsBase}.${idx}`);
+    });
+
+    session.get(oids, (error, varbinds) => {
+      session.close();
+
+      if (error) return res.status(500).json({ error: error.toString() });
+
+      const result = [];
+      for (let i = 0; i < indices.length; i++) {
+        const index = indices[i];
+        const base = i * 3;
+
+        result.push({
+          index: parseInt(index),
+          name: onus[index].name,
+          status: varbinds[base]?.value === 1 ? "Up" : "Down",
+          inOctets: varbinds[base + 1]?.value || 0,
+          outOctets: varbinds[base + 2]?.value || 0
+        });
+      }
+
+      res.json(result);
+    });
+  });
+}

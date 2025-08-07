@@ -183,8 +183,8 @@ export function NavbarFragmentAll() {
                                     </a>
                                 </li>
                                 <li className="ms-4">
-                                    <a className="nav-link" onClick={() => navigate(`/network/fibra-optica/dispositivos/${adminId}`)} role="button">
-                                        Dispositivos
+                                    <a className="nav-link" onClick={() => navigate(`/network/fibra-optica/onus/${adminId}`)} role="button">
+                                        Onus
                                     </a>
                                 </li>
                                 <li className="ms-4">
