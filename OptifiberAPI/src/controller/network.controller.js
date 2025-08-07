@@ -1,6 +1,5 @@
 // controller/network.controller.js
 import snmp from 'net-snmp';
-import Log from '../models/logSchema.js';
 
 const host = "192.168.10.10";
 const community = "public";
@@ -90,17 +89,6 @@ export async function getOLTPorts(req, res) {
           speed: portSpeed
         };
 
-        if (port.status === "Down") {
-          const logMessage = `El puerto ${port.name} (Índice real: ${port.realIndex}) está caído.`;
-          const newLog = new Log({
-            source: 'Monitoreo de Red',
-            eventType: 'Caída de Puerto',
-            message: logMessage,
-            level: 'warning'
-          });
-          newLog.save();
-        }
-
         const lastList = lastSample[type] || [];
         const last = lastList.find(p => p.realIndex === port.realIndex);
 
@@ -183,13 +171,6 @@ export function iniciarMonitoreoSalud() {
       });
     } catch (err) {
       console.error("Error al actualizar la salud de la red:", err);
-      const newLog = new Log({
-        source: 'Monitoreo de Salud de Red',
-        eventType: 'Error de Monitoreo',
-        message: err.message,
-        level: 'error'
-      });
-      await newLog.save();
     }
   }, 5 * 60 * 1000);
 }
