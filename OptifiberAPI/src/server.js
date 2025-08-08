@@ -5,6 +5,7 @@ import configureRoutes from './routes/routes.js';
 import cors from 'cors';
 import corsOptions from './libs/cors.js';
 import { iniciarMonitoreoSalud } from './controller/network.controller.js'; // 👈 Agrega esta línea
+import servicesRoutes from "./middlewares/servicesPackage.routes.js";
 
 //Config
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cors(corsOptions));
 
 //Rutas
 configureRoutes(app);
+app.use('/api/services', servicesRoutes);
 
 // Inicia monitoreo de red 
 iniciarMonitoreoSalud();

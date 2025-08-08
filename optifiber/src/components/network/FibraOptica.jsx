@@ -2,9 +2,21 @@ import React, { useState } from 'react';
 import { Box, ButtonGroup, Button, Typography } from '@mui/material';
 import NetworkHealth from './NetworkHealth';
 import OltPorts from './OltPorts';
+import Logs from './Logs';
 
 export default function FibraOptica() {
   const [view, setView] = useState('salud');
+
+  const renderView = () => {
+    switch (view) {
+      case 'salud':
+        return <NetworkHealth />;
+      case 'trafico':
+        return <OltPorts />;
+         default:
+        return <NetworkHealth />;
+    }
+  };
 
   return (
     <Box sx={{ p: 2 }}>
@@ -27,11 +39,12 @@ export default function FibraOptica() {
           >
             Tráfico de Red
           </Button>
+        
         </ButtonGroup>
       </Box>
 
       {/* Condicionalmente muestra los componentes */}
-      {view === 'salud' ? <NetworkHealth /> : <OltPorts />}
+      {renderView()}
     </Box>
   );
 }
