@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import ApiRequest from '../hooks/apiRequest';
+import ApiRequest from '../hooks/apiRequest.jsx';
 
-import PaymentCard from './Payment.card';
-import PaymentInfo from './Payment.info';
+import PaymentCard from './Payment.card.jsx';
+import PaymentInfo from './Payment.info.jsx';
 import { LoadFragment } from '../fragments/Load.fragment.jsx'
+import TicketInfo from '../tickets/Tickets.info.jsx';
 
 function PaymentComponent() {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
@@ -31,8 +32,17 @@ function PaymentComponent() {
         <>
             <div className="container-fluid d-flex justify-content-center mt-1">
                 <PaymentCard payments={data ? data : []} onSelected={setSelect} />
-
-                <PaymentInfo payment={select ? select : ''} />
+                {select && (
+                    <PaymentInfo
+                    payment={select}
+                    onStatusChange={(updatedPayment)=> {
+                        setData (prev =>
+                            prev.map(t => t._id=== updatedPayment._id ? updatedPayment : t)
+                    );
+                    }}
+                    />
+                )}
+                
             </div>
         </>
     );
