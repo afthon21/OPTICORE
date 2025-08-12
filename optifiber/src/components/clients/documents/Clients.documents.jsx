@@ -23,17 +23,41 @@ function ClientDocuments({ client }) {
         fetchData()
     }, [makeRequest]);
 
+    function getFileExtension(filename) {
+        const url = new URL(filename);
+        const pathname = url.pathname;
+        return pathname.split('.').pop();
+    }
+
     function documentModal(document, title) {
-        Swal.fire({
-            imageAlt: title,
-            imageUrl: document,
-            showCloseButton: true,
-            showConfirmButton: false,
-            showCancelButton: true,
-            cancelButtonText: 'Cerrar',
-            cancelButtonColor: '#404040',
-            background: '#ededed'
-        })
+        const extension = getFileExtension(document).toLowerCase();
+
+        if (extension === 'pdf') {
+            Swal.fire({
+                title: title,
+                html: `<embed src="${document}" type="application/pdf" width="100%" height="500px" />`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar',
+                cancelButtonColor: '#404040',
+                background: '#ededed',
+                customClass: {
+                    popup: styleDocuments['pdf-modal'],
+                },
+            });
+        } else {
+            Swal.fire({
+                imageAlt: title,
+                imageUrl: document,
+                showCloseButton: true,
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar',
+                cancelButtonColor: '#404040',
+                background: '#ededed'
+            });
+        }
     }
 
     const handleDownload = async (url) => {
