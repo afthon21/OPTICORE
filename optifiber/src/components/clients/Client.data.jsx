@@ -14,7 +14,6 @@ function ClientData({ client, onUpdateClient }) {
     const Indicators = () => (
         <div className={styleData['indicator-container']}>
             <div className={`${styleData['circle']} ${styleData['red']}`}
-                onClick={() => setShowEditModal(true)}
                 style={{ cursor: 'pointer' }}
                 title="Archivar cliente"
             ></div>
@@ -25,7 +24,6 @@ function ClientData({ client, onUpdateClient }) {
                 title="Editar cliente"
             ></div>
             <div className={`${styleData['circle']} ${styleData['green']}`}
-                onClick={() => setShowEditModal(true)}
                 style={{ cursor: 'pointer' }}
                 title="Activar/Desactivar cliente"
             ></div>

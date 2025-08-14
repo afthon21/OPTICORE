@@ -1,7 +1,7 @@
 import service from '../models/servicesSchema.js';
 
 //Crear servicio
-export const newService = async (req, res) => {
+export const newService = async(req, res) => {
     const { Name, Price, Description } = req.body;
     const Admin = req.adminId;
 
@@ -22,7 +22,7 @@ export const newService = async (req, res) => {
 }
 
 //Ver todos los servicios
-export const viewAllServices = async (req, res) => {
+export const viewAllServices = async(req, res) => {
     try {
         const allServices = await service.find()
             .populate('Admin', 'UserName')
@@ -36,7 +36,7 @@ export const viewAllServices = async (req, res) => {
 }
 
 //Ver un solo servicio
-export const viewOneService = async (req, res) => {
+export const viewOneService = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -57,7 +57,7 @@ export const viewOneService = async (req, res) => {
 }
 
 //Editar servicio
-export const editService = async (req, res) => {
+export const editService = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -90,7 +90,7 @@ export const editService = async (req, res) => {
 }
 
 //Eliminar servicio
-export const deleteService = async (req, res) => {
+export const deleteService = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -104,6 +104,6 @@ export const deleteService = async (req, res) => {
         return res.status(200).json({ message: 'Service deletes' });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: 'Server Error!'});
+        return res.status(500).json({ message: 'Server Error!' });
     }
 }

@@ -60,16 +60,19 @@ function HomeComponent() {
         t => t.Status === 'En espera'
     );
 
-    // Filtrar clientes nuevos (últimos 30 días)
-    const clientesNuevos = clients.filter(client => {
-        const fechaRegistro = new Date(client.Date);
-        const fechaActual = new Date();
-        const diasDiferencia = (fechaActual - fechaRegistro) / (1000 * 60 * 60 * 24);
-        return diasDiferencia <= 30;
-    });
+    // Filtrar clientes nuevos (últimos 30 días) y ordenar de reciente a antiguo
+    const clientesNuevos = clients
+        .filter(client => {
+            if (!client.CreateDate) return false;
+            const fechaRegistro = new Date(client.CreateDate);
+            const fechaActual = new Date();
+            const diasDiferencia = (fechaActual - fechaRegistro) / (1000 * 60 * 60 * 24);
+            return diasDiferencia <= 30;
+        })
+        .sort((a, b) => new Date(b.CreateDate) - new Date(a.CreateDate));
 
     return (
-        <div className="container-fluid mt-3">
+        <div className="container-fluid mt-3" style={{ marginLeft: '70px' }}>
             {/* Primera fila */}
             <div className="row mb-2" style={{ minHeight: '250px' }}>
                 <div className="col-3 border p-2 d-flex flex-column">
@@ -80,14 +83,23 @@ function HomeComponent() {
                         ) : (
                             <ul className="list-group list-group-flush">
                                 {clientesNuevos.slice(0, 8).map(client => (
-                                    <li key={client._id} className="list-group-item py-1 px-2">
+                                    <li key={client._id} className="list-group-item py-1 px-2" style={{ background: '#e3fcec', borderLeft: '4px solid #2a9d8f' }}>
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
-                                                <strong>{`${client.Name.FirstName} ${client.LastName.FatherLastName}`}</strong>
+                                                <strong>
+                                                    <i className="bi bi-person-plus-fill text-success me-1"></i>
+                                                    {`${client.Name.FirstName} ${client.Name.SecondName || ''} ${client.LastName.FatherLastName} ${client.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim()}
+                                                </strong>
                                                 <br />
                                                 <small className="text-muted">
-                                                    Registrado: {new Date(client.Date).toLocaleDateString('es-ES')}
+                                                    Registrado: {client.CreateDate ? new Date(client.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}
                                                 </small>
+                                                {client.Email && (
+                                                    <><br /><small className="text-muted">Email: {client.Email}</small></>
+                                                )}
+                                                {client.PhoneNumber && client.PhoneNumber.length > 0 && (
+                                                    <><br /><small className="text-muted">Tel: {client.PhoneNumber.join(', ')}</small></>
+                                                )}
                                             </div>
                                             <span className="badge bg-primary">Nuevo</span>
                                         </div>
