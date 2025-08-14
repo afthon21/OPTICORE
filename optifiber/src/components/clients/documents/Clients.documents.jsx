@@ -60,7 +60,7 @@ function ClientDocuments({ client }) {
         }
     }
 
-    const handleDownload = async (url) => {
+    const handleDownload = async (url, description) => {
         const imgUrl = url;
         const response = await fetch(imgUrl);
 
@@ -68,7 +68,13 @@ function ClientDocuments({ client }) {
 
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = "img.jpg"; // Nombre del archivo
+
+        // Extraer el nombre del archivo de la URL
+        const filename = url.substring(url.lastIndexOf('/') + 1);
+
+        // Usar la descripción como nombre de archivo si está disponible, de lo contrario, usar el nombre de archivo de la URL
+        link.download = description ? `${description}.${filename.split('.').pop()}` : filename;
+
         link.click();
 
         // Limpia la URL para evitar problemas de memoria
@@ -131,7 +137,7 @@ function ClientDocuments({ client }) {
                             </td>
                             <td style={{ width: '5rem' }}>
                                 <button
-                                    onClick={() => handleDownload(item.Document)}
+                                    onClick={() => handleDownload(item.Document, item.Description)}
                                     className={`${styleDocuments['Btn']}`}>
                                     <svg className={styleDocuments['svgIcon']} viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" /></svg>
                                     <span className={styleDocuments['icon2']} />
