@@ -11,7 +11,7 @@
 ````
  4. Clona el repositorio:
 ```sh
-https://github.com/afthon21/OPTICFLOW1.git
+https://github.com/afthon21/OPTICORE.git
 ````         
 ## INICIALIZACIÓN
 
