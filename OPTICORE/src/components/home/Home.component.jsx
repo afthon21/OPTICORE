@@ -117,7 +117,7 @@ function HomeComponent() {
                     </div>
                 </div>
                 <div className="col-3 border p-2 d-flex flex-column">
-                    <h5 className="border-bottom">Clientes Activos</h5>
+                    <h5 className="border-bottom">Administradores Activos</h5>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {userName ? (
                             <ul className="list-group list-group-flush">
