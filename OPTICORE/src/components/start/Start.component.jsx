@@ -19,17 +19,17 @@ function StartComponent() {
             >
                 {/* Título */}
                 <h1 className="display-2 fw-bold text-uppercase mb-4" style={{ letterSpacing: '2px' }}>
-                    FIBERTRACK
+                    OPTICORE
                 </h1>
 
                 {/* Subtítulo */}
                 <h2 className="h4 fw-semibold mb-3" style={{ color: '#f0f0f0' }}>
-                    ¡Bienvenido a FiberTrack!
+                    ¡Bienvenido a OPTICORE!
                 </h2>
 
                 {/* Descripción */}
                 <p className="lead mb-5" style={{ maxWidth: '600px', color: '#e0e0e0' }}>
-                    Con <strong>FiberTrack</strong>, optimiza y gestiona tus redes de manera fácil y eficiente. Inicia sesión con tu cuenta o regístrate ahora y accede a nuestras herramientas avanzadas diseñadas para mejorar tu experiencia.
+                    Con <strong>OPTICORE</strong>, optimiza y gestiona tus redes de manera fácil y eficiente. Inicia sesión con tu cuenta o regístrate ahora y accede a nuestras herramientas avanzadas diseñadas para mejorar tu experiencia.
                 </p>
 
                 {/* Botones */}

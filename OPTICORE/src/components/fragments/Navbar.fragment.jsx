@@ -23,7 +23,7 @@ export function NavbarFragmentAll() {
                     className="mb-0 ms-2 title"
                     onClick={() => handleHome(navigate, adminId)}
                     role="button">
-                    FIBERTRACK
+                    OPTICORE
                 </p>
             </div>
 
