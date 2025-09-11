@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useRegion } from '../../hooks/RegionContext';
 
 import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket } from './js/Routes.js';
 import { handleClients, handleCreateClient, handlePayments, handleCreatePayment } from './js/Routes.js';
@@ -8,42 +9,42 @@ import { handlePackages, handleCreatePackages } from './js/Routes.js';
 export function NavbarFragmentAll() {
     const navigate = useNavigate();
     const [name, setName] = useState(null);
-    const adminId = sessionStorage.getItem('adminId')
+    const adminId = sessionStorage.getItem('adminId');
+    const { region, setRegion } = useRegion();
 
     useEffect(() => {
         const name = sessionStorage.getItem('userName');
         setName(name);
-    });
+    }, []);
 
     return (
-        <nav className="d-flex flex-column position-fixed shadow top-0 left-0 vh-100 px-2 py-3 main-menu">
-            <div className="d-flex justify-content-between align-items-center mb-3 header-content">
-                <i className="bi bi-list fs-3"></i>
-                <p
-                    className="mb-0 ms-2 title"
-                    onClick={() => handleHome(navigate, adminId)}
-                    role="button">
+        <nav className="d-flex flex-column position-fixed shadow top-0 left-0 vh-100 px-2 py-3 main-menu" >
+            <div className="d-flex align-items-center mb-3 header-content">
+                <i className="bi bi-list fs-3" ></i>
+                <p className="mb-0 ms-2 title">
                     OPTICORE
                 </p>
             </div>
 
             <ul className="nav flex-column mb-auto">
+                
                 <li className="nav-item item">
                     <a
                         className="nav-link d-flex align-items-center item-link"
                         onClick={() => handleHome(navigate, adminId)}
                         role="button"
                     >
-                        <i className="bi bi-house-door-fill me-2"></i>
+                        <i className="bi bi-house-door me-2"></i>
                         <span className="item-title">Inicio</span>
                     </a>
                 </li>
+                
                 <li className="nav-item item">
                     <a
                         className="nav-link d-flex align-items-center item-link"
                         role="button"
                     >
-                        <i className="bi bi-people-fill me-2"></i>
+                        <i className="bi bi-people me-2"></i>
                         <span className="item-title">Clientes</span>
                     </a>
                     <ul className="list-unstyled ps-3 sub-menu">
@@ -72,7 +73,7 @@ export function NavbarFragmentAll() {
                         className="nav-link d-flex align-items-center item-link"
                         role="button"
                     >
-                        <i className="bi bi-wallet-fill me-2"></i>
+                        <i className="bi bi-wallet2 me-2"></i>
                         <span className="item-title">Pagos</span>
                     </a>
                     <ul className="list-unstyled ps-3 sub-menu">
@@ -101,7 +102,7 @@ export function NavbarFragmentAll() {
                         className="nav-link d-flex align-items-center item-link"
                         role="button"
                     >
-                        <i className="bi bi-clipboard-heart-fill me-2"></i>
+                        <i className="bi bi-clipboard2-plus me-2"></i>
                         <span className="item-title">Tickets</span>
                     </a>
                     <ul className="list-unstyled ps-3 sub-menu">
@@ -128,7 +129,7 @@ export function NavbarFragmentAll() {
                 <li className="nav-item item">
                     <a className="nav-link d-flex align-items-center item-link"
                         role="button">
-                        <i className="bi bi-box2-heart-fill me-2"></i>
+                        <i className="bi bi-box-seam me-2"></i>
                         <span className="item-title">Paquetes</span>
                     </a>
 
@@ -193,6 +194,35 @@ export function NavbarFragmentAll() {
                                     </a>
                                 </li>
                             </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li className="nav-item item">
+                    <a
+                        className="nav-link d-flex align-items-center item-link"
+                        role="button"
+                    >
+                        <i className="bi bi-map me-2"></i>
+                        <span className="item-title">Mercado</span>
+                    </a>
+                    <ul className="list-unstyled ps-3 sub-menu">
+                        <li className="ms-4">
+                            <a
+                                className={`nav-link${region === 'EdoMéx' ? ' active' : ''}`}
+                                onClick={() => setRegion('EdoMéx')}
+                                role="button"
+                            >
+                                EdoMéx
+                            </a>
+                        </li>
+                        <li className="ms-4">
+                            <a
+                                className={`nav-link${region === 'Puebla' ? ' active' : ''}`}
+                                onClick={() => setRegion('Puebla')}
+                                role="button"
+                            >
+                                Puebla
+                            </a>
                         </li>
                     </ul>
                 </li>

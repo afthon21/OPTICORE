@@ -5,3 +5,8 @@ body {
   -ms-user-select:none;
   user-select: none;
 }
+
+.content {
+  margin-left: 80px; /* Igual al ancho máximo del navbar en hover */
+  transition: margin-left 0.4s ease;
+}
