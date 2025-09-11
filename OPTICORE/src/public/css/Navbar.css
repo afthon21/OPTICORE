@@ -106,3 +106,7 @@
     margin-left: 200px;
     display: flex; /* Ajusta el contenido cuando el navbar se expande */
 }
+
+.header-content i {
+  margin-left: 10px; /* Para mover solo el ícono */
+}

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import ApiRequest from '../hooks/apiRequest'; //importacion de la API
+import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
 
 function HomeComponent() {
-    
+
     const [tickets, setTickets] = useState([]);
     const [showAllTickets, setShowAllTickets] = useState(false);
     const [userName, setUserName] = useState('');
@@ -137,8 +138,11 @@ function HomeComponent() {
                         )}
                     </div>
                 </div>
-                <div className="col-4 border p-2 d-flex justify-content-center align-items-center text-center">
-                    <h5>Estado de Red<br />(pendiente)</h5>
+                <div className="col-3 border p-2 d-flex flex-column">
+                    <h6 className="border-bottom">Estado de Red</h6>
+                    <div className="flex-grow-1">
+                        <EstadoRedResumen />
+                    </div>
                 </div>
                 <div className="col-2 border p-2 d-flex flex-column">
                     <h5 className="border-bottom">Registro de Errores</h5>
@@ -177,12 +181,11 @@ function HomeComponent() {
                                                 <br />
                                                 <small className="text-muted">{ticket.Issue}</small>
                                             </div>
-                                            <span className={`badge ${
-                                                ticket.Status === 'Resuelto' ? 'bg-success' :
-                                                ticket.Status === 'En espera' ? 'bg-warning text-dark' :
-                                                ticket.Status === 'En proceso' ? 'bg-info text-dark' :
-                                                'bg-secondary'
-                                            }`}>
+                                            <span className={`badge ${ticket.Status === 'Resuelto' ? 'bg-success' :
+                                                    ticket.Status === 'En espera' ? 'bg-warning text-dark' :
+                                                        ticket.Status === 'En proceso' ? 'bg-info text-dark' :
+                                                            'bg-secondary'
+                                                }`}>
                                                 {ticket.Status}
                                             </span>
                                         </div>
@@ -190,7 +193,7 @@ function HomeComponent() {
                                 ))}
                                 {tickets.length > 8 && (
                                     <li className="list-group-item py-1 px-2 text-center">
-                                        <button 
+                                        <button
                                             className="btn btn-link btn-sm p-0 text-decoration-none"
                                             onClick={() => setShowAllTickets(!showAllTickets)}
                                             style={{ fontSize: '0.8rem' }}
