@@ -164,11 +164,11 @@ function HomeComponent() {
                             <span className="text-muted">No hay clientes nuevos</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {clientesNuevos.slice(0, 8).map(client => (
+                                {(showAllTickets ? clientesNuevos : clientesNuevos.slice(0, 8)).map(client => (
                                     <li
                                         key={client._id}
                                         className="list-group-item py-1 px-2"
-                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
                                         onClick={() => handleShowClientDetails(client)}
                                         title="Ver detalles del cliente"
                                     >
@@ -183,6 +183,8 @@ function HomeComponent() {
                                                         client.LastName.MotherLastName
                                                     ].filter(Boolean).join(' ').toUpperCase()}
                                                 </strong>
+                                                <br />
+                                                <small className="text-muted">{client.CreateDate ? new Date(client.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</small>
                                             </div>
                                             <span className="badge bg-primary">Nuevo</span>
                                         </div>
@@ -190,9 +192,23 @@ function HomeComponent() {
                                 ))}
                                 {clientesNuevos.length > 8 && (
                                     <li className="list-group-item py-1 px-2 text-center">
-                                        <small className="text-muted">
-                                            +{clientesNuevos.length - 8} clientes más...
-                                        </small>
+                                        <button
+                                            className="btn btn-link btn-sm p-0 text-decoration-none"
+                                            onClick={() => setShowAllTickets(!showAllTickets)}
+                                            style={{ fontSize: '0.8rem' }}
+                                        >
+                                            {showAllTickets ? (
+                                                <>
+                                                    <i className="bi bi-chevron-up me-1"></i>
+                                                    Mostrar menos
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <i className="bi bi-chevron-down me-1"></i>
+                                                    +{clientesNuevos.length - 8} clientes más...
+                                                </>
+                                            )}
+                                        </button>
                                     </li>
                                 )}
                             </ul>
