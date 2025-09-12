@@ -67,15 +67,7 @@ export function NavbarFragmentAll() {
                             </a>
                         </li>
                         
-                        <li className="ms-4">
-                            <a
-                            className="nav-link"
-                            onClick={()=> handleClients(navigate, adminId)}
-                            role="button"
-                            >
-                                Archivados
-                            </a>
-                        </li>
+                        
                     </ul>
                 </li>
                 <li className="nav-item item">
@@ -106,15 +98,7 @@ export function NavbarFragmentAll() {
                                 Ver
                             </a>
                         </li>
-                        <li className="ms-4">
-                            <a
-                            className="nav-link"
-                            onClick={()=> handlePayments(navigate, adminId)}
-                            role="button"
-                            >
-                                Archivados
-                            </a>
-                        </li>
+                        
                         
                     </ul>
                 </li>
@@ -145,15 +129,7 @@ export function NavbarFragmentAll() {
                                 Ver
                             </a>
                         </li>
-                        <li className="ms-4">
-                            <a 
-                                className="nav-link"
-                                onClick={()=> handleTicket(Navigate, adminId)}
-                                role="button"
-                            >
-                                Archivados
-                            </a>
-                        </li>
+                       
                         
                     </ul>
                 </li>
