@@ -98,6 +98,9 @@ function ClientPayments({ client }) {
                         </th>
                         <th>Monto</th>
                         {/* Nuevo encabezado */}
+                        <th>
+                            Abono
+                        </th>
                         <th>Creado por</th>
                         <th onClick={() => handleSort('CreateDate')} style={{ cursor: 'pointer' }}>
                             Fecha{renderArrow('CreateDate')}
@@ -112,6 +115,7 @@ function ClientPayments({ client }) {
                                 <td>{item.Folio}</td>
                                 <td>{item.Method}</td>
                                 <td>{item.Amount}</td>
+                                <td>{item.Abono}</td>
                                 {/* Nuevo campo: nombre del admin */}
                                 <td>{item.Admin?.UserName ?? 'Sin asignar'}</td>
                                 <td>{item.CreateDate.split("T")[0]}</td>
