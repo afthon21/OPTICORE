@@ -17,6 +17,10 @@ const paymentSchema = new mongoose.Schema({
         type: Number,
         require: true
     },
+    Abono:{
+        type: Number,
+        require: true
+    },
     Note:{
         type: String,
         require: false

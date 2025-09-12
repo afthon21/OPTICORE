@@ -114,6 +114,7 @@ function PaymentCard({ payments = [], onSelected }) {
                         </th>
                         <th>Monto</th>
                         {/* Nuevo encabezado */}
+
                         <th>Creado por</th>
                         <th onClick={() => handleHeaderClick('Fecha')} style={{ cursor: 'pointer' }}>
                             Fecha {sortField === 'Fecha' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}

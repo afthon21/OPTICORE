@@ -247,7 +247,9 @@ function EditClientModal({ client, onClose, onSave }) {
         {/* Tres puntos de colores */}
         <div style={styles.dotsContainer}>
           <span style={styles.dotRed}></span>
+
           <span style={styles.dotYellow}></span>
+          
           <span style={styles.dotGreen}></span>
         </div>
         <h3>Editar Cliente</h3>
