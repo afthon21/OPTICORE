@@ -22,6 +22,7 @@ import CreatePackage from './components/services packages/Create.Packages.jsx';
 import RecoveryPwdComponent from './components/auth/recoveryPwd/recovery.component.jsx';
 import ResetPwdComponent from './components/auth/recoveryPwd/resetPwd.components.jsx';
 import { NavbarFragmentAll } from './components/fragments/Navbar.fragment.jsx';
+import { RegionProvider } from './hooks/RegionContext';
 import Radiofrecuencia from './components/network/Radiofrecuencia.jsx';
 import FibraOptica from './components/network/FibraOptica.jsx';
 import Mapa from './components/network/Mapa.jsx';
@@ -33,40 +34,42 @@ import Onus from './components/network/Onus.jsx';
 
 function App() {
   return (
-    <BrowserRouter>
-      <NavbarFragmentAll />
-      <div className="container d-flex content">
-        <Routes>
-          <Route path='/' Component={StartComponent}></Route>
-          <Route path='/home/:adminId' element={<ProtectedRoute> <HomeComponent /> </ProtectedRoute>}></Route>
-          <Route path='/profile/:adminId' element={<ProtectedRoute> <ProfileComponent /> </ProtectedRoute>}></Route>
-          {/* tickets rutas */}
-          <Route path='/ticket/:adminId' element={<ProtectedRoute> <TicketComponent /> </ProtectedRoute>}></Route>
-          <Route path='/ticket/create/:adminId' element={<ProtectedRoute> <CreateTicket /> </ProtectedRoute>}></Route>
-          {/* clientes rutas */}
-          <Route path='/clients/:adminId' element={<ProtectedRoute> <ClientsComponent /> </ProtectedRoute>}></Route>
-          <Route path='/clients/register/:adminId' element={<ProtectedRoute> <CreateClient /> </ProtectedRoute>}></Route>
-          {/* pagos rutas */}
-          <Route path='/payment/:adminId' element={<ProtectedRoute> <PaymentComponent /> </ProtectedRoute>}></Route>
-          <Route path='/payment/create/:adminId' element={<ProtectedRoute> <CreatePayment /> </ProtectedRoute>}></Route>
-          {/* Paquetes rutas */}
-          <Route path='/packageServices/:id' element={<ProtectedRoute> <ServicePackagesComponent /> </ProtectedRoute>}></Route>
-          <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
-          {/* Monitoreo de red */}
-          <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
-          <Route path='/network/fibra-optica/:adminId' element={<FibraOptica />}></Route>
-          <Route path='/network/fibra-optica/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
-          <Route path='/network/fibra-optica/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>
-          <Route path='/network/fibra-optica/mapa/:adminId' element={<ProtectedRoute><Mapa /></ProtectedRoute>}></Route>
-          <Route path='/network/fibra-optica/topologia/:adminId' element={<ProtectedRoute><Topologia /></ProtectedRoute>}></Route>
-          <Route path='/network/fibra-optica/logs/:adminId' element={<ProtectedRoute><Logs /></ProtectedRoute>}></Route>
-          <Route path='/network/fibra-optica/onus/:adminId' element={<ProtectedRoute><Onus /></ProtectedRoute>}></Route>
-          {/* Recuperar contraseña */}
-          <Route path='/reset-password' element = {<RecoveryPwdComponent />}></Route>
-          <Route path='/reset-password-new' element={<ResetPwdComponent />}></Route>
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <RegionProvider>
+      <BrowserRouter>
+        <NavbarFragmentAll />
+        <div className="container d-flex content">
+          <Routes>
+            <Route path='/' Component={StartComponent}></Route>
+            <Route path='/home/:adminId' element={<ProtectedRoute> <HomeComponent /> </ProtectedRoute>}></Route>
+            <Route path='/profile/:adminId' element={<ProtectedRoute> <ProfileComponent /> </ProtectedRoute>}></Route>
+            {/* tickets rutas */}
+            <Route path='/ticket/:adminId' element={<ProtectedRoute> <TicketComponent /> </ProtectedRoute>}></Route>
+            <Route path='/ticket/create/:adminId' element={<ProtectedRoute> <CreateTicket /> </ProtectedRoute>}></Route>
+            {/* clientes rutas */}
+            <Route path='/clients/:adminId' element={<ProtectedRoute> <ClientsComponent /> </ProtectedRoute>}></Route>
+            <Route path='/clients/register/:adminId' element={<ProtectedRoute> <CreateClient /> </ProtectedRoute>}></Route>
+            {/* pagos rutas */}
+            <Route path='/payment/:adminId' element={<ProtectedRoute> <PaymentComponent /> </ProtectedRoute>}></Route>
+            <Route path='/payment/create/:adminId' element={<ProtectedRoute> <CreatePayment /> </ProtectedRoute>}></Route>
+            {/* Paquetes rutas */}
+            <Route path='/packageServices/:id' element={<ProtectedRoute> <ServicePackagesComponent /> </ProtectedRoute>}></Route>
+            <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
+            {/* Monitoreo de red */}
+            <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
+            <Route path='/network/fibra-optica/:adminId' element={<FibraOptica />}></Route>
+            <Route path='/network/fibra-optica/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
+            <Route path='/network/fibra-optica/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>
+            <Route path='/network/fibra-optica/mapa/:adminId' element={<ProtectedRoute><Mapa /></ProtectedRoute>}></Route>
+            <Route path='/network/fibra-optica/topologia/:adminId' element={<ProtectedRoute><Topologia /></ProtectedRoute>}></Route>
+            <Route path='/network/fibra-optica/logs/:adminId' element={<ProtectedRoute><Logs /></ProtectedRoute>}></Route>
+            <Route path='/network/fibra-optica/onus/:adminId' element={<ProtectedRoute><Onus /></ProtectedRoute>}></Route>
+            {/* Recuperar contraseña */}
+            <Route path='/reset-password' element = {<RecoveryPwdComponent />}></Route>
+            <Route path='/reset-password-new' element={<ResetPwdComponent />}></Route>
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </RegionProvider>
   )
 }
 

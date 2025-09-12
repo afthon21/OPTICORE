@@ -1,7 +1,12 @@
 body {
-  background-color: #F8F9FA;
+  background: #b5dffa;
+  background: radial-gradient(circle, rgba(171, 170, 170, 0.52) 0%, rgb(177, 213, 253) 100%);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select:none;
-  user-select: none;
+  user-select: none;
+}
+.content {
+  margin-left: 80px; /* Igual al ancho máximo del navbar en hover */
+  transition: margin-left 0.4s ease;
 }
