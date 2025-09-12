@@ -56,6 +56,15 @@ function InfoPay({ payment }) {
                                 value={payment.Amount || ''} />
                         </div>
                         <br />
+                        <p className="form-label"> <strong> Abono </strong> </p>
+                        <div className="input-group" >
+                            <input type="text"
+                            className={`form-control ${styleInfo['input']}`}
+                            disabled
+                            value={payment.Abono || ''}/> 
+                            
+                        </div>
+                        <br/>
 
                         <p className="form-label"><strong>Nota:</strong></p>
                         <div className="input-group">
