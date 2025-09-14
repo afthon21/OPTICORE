@@ -9,6 +9,7 @@ export const createPayment = async (req, res) => {
         Client,
         Method,
         Amount,
+        Abono,
         Note
     } = req.body;
 
@@ -33,6 +34,7 @@ export const createPayment = async (req, res) => {
             Client,
             Method,
             Amount,
+            Abono,
             Note,
             Admin
         });
@@ -90,6 +92,7 @@ export const createPaymentById = async (req, res) => {
         CreateDate,
         Method,
         Amount,
+        Abono,
         Note
     } = req.body;
 
@@ -115,6 +118,7 @@ export const createPaymentById = async (req, res) => {
             Client: clientExist._id,
             Method,
             Amount,
+            Abono,
             Note,
             Admin
         });
@@ -169,6 +173,7 @@ export const editPayment = async (req, res) => {
             CreateDate: (value) => { UpdateQuery['CreateDate'] = value },
             Method: (value) => { UpdateQuery['Method'] = value },
             Amount: (value) => { UpdateQuery['Amount'] = value },
+            Abono: (value) => {UpdateQuery['Abono'] = value },
             Note: (value) => { UpdateQuery['Note'] = value },
             Status: (value) => { UpdateQuery['Status']=value}
         };
