@@ -35,7 +35,17 @@ const platforms = [
     price: 45,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Prime_Video.png/160px-Prime_Video.png",
   },
-];
+  {
+    name: "Spotify",
+    price: 30,
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/2024_Spotify_Logo.svg/160px-2024_Spotify_Logo.svg.png",
+  },
+  {
+    name: "Roku",
+    price: 25,
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Roku_logo.svg/500px-Roku_logo.svg.png"
+  },
+]; 
 
 const whatsappLogo = "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
 
@@ -260,9 +270,12 @@ export default function Card() {
               marginBottom: 50,
               maxWidth: 900,
               width: "100%",
+              overflow: "visible",
+              minHeight: 120,
             }}
           >
             {platforms.map((p) => {
+              console.log("Renderizando:", p.name);
               const selected = selectedPlatforms.includes(p.name);
               return (
                 <button
