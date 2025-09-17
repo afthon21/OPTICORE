@@ -217,20 +217,6 @@ function CardCreatePayment({ clients = [] }) {
                             value={formValues.Amount}
                             placeholder='...' />
                     </div>
-
-                    <label className="form-label">Abono</label>
-                    <div className="input-group d-flex">
-                        <span className="input-group-text">$</span>
-                        <input 
-                        type="number"
-                        className={`form-control ${styleCreate['input']}`}
-                        onChange={handleChangue}
-                        name="Abono"
-                        value={formValues.Abono}
-                        placeholder='...'/>
-                    </div>
-
-                    
                     {formErrors.Amount && <p className={styleCreate['error']}>{formErrors.Amount}</p>}
                     <br />
 
