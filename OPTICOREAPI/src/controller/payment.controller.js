@@ -210,3 +210,22 @@ export const deletePayment = async (req, res) => {
         return res.status(500).json({ message: 'Server Error!' });
     }
 }
+
+//Archivar pagos
+export const archivePayments = async (req, res) => {
+    const id=req.params.id;
+    try {
+        const idPayment=await payment.findById(id);
+           if (!idPayment) {
+            return res.status(404).json({ message: 'Payment does not exist' });
+        }
+
+        idPayment.Archived = true;
+        await idPayment.save();
+
+        return res.status(200).json({ message: 'Payment archived successfully' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error archiving payment' });
+    }
+}
