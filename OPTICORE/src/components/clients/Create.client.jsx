@@ -6,6 +6,7 @@ import { cleanData } from '../fragments/js/cleanData.js';
 import { getDate } from '../fragments/js/getDate.js';
 import ApiRequest from '../hooks/apiRequest.jsx';
 import ModalGoogleMap from './Modal.map.jsx';
+import localidadesData from '../../assets/localidades.json';
 
 function CreateClient() {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
@@ -21,13 +22,15 @@ function CreateClient() {
         ZIP: '',
         Address: '',
         Cologne: '',
-        Locality: '',
         OutNumber: '',
         InNumber: ''
     });
     const [formErrors, setFormErrors] = useState({});
     const [center, setCenter] = useState({ lat: 0, lng: 0 });
-    const [marker,setMarker] = useState({ lat: 0, lng: 0});
+    const [marker, setMarker] = useState({ lat: 0, lng: 0 });
+    const [selectedState, setSelectedState] = useState('');
+    const [selectedMunicipio, setSelectedMunicipio] = useState('');
+    const [selectedColonia, setSelectedColonia] = useState('');
     const data = {
         Name: {
             FirstName: formValues.FirstName,
@@ -37,7 +40,11 @@ function CreateClient() {
             FatherLastName: formValues.FatherLastName,
             MotherLastName: formValues.MotherLastName
         },
-        PhoneNumber: formValues.PhoneNumber,
+        PhoneNumber: Array.isArray(formValues.PhoneNumber)
+            ? formValues.PhoneNumber.map(num => Number(num))
+            : formValues.PhoneNumber
+                ? [Number(formValues.PhoneNumber)]
+                : [],
         Email: formValues.Email,
         Location: {
             State: formValues.State,
@@ -45,13 +52,22 @@ function CreateClient() {
             ZIP: formValues.ZIP,
             Address: formValues.Address,
             Cologne: formValues.Cologne,
-            Locality: formValues.Locality,
             OutNumber: formValues.OutNumber,
             InNumber: formValues.InNumber,
             Latitude: marker.lat,
             Length: marker.lng
         }
     }
+
+    const estados = [...new Set(localidadesData.map(loc => loc.estado))];
+    const municipios = localidadesData
+        .filter(loc => loc.estado === selectedState)
+        .map(loc => loc.municipio);
+    const municipiosUnicos = [...new Set(municipios)].sort((a, b) => a.localeCompare(b));
+    const colonias = localidadesData
+        .filter(loc => loc.estado === selectedState && loc.municipio === selectedMunicipio)
+        .map(loc => loc.Colonia);
+    const coloniasUnicas = [...new Set(colonias)].sort((a, b) => a.localeCompare(b));
 
     const handleClear = () => {
         setFormValues({
@@ -66,12 +82,11 @@ function CreateClient() {
             ZIP: '',
             Address: '',
             Cologne: '',
-            Locality: '',
             OutNumber: '',
             InNumber: ''
         });
-        setCenter({ lat: 0, lng: 0});
-        setMarker({ lat: 0, lng: 0});
+        setCenter({ lat: 0, lng: 0 });
+        setMarker({ lat: 0, lng: 0 });
     }
 
     const handleChangue = (e) => {
@@ -88,6 +103,20 @@ function CreateClient() {
             [name]: newValue
         }));
 
+        if (name === 'ZIP') {
+            const match = localidadesData.find(loc => loc.CP === value);
+            if (match && !formValues.State && !formValues.Municipality) {
+                setSelectedState(match.estado);
+                setSelectedMunicipio(match.municipio);
+                setFormValues(prev => ({
+                    ...prev,
+                    State: match.estado,
+                    Municipality: match.municipio,
+                    ZIP: value
+                }));
+                return;
+            }
+        }
     };
 
     const validators = () => {
@@ -96,8 +125,7 @@ function CreateClient() {
         // Campos requeridos
         const requiredFields = [
             'FirstName', 'FatherLastName', 'MotherLastName', 'PhoneNumber',
-            'Email', 'State', 'Municipality', 'ZIP', 'Address', 'Cologne',
-            'Locality', 'OutNumber'
+            'Email', 'State', 'Municipality', 'ZIP', 'Address', 'Cologne', 'OutNumber'
         ];
 
         requiredFields.forEach(field => {
@@ -144,50 +172,80 @@ function CreateClient() {
     }
 
     const handleSubmit = async (e) => {
+        // Mostrar el objeto que se enviará al backend
+        const previewData = {
+            ...data,
+            Location: {
+                ...data.Location,
+                State: selectedState,
+                Municipality: selectedMunicipio,
+                Cologne: selectedColonia
+            }
+        };
+        console.log('Datos enviados al backend:', JSON.stringify(previewData, null, 2));
         e.preventDefault();
 
-        if (!validators()) {
-            setTimeout(() => {
-                setFormErrors({})
-            }, 1200);
-            return;
-        }
+        // Sincronizar selects con formValues antes de enviar
+        setFormValues(prev => ({
+            ...prev,
+            State: selectedState,
+            Municipality: selectedMunicipio,
+            Cologne: selectedColonia
+        }));
 
-        const cleanedData = cleanData(data);
-        try {
-            const res = await makeRequest('/client/new', 'POST', cleanedData);
-            Swal.fire({
-                icon: 'success',
-                title: 'Completado',
-                text: res.message,
-                toast: true,
-                position: 'top',
-                timer: 1200,
-                timerProgressBar: true,
-                showConfirmButton: false
-            }).then(() => {
-                handleClear();
-            })
+        // Esperar a que se actualice el estado antes de continuar
+        setTimeout(async () => {
+            if (!validators()) {
+                setTimeout(() => {
+                    setFormErrors({})
+                }, 1200);
+                return;
+            }
 
-            if(error){
+            const cleanedData = cleanData({
+                ...data,
+                Location: {
+                    ...data.Location,
+                    State: selectedState,
+                    Municipality: selectedMunicipio,
+                    Cologne: selectedColonia
+                }
+            });
+            try {
+                const res = await makeRequest('/client/new', 'POST', cleanedData);
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: error,
+                    icon: 'success',
+                    title: 'Completado',
+                    text: res?.message || 'Cliente registrado',
                     toast: true,
+                    position: 'top',
                     timer: 1200,
                     timerProgressBar: true,
-                    position: 'top',
-                    showConfirmButton:false
-                });
+                    showConfirmButton: false
+                }).then(() => {
+                    handleClear();
+                })
+
+                if (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error,
+                        toast: true,
+                        timer: 1200,
+                        timerProgressBar: true,
+                        position: 'top',
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                console.log(error);
             }
-        } catch (error) {
-            console.log(error);
-        }
+        }, 0);
 
     }
 
-    const saveMarker = (markerPosition) =>{
+    const saveMarker = (markerPosition) => {
         setMarker(markerPosition);
     }
 
@@ -309,55 +367,66 @@ function CreateClient() {
                                     value={formValues.InNumber} />
                             </div>
                         </div>
-
+                        {/* Estado */}
                         <div className="input-group mb-3 me-5">
                             <span className="input-group-text">Estado</span>
-                            <input type="text"
-                                className={`form-control ${styleCreateCard['input']}`}
-                                onChange={handleChangue}
-                                name="State"
-                                value={formValues.State}
-                                placeholder="estado..." />
+                            <select
+                                className="form-select"
+                                value={selectedState}
+                                onChange={e => {
+                                    setSelectedState(e.target.value);
+                                    setSelectedMunicipio('');
+                                    setFormValues(prev => ({ ...prev, State: e.target.value, Municipality: '', Cologne: '' }));
+                                }}
+                            >
+                                <option value="">Selecciona estado...</option>
+                                {estados.map(estado => (
+                                    <option key={estado} value={estado}>{estado}</option>
+                                ))}
+                            </select>
                         </div>
                         {formErrors.State && <p className={styleCreateCard['error']}>{formErrors.State}</p>}
 
-                        <div className="d-flex justify-content-between">
-                            <div className="input-group mb-3 me-1">
-                                <span className="input-group-text">Colonia</span>
-                                <input type="text"
-                                    className={`form-control ${styleCreateCard['input']}`}
-                                    onChange={handleChangue}
-                                    name="Cologne"
-                                    value={formValues.Cologne}
-                                    placeholder="colonia..." />
-                            </div>
-                            {formErrors.Cologne && <p className={styleCreateCard['error']}>{formErrors.Cologne}</p>}
-
-                            <div className="input-group mb-3 me-1">
-                                <span className="input-group-text">Localidad</span>
-                                <input type="text"
-                                    className={`form-control ${styleCreateCard['input']}`}
-                                    onChange={handleChangue}
-                                    name="Locality"
-                                    value={formValues.Locality}
-                                    placeholder="localidad..." />
-                            </div>
-                            {formErrors.Locality && <p className={styleCreateCard['error']}>{formErrors.Locality}</p>}
-
-                        </div>
-
+                        {/* Municipio */}
                         <div className="d-flex justify-content-between">
                             <div className="input-group mb-3">
                                 <span className="input-group-text">Municipio</span>
-                                <input type="text"
-                                    className={`form-control ${styleCreateCard['input']}`}
-                                    onChange={handleChangue}
-                                    name="Municipality"
-                                    value={formValues.Municipality}
-                                    placeholder="municipio..." />
+                                <select
+                                    className="form-select"
+                                    value={selectedMunicipio}
+                                    onChange={e => {
+                                        setSelectedMunicipio(e.target.value);
+                                        setFormValues(prev => ({ ...prev, Municipality: e.target.value, Cologne: '' }));
+                                    }}
+                                    disabled={!selectedState}
+                                >
+                                    <option value="">Selecciona municipio...</option>
+                                    {municipiosUnicos.map(mun => (
+                                        <option key={mun} value={mun}>{mun}</option>
+                                    ))}
+                                </select>
                             </div>
                             {formErrors.Municipality && <p className={styleCreateCard['error']}>{formErrors.Municipality}</p>}
 
+                            {/* Colonia */}
+                            <div className="input-group mb-3 me-5">
+                                <span className="input-group-text">Colonia</span>
+                                <select
+                                    className="form-select"
+                                    value={selectedColonia}
+                                    onChange={e => {
+                                        setSelectedColonia(e.target.value);
+                                        setFormValues(prev => ({ ...prev, Cologne: e.target.value }));
+                                    }}
+                                >
+                                    <option value="">Selecciona colonia...</option>
+                                    {coloniasUnicas.map(Colonia => (
+                                        <option key={Colonia} value={Colonia}>{Colonia}</option>
+                                    ))}
+                                </select>
+
+                                {formErrors.Cologne && <p className={styleCreateCard['error']}>{formErrors.Cologne}</p>}
+                            </div>
                             <div className="input-group mb-3">
                                 <span className="input-group-text">Código Postal</span>
                                 <input type="text"
@@ -383,7 +452,7 @@ function CreateClient() {
                             <i className="bi bi-geo-alt-fill ms-2"></i>
                         </button>
 
-                        <ModalGoogleMap center={center} handleMarker={saveMarker}/>
+                        <ModalGoogleMap center={center} handleMarker={saveMarker} />
                     </div>
 
                     <div className="d-flex justify-content-end mt-3">

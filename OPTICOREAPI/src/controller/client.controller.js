@@ -30,7 +30,8 @@ export const newClient = async (req, res) => {
             Length
         }
     } = req.body;
-
+    console.log('Petición recibida en /client/new');
+    console.log('Body recibido:', JSON.stringify(req.body, null, 2));
     try {
         const newClient = client({
             Name: {
@@ -56,6 +57,7 @@ export const newClient = async (req, res) => {
                 Length
             }
         });
+
 
         await newClient.save();
         return res.status(201).json({ message: 'Client created' });
