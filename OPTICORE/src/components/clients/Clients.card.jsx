@@ -1,23 +1,28 @@
 import styleCard from './css/clientsCard.module.css';
+import { useRegion } from '../../hooks/RegionContext';
 import styleTable from './css/clientsCard.module.css';
 
 import { useState } from 'react';
 
 function ClientsCard({ clients = [], onSelected }) {
+    const { region } = useRegion();
     const [search, setSearch] = useState('')
 
     const handleInputSearch = (e) => {
         setSearch(e.target.value);
     }
 
+    // Filtrar por nombre y por estado
     const filteredName = clients.filter(client => {
         let clientName = `${client.Name.FirstName} 
         ${client.Name.SecondName || ''} 
         ${client.LastName.FatherLastName}  
         ${client.LastName.MotherLastName}`
             .replace(/\s+/g, ' ').trim();
-
-        return clientName.toLowerCase().includes(search.toLowerCase())
+        // Filtrar por nombre y por estado
+        const matchesName = clientName.toLowerCase().includes(search.toLowerCase());
+        const matchesRegion = client.Location?.State === region;
+        return matchesName && matchesRegion;
     });
 
     return (

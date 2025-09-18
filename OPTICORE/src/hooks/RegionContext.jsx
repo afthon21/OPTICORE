@@ -3,8 +3,8 @@ import React, { createContext, useContext, useState } from 'react';
 const RegionContext = createContext();
 
 export const RegionProvider = ({ children }) => {
-  // EdoMéx por defecto
-  const [region, setRegion] = useState('EdoMéx');
+  // Estado de México por defecto
+  const [region, setRegion] = useState('Estado de México');
 
   return (
     <RegionContext.Provider value={{ region, setRegion }}>
