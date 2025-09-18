@@ -9,6 +9,39 @@ import ModalGoogleMap from './Modal.map.jsx';
 import localidadesData from '../../assets/localidades.json';
 
 function CreateClient() {
+    // Validar CP con estado y municipio seleccionados SOLO en submit
+    const validateCPWithStateMunicipio = (cp, estado, municipio) => {
+        const match = localidadesData.find(loc => loc.CP === cp);
+        if (!match) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Código postal inválido',
+                text: `El código postal ingresado no existe en la base de datos oficial.`,
+                toast: true,
+                position: 'top',
+                timer: 2500,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return false;
+        }
+        if (cp && estado && municipio) {
+            if (match.estado !== estado || match.municipio !== municipio) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Código postal no coincide',
+                    text: `El código postal ingresado no corresponde al estado y municipio seleccionados.`,
+                    toast: true,
+                    position: 'top',
+                    timer: 2500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+                return false;
+            }
+        }
+        return true;
+    };
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
         FirstName: '',
@@ -104,15 +137,33 @@ function CreateClient() {
         }));
 
         if (name === 'ZIP') {
-            const match = localidadesData.find(loc => loc.CP === value);
-            if (match && !formValues.State && !formValues.Municipality) {
+            const match = localidadesData.find(loc => loc.CP === newValue);
+            // Usar selectedState y selectedMunicipio para validar
+            if (match && selectedState && selectedMunicipio) {
+                if (match.estado !== selectedState || match.municipio !== selectedMunicipio) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Código postal no coincide',
+                        text: `El código postal ingresado no corresponde al estado y municipio seleccionados.`,
+                        toast: true,
+                        position: 'top',
+                        timer: 2500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                    setFormValues(prev => ({ ...prev, ZIP: '' }));
+                    return;
+                }
+            }
+            // Si no hay estado/municipio seleccionados, autocompletar como antes
+            if (match && !selectedState && !selectedMunicipio) {
                 setSelectedState(match.estado);
                 setSelectedMunicipio(match.municipio);
                 setFormValues(prev => ({
                     ...prev,
                     State: match.estado,
                     Municipality: match.municipio,
-                    ZIP: value
+                    ZIP: newValue
                 }));
                 return;
             }
@@ -172,18 +223,12 @@ function CreateClient() {
     }
 
     const handleSubmit = async (e) => {
-        // Mostrar el objeto que se enviará al backend
-        const previewData = {
-            ...data,
-            Location: {
-                ...data.Location,
-                State: selectedState,
-                Municipality: selectedMunicipio,
-                Cologne: selectedColonia
-            }
-        };
-        console.log('Datos enviados al backend:', JSON.stringify(previewData, null, 2));
         e.preventDefault();
+
+        // Validar CP con estado y municipio seleccionados SOLO al registrar
+        if (!validateCPWithStateMunicipio(formValues.ZIP, selectedState, selectedMunicipio)) {
+            return;
+        }
 
         // Sincronizar selects con formValues antes de enviar
         setFormValues(prev => ({
@@ -193,7 +238,6 @@ function CreateClient() {
             Cologne: selectedColonia
         }));
 
-        // Esperar a que se actualice el estado antes de continuar
         setTimeout(async () => {
             if (!validators()) {
                 setTimeout(() => {
@@ -377,6 +421,8 @@ function CreateClient() {
                                     setSelectedState(e.target.value);
                                     setSelectedMunicipio('');
                                     setFormValues(prev => ({ ...prev, State: e.target.value, Municipality: '', Cologne: '' }));
+                                    // Validar CP con nuevo estado
+                                    validateCPWithStateMunicipio(formValues.ZIP, e.target.value, selectedMunicipio);
                                 }}
                             >
                                 <option value="">Selecciona estado...</option>
@@ -397,6 +443,8 @@ function CreateClient() {
                                     onChange={e => {
                                         setSelectedMunicipio(e.target.value);
                                         setFormValues(prev => ({ ...prev, Municipality: e.target.value, Cologne: '' }));
+                                        // Validar CP con nuevo municipio
+                                        validateCPWithStateMunicipio(formValues.ZIP, selectedState, e.target.value);
                                     }}
                                     disabled={!selectedState}
                                 >
