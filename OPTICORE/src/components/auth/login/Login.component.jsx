@@ -93,11 +93,11 @@ function LoginComponent() {
         try {
             const res = await makeRequest('/auth/login', 'POST', data, { requiresAuth: false });
 
-            if (error) {
+            if (error || !res || !res.adminId) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error en el servidor!',
-                    text: error || 'Error desconocido',
+                    text: error || res?.message || 'Error desconocido',
                     timer: 1200,
                     showConfirmButton: false,
                     timerProgressBar: true,
@@ -105,7 +105,7 @@ function LoginComponent() {
                     position: 'top',
                     background: '#e5e8e8'
                 });
-
+                return;
             }
 
             // Guarda el token o datos importantes en el almacenamiento si es necesario
