@@ -1,9 +1,11 @@
 import styleCard from './css/paymentCard.module.css';
 import styleTable from './css/paymentCard.module.css';
+import { useRegion } from '../../hooks/RegionContext';
 
 import { useState } from 'react';
 
 function PaymentCard({ payments = [], onSelected }) {
+    const { region } = useRegion();
     const [search, setSearch] = useState('');
     
     const [sortField, setSortField] = useState(null);
@@ -24,6 +26,10 @@ function PaymentCard({ payments = [], onSelected }) {
     };
 
     const filteredData = payments.filter(payment => {
+        // Filtrar por región primero
+        const matchesRegion = payment.Client?.Location?.State === region;
+        if (!matchesRegion) return false;
+
         const folio = payment.Folio?.toString().toLowerCase() || '';
         const method = payment.Method?.toString().toLowerCase() || '';
         const amount =(payment.Amount ?? '').toString().toLowerCase();
