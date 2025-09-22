@@ -99,8 +99,8 @@ function ClientData({ client, onUpdateClient }) {
                     <input type="text" className={`form-control ${styleData['input']}`} value={currentClient.Location.Municipality || ''} disabled />
                 </div>
                 <div className="input-group mb-4 ms-4">
-                    <span className={`input-group-text ${styleData['item']}`}>Localidad:</span>
-                    <input type="text" className={`form-control ${styleData['input']}`} value={currentClient.Location.Locality || ''} disabled />
+                    <span className={`input-group-text ${styleData['item']}`}>Colonia:</span>
+                    <input type="text" className={`form-control ${styleData['input']}`} value={currentClient.Location.Cologne || ''} disabled />
                 </div>
             </div>
 
@@ -112,7 +112,7 @@ function ClientData({ client, onUpdateClient }) {
                         setCurrentClient(updatedClient);
                         setShowEditModal(false);
                         if (onUpdateClient) onUpdateClient(updatedClient);
-                         window.location.reload();
+                        window.location.reload();
                     }}
                 />
             )}

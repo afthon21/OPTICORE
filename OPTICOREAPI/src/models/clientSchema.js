@@ -54,10 +54,6 @@ const clientSchema = new mongoose.Schema({
             type: String,
             require: true
         },
-        Locality: {
-            type: String,
-            require: true
-        },
         OutNumber: {
             type: [Number, String],
             require: true
