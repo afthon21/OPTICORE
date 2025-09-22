@@ -152,10 +152,10 @@ function HomeComponent() {
         .sort((a, b) => new Date(b.CreateDate) - new Date(a.CreateDate));
 
     return (
-        <div className="container-fluid mt-3" style={{ marginLeft: '70px' }}>
+        <div className="content mt-3" style={{ marginLeft: '70px' }}>
             {/* Primera fila */}
-            <div className="row mb-2" style={{ minHeight: '250px' }}>
-                <div className="col-3 border p-2 d-flex flex-column" style={{ background: boxColors.clientesNuevos }}>
+            <div className="dashboard-row" style={{ minHeight: '250px' }}>
+                <div className="dashboard-card" style={{ background: boxColors.clientesNuevos }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="border-bottom">Clientes Nuevos</h5>
                     </div>
@@ -215,7 +215,7 @@ function HomeComponent() {
                         )}
                     </div>
                 </div>
-                <div className="col-3 border p-2 d-flex flex-column" style={{ background: boxColors.admins }}>
+                <div className="dashboard-card" style={{ background: boxColors.admins }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="border-bottom">Administradores Activos</h5>
                     </div>
@@ -238,7 +238,7 @@ function HomeComponent() {
                         )}
                     </div>
                 </div>
-                <div className="col-4 border p-2 d-flex flex-column" style={{ background: boxColors.red }}>
+                <div className="dashboard-card" style={{ background: boxColors.red, flex: '2 1 400px' }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Estado de Red</h6>
                     </div>
@@ -246,7 +246,7 @@ function HomeComponent() {
                         <EstadoRedResumen />
                     </div>
                 </div>
-                <div className="col-2 border p-2 d-flex flex-column" style={{ background: boxColors.errores }}>
+                <div className="dashboard-card" style={{ background: boxColors.errores, flex: '1 1 200px' }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="border-bottom">Registro de Errores</h5>
                     </div>
@@ -255,8 +255,8 @@ function HomeComponent() {
             </div>
 
             {/* Segunda fila */}
-            <div className="row mb-2" style={{ minHeight: '250px' }}>
-                <div className="col-3 border p-2 d-flex flex-column" style={{ background: boxColors.radio }}>
+            <div className="dashboard-row" style={{ minHeight: '250px' }}>
+                <div className="dashboard-card" style={{ background: boxColors.radio }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Radio Frecuencia - Paquetes</h6>
                     </div>
@@ -265,7 +265,7 @@ function HomeComponent() {
                         {/* Aquí va tu gráfica circular */}
                     </div>
                 </div>
-                <div className="col-3 border p-2 d-flex flex-column" style={{ background: boxColors.fibra }}>
+                <div className="dashboard-card" style={{ background: boxColors.fibra }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Fibra Optica - Paquetes</h6>
                     </div>
@@ -274,7 +274,7 @@ function HomeComponent() {
                         {/* Aquí va tu gráfica circular */}
                     </div>
                 </div>
-                <div className="col-3 border p-2 d-flex flex-column" style={{ background: boxColors.tickets }}>
+                <div className="dashboard-card dashboard-table" style={{ background: boxColors.tickets }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Todos los Tickets</h6>
                     </div>
@@ -326,7 +326,7 @@ function HomeComponent() {
                         )}
                     </div>
                 </div>
-                <div className="col-3 border p-2 d-flex flex-column" style={{ background: boxColors.pendientes }}>
+                <div className="dashboard-card dashboard-table" style={{ background: boxColors.pendientes }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Tickets Pendientes</h6>
                     </div>
