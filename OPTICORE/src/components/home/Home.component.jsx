@@ -66,6 +66,7 @@ import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import ApiRequest from '../hooks/apiRequest'; //importacion de la API
 import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
+import ErrorDisplay from './ErrorDisplay.jsx';
 
 function HomeComponent() {
     const [tickets, setTickets] = useState([]);
@@ -250,7 +251,7 @@ function HomeComponent() {
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="border-bottom">Registro de Errores</h5>
                     </div>
-                    <p className="flex-grow-1">(Registro de errores o alertas registradas)</p>
+                    <ErrorDisplay />
                 </div>
             </div>
 
