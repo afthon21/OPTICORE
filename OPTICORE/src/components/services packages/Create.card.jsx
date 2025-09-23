@@ -162,7 +162,6 @@ export default function Card({ onPackageCreated }) {
         maxWidth: "100vw",
         minHeight: "100vh",
         margin: "0 auto",
-        backgroundColor: "#fafafa",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

@@ -26,6 +26,19 @@ export function NavbarFragmentAll() {
                 </p>
             </div>
 
+            {/* Selector de Estado */}
+            <div className="mb-3">
+                <label className="form-label fw-bold">Región:</label>
+                <select
+                    className="form-select"
+                    value={region}
+                    onChange={e => setRegion(e.target.value)}
+                >
+                    <option value="Estado de México">Estado de México</option>
+                    <option value="Puebla">Puebla</option>
+                </select>
+            </div>
+
             <ul className="nav flex-column mb-auto">
                 
                 <li className="nav-item item">
@@ -231,35 +244,7 @@ export function NavbarFragmentAll() {
                         </li>
                     </ul>
                 </li>
-                <li className="nav-item item">
-                    <a
-                        className="nav-link d-flex align-items-center item-link"
-                        role="button"
-                    >
-                        <i className="bi bi-map me-2"></i>
-                        <span className="item-title">Mercado</span>
-                    </a>
-                    <ul className="list-unstyled ps-3 sub-menu">
-                        <li className="ms-4">
-                            <a
-                                className={`nav-link${region === 'EdoMéx' ? ' active' : ''}`}
-                                onClick={() => setRegion('EdoMéx')}
-                                role="button"
-                            >
-                                EdoMéx
-                            </a>
-                        </li>
-                        <li className="ms-4">
-                            <a
-                                className={`nav-link${region === 'Puebla' ? ' active' : ''}`}
-                                onClick={() => setRegion('Puebla')}
-                                role="button"
-                            >
-                                Puebla
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                
             </ul>
 
             <div className="mt-auto border-div">
