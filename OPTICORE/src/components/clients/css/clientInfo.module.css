@@ -3,10 +3,12 @@
 
 /** card */
 .card-container {
-    height: 10rem;
-    width: 40rem;
+    min-height: 10rem;
+    width: 100%;
+    max-width: 50rem;
     background: transparent;
-    border: 1px solid #ededed
+    border: 1px solid #ededed;
+    box-sizing: border-box;
 }
 
 .title {
