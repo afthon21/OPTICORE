@@ -19,10 +19,10 @@ function CreateTicket() {
 
     const handleLoadTechnicians = async () => {
         try {
-            const result = await makeRequest('/technician/all');
-            setTechnicians(result);
+            const result = await makeRequest('/technician/all', 'GET', null, { requiresAuth: false });
+            setTechnicians(result || []);
         } catch (error) {
-            console.log(error);
+            console.error('Error al cargar técnicos:', error);
         }
     };
 
@@ -32,7 +32,7 @@ function CreateTicket() {
     }, []);
 
     if (loading) return <LoadFragment />
-    if (error) return <p>{error}</p>
+    if (error) return <div className="alert alert-danger">Error: {error}</div>
 
     return (
         <div className="container-fluid d-flex justify-content-center mt-4">

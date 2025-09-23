@@ -96,7 +96,7 @@ export function CardCreateTicket({ clients = [], technician = [] }) {
     setIsTechOpen(true);
 };
 const handleTechOptionClick = (option) => {
-    const techName = `${option.nombre} ${option.apellidoP || ''} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim();
+    const techName = `${option.nombre} ${option.apellidoP || ''}`.replace(/\s+/g, ' ').trim();
     // setSelectedTech(techName); // <-- Elimina esta línea
     setFormValues((prev) => ({ ...prev, tecnico: techName }));
     setSearchTech(techName);
@@ -104,8 +104,11 @@ const handleTechOptionClick = (option) => {
 };
 
     const filteredTechOptions = technician.filter((option) => {
-    const techName = `${option.nombre} ${option.apellidoP || ''} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim();
-    return techName.toLowerCase().includes(searchTech.toLowerCase());
+        if (!option.nombre) return false; // Validar que existe el nombre
+        const techName = `${option.nombre} ${option.apellidoP || ''}`.replace(/\s+/g, ' ').trim();
+        // Si searchTech está vacío, mostrar todos los técnicos
+        if (!searchTech || searchTech.trim() === '') return true;
+        return techName.toLowerCase().includes(searchTech.toLowerCase());
     });
 
     const validators = () => {

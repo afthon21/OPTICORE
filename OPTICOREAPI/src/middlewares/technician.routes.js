@@ -5,7 +5,7 @@ import { protectRoute, getProfile } from "../controller/auth.controller.js";
 const technicianRoutes = Router();
 
 technicianRoutes.post('/new', protectRoute, getProfile, newTechnician);
-technicianRoutes.get('/all', protectRoute, getProfile, viewAllTechnicians);
+technicianRoutes.get('/all', viewAllTechnicians);
 technicianRoutes.get('/view/:id', protectRoute, getProfile, viewTechnicianById);
 technicianRoutes.post('/edit/:id', protectRoute, getProfile, editTechnician);
 technicianRoutes.delete('/delete/:id', protectRoute, getProfile, deleteTechnician);
