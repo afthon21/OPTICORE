@@ -344,7 +344,7 @@ function HomeComponent() {
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Estado de Red</h6>
                     </div>
-                    <div className="flex-grow-1">
+                    <div className="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
                         <EstadoRedResumen />
                     </div>
                 </div>

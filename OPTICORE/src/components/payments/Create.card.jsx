@@ -1,4 +1,5 @@
 import styleCreate from './css/createCard.module.css';
+import { useRegion } from '../../hooks/RegionContext';
 
 import { useEffect, useState } from 'react';
 import ApiRequest from '../hooks/apiRequest.jsx';
@@ -10,6 +11,7 @@ import { getDate } from '../fragments/js/getDate.js';
 import { DropdownClients } from '../fragments/Dropdown.clients.jsx';
 
 function CardCreatePayment({ clients = [] }) {
+    const { region } = useRegion();
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -74,8 +76,12 @@ function CardCreatePayment({ clients = [] }) {
         setIsOpen(false);
     };
 
-    // Filtra las opciones usando el nombre completo
+    // Filtra las opciones usando el nombre completo y la región
     const filteredOptions = clients.filter(option => {
+        // Filtrar por región primero
+        const matchesRegion = option.Location?.State === region;
+        if (!matchesRegion) return false;
+
         const clientName = `${option.Name.FirstName} 
                 ${option.Name.SecondName || ''} 
                 ${option.LastName.FatherLastName} 
