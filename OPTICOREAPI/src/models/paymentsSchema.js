@@ -37,6 +37,10 @@ const paymentSchema = new mongoose.Schema({
     Folio:{
         type: String,
         require: true
+    },
+    Archived: {
+        type: Boolean,
+        default: false
     }
 });
 

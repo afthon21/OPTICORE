@@ -165,6 +165,22 @@ function CreatePay({ client, onPaymentCreated }) {
                                 <div className="text-danger mt-1" style={{ fontSize: '0.9em' }}>{formErrors.Amount}</div>
                             )}
                             <br />
+                            <label className="form-label">Abono</label> 
+                            <div className="input-group">
+                                <span className="input-group-text">$</span>
+                                <input
+                                    type="number"
+                                    className={`form-control ${formErrors.Abono ? 'is-invalid' : ''}`}
+                                    name="Abono"
+                                    value={formValues.Abono}
+                                    onChange={handleChange}
+                                    placeholder="..."
+                                />
+                            </div>
+                            {formErrors.Abono && (
+                                <div className="text-danger mt-1" style={{fontSize: '0.9em' }}>{formErrors.Abono}</div>
+                            )}
+                           <br/>
 
                             {/* Nota */}
                             <label className="form-label">Nota</label>

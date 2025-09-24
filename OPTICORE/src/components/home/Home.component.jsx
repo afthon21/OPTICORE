@@ -13,9 +13,14 @@
                 <b>Descripción:</b> ${ticket.Description || 'Sin descripción'}<br/>
                 <b>Estado:</b> ${ticket.Status || 'Sin estado'}<br/>
                 <b>Fecha de creación:</b> ${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}<br/>
+<<<<<<< HEAD
                 <b>Cliente:</b> ${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}<br/>
                 <b>Técnico:</b> ${ticket.tecnico || 'Sin técnico'}<br/>
                 <b>Prioridad: </b> ${ticket.Priority || 'Sin prioridad'}<br/>
+=======
+                <b>Cliente:</b> ${ticket.ClientName || 'Sin cliente'}<br/>
+                <b>Técnico:</b> ${ticket.TechnicianName || 'Sin técnico'}<br/>
+>>>>>>> 328e915e317b813ad3412c42d210b8e8b60a8758
             `,
             icon: undefined,
             showClass: {
@@ -266,6 +271,7 @@ function HomeComponent() {
                         ) : (
                             <ul className="list-group list-group-flush">
                                 {(showAllTickets ? tickets : tickets.slice(0, 8)).map(ticket => (
+<<<<<<< HEAD
                                     <li
                                         key={ticket._id}
                                         className="list-group-item py-1 px-2"
@@ -280,6 +286,9 @@ function HomeComponent() {
                                         title="Ver detalles del ticket"
                                     >
 
+=======
+                                    <li key={ticket._id} className="list-group-item py-1 px-2" style={{cursor: 'pointer'}} onClick={() => handleShowTicketDetails(ticket)} title="Ver detalles del ticket">
+>>>>>>> 328e915e317b813ad3412c42d210b8e8b60a8758
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
@@ -338,6 +347,7 @@ function HomeComponent() {
                         ) : (
                             <ul className="list-group list-group-flush">
                                 {pendientes.slice(0, 8).map(ticket => (
+<<<<<<< HEAD
                                     <li key={ticket._id} 
                                     className="list-group-item py-1 px-2" 
                                     style={{
@@ -349,6 +359,9 @@ function HomeComponent() {
                                         cursor: 'pointer' }}
                                     onClick={() => handleShowTicketDetails(ticket)} 
                                     title="Ver detalles del ticket pendiente">
+=======
+                                    <li key={ticket._id} className="list-group-item py-1 px-2" style={{cursor: 'pointer'}} onClick={() => handleShowTicketDetails(ticket)} title="Ver detalles del ticket">
+>>>>>>> 328e915e317b813ad3412c42d210b8e8b60a8758
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
