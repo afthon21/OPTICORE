@@ -1,55 +1,36 @@
     // Función para mostrar detalles del cliente en un modal
-        const handleShowClientDetails = (client) => {
-            // Mostrar la dirección exactamente como la ingresó el usuario
-            let direccion = 'Sin dirección';
-            // Buscar dirección en Address o en Location
-            if (client.Address) {
-                if (typeof client.Address === 'string') {
-                    direccion = client.Address;
-                } else if (typeof client.Address === 'object') {
-                    const municipio = client.Address.City || client.Address.Municipio || '';
-                    const calle = client.Address.Street || '';
-                    const cp = client.Address.PostalCode || client.Address.CP || '';
-                    direccion = [municipio, calle, cp].filter(Boolean).join(', ');
-                }
-            } else if (client.Location) {
-                // Algunos clientes pueden tener la dirección en Location
-                const municipio = client.Location.Municipality || '';
-                const calle = client.Location.Address || '';
-                const cp = client.Location.ZIP || '';
-                direccion = [municipio, calle, cp].filter(Boolean).join(', ');
+    const handleShowClientDetails = (client) => {
+        // ...existing code...
+    };
+
+    // Función para mostrar detalles del ticket en un modal
+    const handleShowTicketDetails = (ticket) => {
+        Swal.fire({
+            title: `<div style='display:flex;justify-content:center;align-items:center;'><i class="bi bi-ticket-perforated-fill text-primary" style="font-size:2.5rem;"></i></div>` +
+                `<div style="margin-top:10px;font-size:1.2rem;font-weight:600;">Folio: ${ticket.Folio || 'Sin folio'}</div>`,
+            html: `
+                <b>Asunto:</b> ${ticket.Issue || 'Sin asunto'}<br/>
+                <b>Descripción:</b> ${ticket.Description || 'Sin descripción'}<br/>
+                <b>Estado:</b> ${ticket.Status || 'Sin estado'}<br/>
+                <b>Fecha de creación:</b> ${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}<br/>
+                <b>Cliente:</b> ${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}<br/>
+                <b>Técnico:</b> ${ticket.tecnico || 'Sin técnico'}<br/>
+                <b>Prioridad: </b> ${ticket.Priority || 'Sin prioridad'}<br/>
+            `,
+            icon: undefined,
+            showClass: {
+                popup: 'swal2-show'
+            },
+            hideClass: {
+                popup: 'swal2-hide'
+            },
+            confirmButtonText: 'Cerrar',
+            width: 350,
+            customClass: {
+                popup: 'swal2-border-radius swal2-small-popup'
             }
-            if (!direccion || direccion === ', , ') direccion = 'Sin dirección';
-            Swal.fire({
-                title: `<div style='display:flex;justify-content:center;align-items:center;'><i class="bi bi-person-plus-fill text-success" style="font-size:2.5rem;"></i></div>` +
-                    '<div style="margin-top:10px;font-size:1.5rem;font-weight:600;">' +
-                    [
-                        client.Name.FirstName,
-                        client.Name.SecondName,
-                        client.LastName.FatherLastName,
-                        client.LastName.MotherLastName
-                    ].filter(Boolean).join(' ').toUpperCase() +
-                    '</div>',
-                html: `
-                    <b>Email:</b> ${client.Email || 'Sin email'}<br/>
-                    <b>Tel:</b> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}<br/>
-                    <b>Registrado:</b> ${client.CreateDate ? new Date(client.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}<br/>
-                    <b>Dirección:</b> ${direccion}<br/>
-                `,
-                icon: undefined,
-                showClass: {
-                    popup: 'swal2-show'
-                },
-                hideClass: {
-                    popup: 'swal2-hide'
-                },
-                confirmButtonText: 'Cerrar',
-                width: 350,
-                customClass: {
-                    popup: 'swal2-border-radius swal2-small-popup'
-                }
-            });
-        };
+        });
+    };
 // SweetAlert2 popup size custom CSS
 const swalSmallStyle = document.createElement('style');
 swalSmallStyle.innerHTML = `
@@ -288,9 +269,17 @@ function HomeComponent() {
                                     <li
                                         key={ticket._id}
                                         className="list-group-item py-1 px-2"
-                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                                        style={{ 
+                                            background: '#fff', 
+                                            border: '1px solid #e0e0e0', 
+                                            borderRadius: '6px', 
+                                            marginBottom: '4px', 
+                                            boxShadow: '0 1px 2px rgba(0,0,0,0.04)', 
+                                            cursor: 'pointer' }}
+                                        onClick={() => handleShowTicketDetails(ticket)}
                                         title="Ver detalles del ticket"
                                     >
+
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
@@ -300,10 +289,14 @@ function HomeComponent() {
                                                 <br />
                                                 <small className="text-muted">{ticket.Issue}</small>
                                             </div>
-                                            <span className={`badge ${ticket.Status === 'Resuelto' ? 'bg-success' :
-                                                    ticket.Status === 'En espera' ? 'bg-warning text-dark' :
-                                                        ticket.Status === 'En proceso' ? 'bg-info text-dark' :
-                                                            'bg-secondary'
+                                            <span className={`badge ${
+                                            ticket.Status === 'Resuelto' 
+                                            ? 'bg-success' 
+                                            :ticket.Status === 'En espera' 
+                                            ? 'bg-warning text-dark' 
+                                            :ticket.Status === 'En proceso' 
+                                            ? 'bg-info text-dark' 
+                                            :'bg-secondary'
                                                 }`}>
                                                 {ticket.Status}
                                             </span>
@@ -345,12 +338,17 @@ function HomeComponent() {
                         ) : (
                             <ul className="list-group list-group-flush">
                                 {pendientes.slice(0, 8).map(ticket => (
-                                    <li
-                                        key={ticket._id}
-                                        className="list-group-item py-1 px-2"
-                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
-                                        title="Ver detalles del ticket pendiente"
-                                    >
+                                    <li key={ticket._id} 
+                                    className="list-group-item py-1 px-2" 
+                                    style={{
+                                        background: '#fff', 
+                                        border: '1px solid #e0e0e0', 
+                                        borderRadius: '6px', 
+                                        marginBottom: '4px', 
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)', 
+                                        cursor: 'pointer' }}
+                                    onClick={() => handleShowTicketDetails(ticket)} 
+                                    title="Ver detalles del ticket pendiente">
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
