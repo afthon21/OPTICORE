@@ -66,6 +66,7 @@ import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import ApiRequest from '../hooks/apiRequest'; //importacion de la API
 import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
+import ErrorDisplay from './ErrorDisplay.jsx';
 
 function HomeComponent() {
     const [tickets, setTickets] = useState([]);
@@ -250,7 +251,7 @@ function HomeComponent() {
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="border-bottom">Registro de Errores</h5>
                     </div>
-                    <p className="flex-grow-1">(Registro de errores o alertas registradas)</p>
+                    <ErrorDisplay />
                 </div>
             </div>
 
@@ -284,10 +285,18 @@ function HomeComponent() {
                         ) : (
                             <ul className="list-group list-group-flush">
                                 {(showAllTickets ? tickets : tickets.slice(0, 8)).map(ticket => (
-                                    <li key={ticket._id} className="list-group-item py-1 px-2">
+                                    <li
+                                        key={ticket._id}
+                                        className="list-group-item py-1 px-2"
+                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                                        title="Ver detalles del ticket"
+                                    >
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
-                                                <strong>{ticket.Folio}</strong>
+                                                <strong>
+                                                    <i className="bi bi-ticket-detailed text-primary me-1"></i>
+                                                    {ticket.Folio}
+                                                </strong>
                                                 <br />
                                                 <small className="text-muted">{ticket.Issue}</small>
                                             </div>
@@ -336,10 +345,18 @@ function HomeComponent() {
                         ) : (
                             <ul className="list-group list-group-flush">
                                 {pendientes.slice(0, 8).map(ticket => (
-                                    <li key={ticket._id} className="list-group-item py-1 px-2">
+                                    <li
+                                        key={ticket._id}
+                                        className="list-group-item py-1 px-2"
+                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                                        title="Ver detalles del ticket pendiente"
+                                    >
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
-                                                <strong>{ticket.Folio}</strong>
+                                                <strong>
+                                                    <i className="bi bi-hourglass-split text-warning me-1"></i>
+                                                    {ticket.Folio}
+                                                </strong>
                                                 <br />
                                                 <small className="text-muted">{ticket.Issue}</small>
                                             </div>

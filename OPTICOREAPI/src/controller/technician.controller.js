@@ -31,7 +31,7 @@ export const viewAllTechnicians = async (req, res) => {
         const allTechnicians = await technician.find();
         return res.status(200).json(allTechnicians);
     } catch (error) {
-        console.log(error);
+        console.log('Error finding technicians:', error);
         return res.status(500).json({ message: 'Error finding technicians' });
     }
 }

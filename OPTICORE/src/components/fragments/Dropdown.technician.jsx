@@ -15,7 +15,7 @@ export function DropdownTechnicians({ filteredOptions, onOptionClick }) {
     return (
         <ul className={`list-group ${styleDrop['drop-list']}`}>
             {filteredOptions.map((option, index) => {
-                const fullName = `${option.nombre} ${option.apellidoP || ''} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim();
+                const fullName = `${option.nombre} ${option.apellidoP || ''}`.replace(/\s+/g, ' ').trim();
                 return (
                     <li
                         className="list-group-item"
