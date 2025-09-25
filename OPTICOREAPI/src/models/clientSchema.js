@@ -1,6 +1,6 @@
 import mongoose, { model } from "mongoose";
 
-const clientSchema = new mongoose.Schema ({
+const clientSchema = new mongoose.Schema({
     CreateDate: {
         type: Date,
         default: Date.now
@@ -16,14 +16,14 @@ const clientSchema = new mongoose.Schema ({
         }
     },
     LastName: {
-       FatherLastName: {
-        type: String,
-        require: true
-       },
-       MotherLastName: {
-        type: String,
-        require: true
-       }
+        FatherLastName: {
+            type: String,
+            require: true
+        },
+        MotherLastName: {
+            type: String,
+            require: true
+        }
     },
     PhoneNumber: {
         type: [Number],
@@ -54,6 +54,10 @@ const clientSchema = new mongoose.Schema ({
             type: String,
             require: true
         },
+        Locality: {
+            type: String,
+            require: true
+        },
         OutNumber: {
             type: [Number, String],
             require: true
@@ -75,4 +79,4 @@ const clientSchema = new mongoose.Schema ({
     }
 });
 
-export default model('client',clientSchema);
+export default model('client', clientSchema);

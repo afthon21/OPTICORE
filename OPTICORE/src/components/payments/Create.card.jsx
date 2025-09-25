@@ -235,7 +235,7 @@ function CardCreatePayment({ clients = [] }) {
                         value={formValues.Abono}
                         placeholder='...'/>
                     </div>
-
+                    
                     {formErrors.Amount && <p className={styleCreate['error']}>{formErrors.Amount}</p>}
                     <br />
 
