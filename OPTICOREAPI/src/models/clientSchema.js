@@ -72,6 +72,10 @@ const clientSchema = new mongoose.Schema ({
     },
     Status: {
         type: String
+    },
+    Archived: {
+        type: Boolean,
+        default: false
     }
 });
 

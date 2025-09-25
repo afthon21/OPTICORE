@@ -166,3 +166,19 @@ export const deleteClient = async (req, res) => {
         return res.status(500).json({ message: 'Server Erro!' });
     }
 }
+//Archivar cliente
+export const archiveClient = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const idClient = await client.findById(id);
+        if (!idClient) {
+            return res.status(404).json({ message: 'Client does not exist yet' });
+        }
+        idClient.Archived = true;
+        await idClient.save();
+        return res.status(200).json({ message: 'Client archived', client: idClient });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
+    }
+}

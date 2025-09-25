@@ -41,6 +41,10 @@ const ticketSchema = new mongoose.Schema({
         type:  String, 
         
         required: true },
+    Archived: {
+        type: Boolean,
+        default: false
+    }
 });
 
 ticketSchema.methods.setFolio = function setFolio(id,clientName,date) {

@@ -31,6 +31,10 @@ import Logs from './components/network/Logs.jsx';
 import OltPorts from './components/network/OltPorts';
 import NetworkHealth from './components/network/NetworkHealth';
 import Onus from './components/network/Onus.jsx';
+import ArchivedClients from './components/clients/ArchivedClients.jsx';
+
+
+
 
 function App() {
   return (
@@ -48,6 +52,9 @@ function App() {
             {/* clientes rutas */}
             <Route path='/clients/:adminId' element={<ProtectedRoute> <ClientsComponent /> </ProtectedRoute>}></Route>
             <Route path='/clients/register/:adminId' element={<ProtectedRoute> <CreateClient /> </ProtectedRoute>}></Route>
+            <Route path='/clients/archived/:adminId' element={<ProtectedRoute><ArchivedClients /> </ProtectedRoute>}></Route>
+            
+
             {/* pagos rutas */}
             <Route path='/payment/:adminId' element={<ProtectedRoute> <PaymentComponent /> </ProtectedRoute>}></Route>
             <Route path='/payment/create/:adminId' element={<ProtectedRoute> <CreatePayment /> </ProtectedRoute>}></Route>
