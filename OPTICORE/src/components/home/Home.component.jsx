@@ -5,6 +5,15 @@ swalSmallStyle.innerHTML = `
         font-size: 0.95rem !important;
         padding: 1.2em 1.2em 1em 1.2em !important;
     }
+    
+    .map-modal-independent {
+        z-index: 9999 !important;
+        position: fixed !important;
+    }
+    
+    .map-modal-independent .swal2-container {
+        z-index: 9999 !important;
+    }
 `;
 if (!document.getElementById('swal2-small-popup-style')) {
     swalSmallStyle.id = 'swal2-small-popup-style';
@@ -25,6 +34,9 @@ function HomeComponent() {
     const [userName, setUserName] = useState('');
     const [clients, setClients] = useState([]);
     const [clientDocuments, setClientDocuments] = useState({});
+    
+    // Variable para controlar el modal principal
+    let mainModalInstance = null;
     // Estado para los colores de cada recuadro
     const [boxColors, setBoxColors] = useState({
         clientes: '#ecebebff',
@@ -94,7 +106,11 @@ function HomeComponent() {
                 </h4>
                 <div style="text-align: left; font-size: 14px; line-height: 1.6;">
                     <p><strong>Tel:</strong> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}</p>
-                    <p><strong>Dirección:</strong> ${direccion}</p>
+                    <p><strong>Dirección:</strong> 
+                        <a id="direccion-link" href="#" style="color: #1a73e8; text-decoration: underline; cursor: pointer;" title="Ver ubicación en el mapa">
+                            ${direccion}
+                        </a>
+                    </p>
                     ${fotoFachada ? `<div style="text-align: center; margin-top: 15px;">
                         <button id="download-foto-btn" style="background-color: #28a745; color: white; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 14px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0 auto;" title="Descargar Foto de Fachada">
                             <i class="bi bi-download"></i>
@@ -111,7 +127,7 @@ function HomeComponent() {
             client.LastName.MotherLastName
         ].filter(Boolean).join(' ');
 
-        Swal.fire({
+        mainModalInstance = Swal.fire({
             html: clientInfoHTML,
             showCloseButton: true,
             showConfirmButton: false,
@@ -127,6 +143,15 @@ function HomeComponent() {
                 if (downloadBtn && fotoFachada) {
                     downloadBtn.addEventListener('click', () => {
                         handleDownloadFotoFachada(fotoFachada, clientName);
+                    });
+                }
+                
+                // Agregar evento de clic al enlace de la dirección
+                const direccionLink = document.getElementById('direccion-link');
+                if (direccionLink) {
+                    direccionLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showClientMap(client, direccion);
                     });
                 }
             }
@@ -158,6 +183,479 @@ function HomeComponent() {
         } catch (error) {
             console.error('Error al descargar la foto:', error);
         }
+    };
+
+    // Función para mostrar el mapa del cliente con prevención de cierre del modal principal
+    const showClientMap = (client, direccion) => {
+        const clientName = [
+            client.Name.FirstName,
+            client.Name.SecondName,
+            client.LastName.FatherLastName,
+            client.LastName.MotherLastName
+        ].filter(Boolean).join(' ');
+
+        // HTML del modal con información detallada y contenedor del mapa
+        const mapHTML = `
+            <div style="padding: 0;">
+                <h5 style="margin-bottom: 20px; color: #333; text-align: center;">
+                    <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                    Ubicación de ${clientName}
+                </h5>
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; text-align: center;">
+                    <strong>Dirección:</strong> ${[
+                        client.Location?.Address,
+                        client.Location?.Cologne, 
+                        client.Location?.Municipality,
+                        client.Location?.State,
+                        client.Location?.ZIP,
+                        client.Location?.OutNumber ? `#${client.Location.OutNumber}` : null,
+                        client.Location?.InNumber ? `Int. ${client.Location.InNumber}` : null
+                    ].filter(Boolean).join(', ')}
+                </div>
+                <div id="map-container-home-${Date.now()}" style="width: 100%; height: 400px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;"></div>
+            </div>
+        `;
+
+        const uniqueContainerId = `map-container-home-${Date.now()}`;
+        const finalMapHTML = mapHTML.replace(`map-container-home-${Date.now()}`, uniqueContainerId);
+
+        // Usar una implementación manual de modal para evitar conflictos con SweetAlert2
+        const modalOverlay = document.createElement('div');
+        modalOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            border-radius: 8px;
+            width: 700px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        `;
+
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '×';
+        closeButton.style.cssText = `
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            z-index: 1;
+            line-height: 1;
+        `;
+
+        const downloadButton = document.createElement('button');
+        downloadButton.innerHTML = '<i class="bi bi-download"></i>';
+        downloadButton.title = 'Descargar mapa';
+        downloadButton.style.cssText = `
+            position: absolute;
+            top: 15px;
+            right: 60px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        downloadButton.addEventListener('mouseover', () => {
+            downloadButton.style.backgroundColor = '#218838';
+        });
+
+        downloadButton.addEventListener('mouseout', () => {
+            downloadButton.style.backgroundColor = '#28a745';
+        });
+
+        const contentDiv = document.createElement('div');
+        contentDiv.style.cssText = `
+            padding: 2em;
+        `;
+        contentDiv.innerHTML = finalMapHTML;
+
+        modalContent.appendChild(closeButton);
+        modalContent.appendChild(downloadButton);
+        modalContent.appendChild(contentDiv);
+        modalOverlay.appendChild(modalContent);
+
+        // Función para descargar el mapa como imagen usando Google Maps Static API con zoom dinámico
+        const downloadMapImage = async () => {
+            try {
+                // Obtener coordenadas del cliente
+                let lat = client.Location?.Latitude || 19.4326;
+                let lng = client.Location?.Length || -99.1332;
+                
+                // Variables para almacenar el estado actual del mapa
+                let currentZoom = 15;
+                let currentCenter = { lat, lng };
+
+                // Intentar obtener el estado actual del mapa interactivo
+                const mapContainer = document.getElementById(uniqueContainerId);
+                if (mapContainer && window.currentMapInstance) {
+                    try {
+                        const mapInstance = window.currentMapInstance;
+                        
+                        if (mapInstance && typeof mapInstance.getZoom === 'function') {
+                            currentZoom = Math.round(mapInstance.getZoom()) || 15;
+                            const center = mapInstance.getCenter();
+                            if (center) {
+                                if (typeof center.lat === 'function') {
+                                    currentCenter = {
+                                        lat: center.lat(),
+                                        lng: center.lng()
+                                    };
+                                } else if (center.lat && center.lng) {
+                                    currentCenter = {
+                                        lat: center.lat,
+                                        lng: center.lng
+                                    };
+                                }
+                            }
+                            console.log('Estado del mapa obtenido exitosamente:', { zoom: currentZoom, center: currentCenter });
+                        } else {
+                            console.log('Métodos del mapa no disponibles, usando valores por defecto');
+                        }
+                    } catch (mapError) {
+                        console.log('Error al obtener el estado del mapa:', mapError);
+                        // Intentar obtener zoom del DOM si está disponible
+                        const zoomButtons = mapContainer.querySelectorAll('[jsaction*="zoom"]');
+                        if (zoomButtons.length > 0) {
+                            console.log('Intentando obtener zoom del DOM...');
+                        }
+                    }
+                } else {
+                    console.log('Contenedor del mapa o instancia no encontrados, usando valores por defecto');
+                }
+
+                // Si no tiene coordenadas válidas, usar geocodificación
+                if (!client.Location?.Latitude || !client.Location?.Length || 
+                    client.Location.Latitude === 0 || client.Location.Length === 0) {
+                    
+                    const addressParts = [
+                        client.Location?.Address,
+                        client.Location?.Cologne,
+                        client.Location?.Municipality,
+                        client.Location?.State,
+                        client.Location?.ZIP
+                    ].filter(Boolean);
+
+                    const fullAddress = addressParts.join(', ');
+                    
+                    if (fullAddress && window.google && window.google.maps) {
+                        const geocoder = new google.maps.Geocoder();
+                        
+                        await new Promise((resolve) => {
+                            geocoder.geocode({ address: fullAddress }, (results, status) => {
+                                if (status === 'OK' && results[0]) {
+                                    const location = results[0].geometry.location;
+                                    lat = location.lat();
+                                    lng = location.lng();
+                                    // Si no se obtuvo el centro del mapa, usar las coordenadas geocodificadas
+                                    if (currentCenter.lat === 19.4326 && currentCenter.lng === -99.1332) {
+                                        currentCenter = { lat, lng };
+                                    }
+                                }
+                                resolve();
+                            });
+                        });
+                    }
+                }
+
+                // Usar Google Maps Static API para generar la imagen con el zoom actual
+                const apiKey = import.meta.env.VITE_GOOGLE_MAP;
+                const mapWidth = 800;
+                const mapHeight = 600;
+
+                // URL de Google Maps Static API con zoom dinámico y centro actual del mapa
+                const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?` +
+                    `center=${currentCenter.lat},${currentCenter.lng}&` +
+                    `zoom=${currentZoom}&` +
+                    `size=${mapWidth}x${mapHeight}&` +
+                    `scale=2&` + // Para mayor resolución
+                    `maptype=roadmap&` +
+                    `markers=color:red%7Clabel:●%7C${lat},${lng}&` + // Marcador rojo en la ubicación original
+                    `style=feature:poi%7Cvisibility:simplified&` + // Estilo simplificado
+                    `key=${apiKey}`;
+
+                console.log('Generando mapa con:', { zoom: currentZoom, center: currentCenter, markerAt: { lat, lng } });
+
+                // Crear un canvas para agregar información adicional
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Configurar tamaño del canvas
+                canvas.width = mapWidth * 2; // Scale 2 para mayor resolución
+                canvas.height = (mapHeight * 2) + 120; // Espacio extra para información
+                
+                // Cargar la imagen del mapa
+                const mapImage = new Image();
+                mapImage.crossOrigin = 'anonymous';
+                
+                await new Promise((resolve, reject) => {
+                    mapImage.onload = () => {
+                        // Fondo blanco
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // Dibujar el mapa
+                        ctx.drawImage(mapImage, 0, 100, mapWidth * 2, mapHeight * 2);
+                        
+                        // Agregar información del cliente
+                        ctx.fillStyle = '#333333';
+                        ctx.font = 'bold 24px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`Ubicación de ${clientName}`, canvas.width / 2, 40);
+                        
+                        // Agregar dirección
+                        ctx.font = '18px Arial';
+                        ctx.fillStyle = '#666666';
+                        const direccionTexto = [
+                            client.Location?.Address,
+                            client.Location?.Cologne, 
+                            client.Location?.Municipality,
+                            client.Location?.State,
+                            client.Location?.ZIP
+                        ].filter(Boolean).join(', ');
+                        
+                        ctx.fillText(direccionTexto, canvas.width / 2, 70);
+                        
+                        // Agregar información de zoom y fecha
+                        ctx.font = '14px Arial';
+                        ctx.fillStyle = '#999999';
+                        const fecha = new Date().toLocaleDateString('es-MX');
+                        ctx.fillText(`Zoom: ${currentZoom} | Generado el ${fecha}`, canvas.width / 2, canvas.height - 20);
+                        
+                        resolve();
+                    };
+                    
+                    mapImage.onerror = () => {
+                        reject(new Error('Error al cargar el mapa'));
+                    };
+                    
+                    mapImage.src = staticMapUrl;
+                });
+
+                // Crear enlace de descarga
+                const link = document.createElement('a');
+                link.download = `mapa_${clientName.replace(/\s+/g, '_')}_zoom${currentZoom}_${new Date().toISOString().slice(0, 10)}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                
+                // Simular clic para descargar
+                link.click();
+                
+                // Mostrar mensaje de éxito
+                const successMsg = document.createElement('div');
+                successMsg.innerHTML = `¡Mapa descargado con zoom ${currentZoom}!`;
+                successMsg.style.cssText = `
+                    position: absolute;
+                    top: 60px;
+                    right: 20px;
+                    background-color: #28a745;
+                    color: white;
+                    padding: 8px 15px;
+                    border-radius: 5px;
+                    font-size: 14px;
+                    z-index: 2;
+                    opacity: 1;
+                    transition: opacity 0.5s;
+                `;
+                
+                modalContent.appendChild(successMsg);
+                
+                // Ocultar mensaje después de 3 segundos
+                setTimeout(() => {
+                    successMsg.style.opacity = '0';
+                    setTimeout(() => {
+                        if (modalContent.contains(successMsg)) {
+                            modalContent.removeChild(successMsg);
+                        }
+                    }, 500);
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error al descargar el mapa:', error);
+                
+                // Mostrar mensaje de error
+                const errorMsg = document.createElement('div');
+                errorMsg.innerHTML = 'Error al descargar el mapa';
+                errorMsg.style.cssText = `
+                    position: absolute;
+                    top: 60px;
+                    right: 20px;
+                    background-color: #dc3545;
+                    color: white;
+                    padding: 8px 15px;
+                    border-radius: 5px;
+                    font-size: 14px;
+                    z-index: 2;
+                    opacity: 1;
+                    transition: opacity 0.5s;
+                `;
+                
+                modalContent.appendChild(errorMsg);
+                
+                setTimeout(() => {
+                    errorMsg.style.opacity = '0';
+                    setTimeout(() => {
+                        if (modalContent.contains(errorMsg)) {
+                            modalContent.removeChild(errorMsg);
+                        }
+                    }, 500);
+                }, 3000);
+            }
+        };
+
+        // Función para cerrar el modal del mapa
+        const closeMapModal = () => {
+            document.body.removeChild(modalOverlay);
+        };
+
+        // Agregar eventos de cierre y descarga
+        closeButton.addEventListener('click', closeMapModal);
+        downloadButton.addEventListener('click', downloadMapImage);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeMapModal();
+            }
+        });
+
+        // Cerrar con Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeMapModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        // Agregar el modal al DOM
+        document.body.appendChild(modalOverlay);
+
+        // Cargar el mapa después de que el modal esté en el DOM
+        setTimeout(async () => {
+            const containerElement = document.getElementById(uniqueContainerId);
+            if (containerElement) {
+                try {
+                    // Importar dinámicamente React y ReactDOM
+                    const [React, ReactDOM, MapGoogle] = await Promise.all([
+                        import('react'),
+                        import('react-dom/client'),
+                        import('../fragments/maps/Map.fragment')
+                    ]);
+
+                    // Determinar la posición inicial del marcador
+                    let position = {
+                        lat: client.Location?.Latitude || 19.4326,
+                        lng: client.Location?.Length || -99.1332
+                    };
+
+                    // Función para renderizar el mapa y almacenar referencia
+                    const renderMap = (pos) => {
+                        const root = ReactDOM.createRoot(containerElement);
+                        
+                        // Crear el elemento del mapa con callback para obtener la referencia
+                        const MapComponent = React.createElement(MapGoogle.default, { 
+                            position: pos,
+                            onMapLoad: (mapInstance) => {
+                                // Almacenar la referencia del mapa para acceso posterior
+                                window.currentMapInstance = mapInstance;
+                                // También almacenar en el contenedor para fácil acceso
+                                if (containerElement) {
+                                    containerElement._mapInstance = mapInstance;
+                                }
+                            }
+                        });
+                        
+                        root.render(MapComponent);
+                    };
+
+                    // Si no tiene coordenadas válidas, intentar geocodificación como en ClientLocation
+                    if ((!client.Location?.Latitude || !client.Location?.Length || 
+                         client.Location.Latitude === 0 || client.Location.Length === 0)) {
+                        
+                        // Geocodificación usando la misma lógica que ClientLocation
+                        const geocodeAddress = () => {
+                            try {
+                                const addressParts = [
+                                    client.Location?.Address,
+                                    client.Location?.Cologne,
+                                    client.Location?.Municipality,
+                                    client.Location?.State,
+                                    client.Location?.ZIP
+                                ].filter(Boolean);
+
+                                const fullAddress = addressParts.join(', ');
+                                
+                                if (fullAddress && window.google && window.google.maps) {
+                                    const geocoder = new google.maps.Geocoder();
+                                    
+                                    geocoder.geocode({ address: fullAddress }, (results, status) => {
+                                        if (status === 'OK' && results[0]) {
+                                            const location = results[0].geometry.location;
+                                            const newPosition = {
+                                                lat: location.lat(),
+                                                lng: location.lng()
+                                            };
+                                            renderMap(newPosition);
+                                        } else {
+                                            console.log('Error en geocodificación:', status);
+                                            renderMap(position);
+                                        }
+                                    });
+                                } else {
+                                    renderMap(position);
+                                }
+                            } catch (error) {
+                                console.error('Error al geocodificar:', error);
+                                renderMap(position);
+                            }
+                        };
+
+                        // Verificar si Google Maps está disponible
+                        if (window.google && window.google.maps) {
+                            geocodeAddress();
+                        } else {
+                            renderMap(position);
+                        }
+                    } else {
+                        // Si tiene coordenadas válidas, usarlas directamente
+                        renderMap(position);
+                    }
+
+                } catch (error) {
+                    console.error('Error al cargar el componente de mapa:', error);
+                    containerElement.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; color: #6c757d; background-color: #f8f9fa; border-radius: 8px;">
+                            <i class="bi bi-geo-alt" style="font-size: 48px; margin-bottom: 15px;"></i>
+                            <p style="margin: 0; font-size: 16px;">Error al cargar el mapa</p>
+                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #999;">Intenta nuevamente más tarde</p>
+                        </div>
+                    `;
+                }
+            }
+        }, 100);
     };
 
     // Función para obtener la foto de fachada de un cliente
