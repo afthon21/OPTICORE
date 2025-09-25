@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import styleCard from '../payments/css/paymentCard.module.css';
 import styleTable from '../payments/css/paymentTable.module.css';
+import { useRegion } from '../../hooks/RegionContext';
 
 function PackagesCard({ packages = [], onSelected }) {
+  const { region } = useRegion();
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
@@ -20,7 +22,25 @@ function PackagesCard({ packages = [], onSelected }) {
     }
   };
 
-    const filteredData = packages.filter(pkg => {
+    // Filtro por región primero
+    const packagesByRegion = packages.filter(pkg => {
+        // Si no hay región seleccionada, mostrar todos
+        if (!region) return true;
+        
+        // Verificar que el paquete tenga cliente y ubicación
+        if (!pkg.Client || !pkg.Client.Location) return false;
+        
+        // Filtrar por el estado de la ubicación del cliente
+        const matches = pkg.Client.Location.State === region;
+        if (matches) {
+            console.log(`Paquete ${pkg.Folio} del cliente en ${pkg.Client.Location.State} coincide con región ${region}`);
+        }
+        return matches;
+    });
+
+    console.log(`Filtrado paquetes por región: ${packagesByRegion.length}/${packages.length} paquetes para región: ${region}`);
+
+    const filteredData = packagesByRegion.filter(pkg => {
     const folio = pkg.Folio?.toString() ?? '';
     const clientName = `${pkg.Client?.Name?.FirstName ?? ''} ${pkg.Client?.Name?.SecondName ?? ''} ${pkg.Client?.LastName?.FatherLastName ?? ''} ${pkg.Client?.LastName?.MotherLastName ?? ''}`.trim();
     const packageName = pkg.Name ?? '';
