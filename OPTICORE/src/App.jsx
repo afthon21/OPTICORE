@@ -35,7 +35,12 @@ import Onus from './components/network/Onus.jsx';
 function App() {
   return (
     <RegionProvider>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <NavbarFragmentAll />
         <div className="container d-flex content">
           <Routes>

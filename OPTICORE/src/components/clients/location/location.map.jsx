@@ -9,7 +9,21 @@ function ClientLocation({ client }) {
         lng: client.Location.Length || -99.1332
     });
 
+    const [mapsAvailable, setMapsAvailable] = useState(false);
+
     useEffect(() => {
+        // Verificar si Google Maps está disponible y configurado
+        const googleMapsKey = import.meta.env.VITE_GOOGLE_MAP;
+        
+        if (!googleMapsKey) {
+            console.log('🗺️ Google Maps deshabilitado - no hay API key configurada');
+            setMapsAvailable(false);
+            return;
+        }
+
+        console.log('🗺️ Google Maps habilitado con API key:', googleMapsKey.substring(0, 10) + '...');
+        setMapsAvailable(true);
+
         // Si ya tiene coordenadas válidas, usarlas
         if (client.Location.Latitude && client.Location.Length && 
             client.Location.Latitude !== 0 && client.Location.Length !== 0) {
@@ -71,7 +85,29 @@ function ClientLocation({ client }) {
         }
     }, [client]);
 
-    console.log('Marker actual:', marker);
+    // console.log('Marker actual:', marker); // Debug removido para reducir logs
+
+    // Si Google Maps no está disponible, mostrar información alternativa
+    if (!mapsAvailable) {
+        return (
+            <div style={{ 
+                padding: "20px", 
+                margin: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "8px",
+                backgroundColor: "#f8f9fa",
+                textAlign: "center"
+            }}>
+                <h5>📍 Ubicación del Cliente</h5>
+                <p><strong>Dirección:</strong> {client.Location.Address}</p>
+                <p><strong>Colonia:</strong> {client.Location.Cologne}</p>
+                <p><strong>Municipio:</strong> {client.Location.Municipality}</p>
+                <p><strong>Estado:</strong> {client.Location.State}</p>
+                <p><strong>CP:</strong> {client.Location.ZIP}</p>
+                <small className="text-muted">Google Maps no disponible</small>
+            </div>
+        );
+    }
 
     return (
         <div style={{ 
