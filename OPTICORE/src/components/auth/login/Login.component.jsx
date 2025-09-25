@@ -32,7 +32,7 @@ function LoginComponent() {
 
     /** Hooks */
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
-    const { setRegion } = useRegion();
+    const { setRegion, initializeAfterLogin } = useRegion();
     const [formValues, setFormValues] = useState({
         Email: '',
         Password: ''
@@ -111,11 +111,21 @@ function LoginComponent() {
             }
 
             // Guarda el token o datos importantes en el almacenamiento si es necesario
+            console.log('🔐 Datos del login recibidos:', res);
+            
             sessionStorage.setItem('adminId', res.adminId);
             sessionStorage.setItem('token', res.token);
             sessionStorage.setItem('userName', res.userName);
             sessionStorage.setItem('adminRegion', res.region);
+            sessionStorage.setItem('adminRole', res.role);
             sessionStorage.setItem('loginSuccess', true);
+
+            console.log('🔐 Rol guardado en sessionStorage:', res.role);
+
+            // Reinicializar el contexto después del login
+            if (initializeAfterLogin) {
+                initializeAfterLogin();
+            }
 
             // Configurar la región del administrador en el contexto global
             if (res.region) {

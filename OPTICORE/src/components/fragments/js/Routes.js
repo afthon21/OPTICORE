@@ -3,6 +3,7 @@ export const handleLogout = (navigate) => {
     sessionStorage.removeItem('userName');
     sessionStorage.removeItem('adminId');
     sessionStorage.removeItem('adminRegion');
+    sessionStorage.removeItem('adminRole');
     navigate('/')
 }
 

@@ -85,7 +85,8 @@ export const loginUser = async (req, res) => {
             token, 
             adminId: User._id, 
             userName: User.UserName,
-            region: User.Region 
+            region: User.Region,
+            role: User.Role
         });
 
 
