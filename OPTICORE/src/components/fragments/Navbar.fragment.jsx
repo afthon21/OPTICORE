@@ -64,6 +64,16 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
+                                onClick={() => handleCreateClient(navigate, adminId)}
+                                role="button"
+                            >
+                                Crear
+                            </a>
+                        </li>
+
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
                                 onClick={() => handleClients(navigate, adminId)}
                                 role="button"
                             >
@@ -73,12 +83,14 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
-                                onClick={() => handleCreateClient(navigate, adminId)}
+                                // onClick={() => handleArchiveClients(navigate, adminId)}
                                 role="button"
                             >
-                                Crear
+                                Archivados
                             </a>
+
                         </li>
+                        
                     </ul>
                 </li>
                 <li className="nav-item item">
@@ -93,21 +105,33 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
-                                onClick={() => handlePayments(navigate, adminId)}
-                                role="button"
-                            >
-                                Ver
-                            </a>
-                        </li>
-                        <li className="ms-4">
-                            <a
-                                className="nav-link"
                                 onClick={() => handleCreatePayment(navigate, adminId)}
                                 role="button"
                             >
                                 Crear
                             </a>
                         </li>
+
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => handlePayments(navigate, adminId)}
+                                role="button"
+                            >
+                                Ver
+                            </a>
+                        </li>
+                         <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                // onClick={() => handleArchivePayments(navigate, adminId)}
+                                role="button"
+                            >
+                                Archivados
+                            </a>
+                        </li>
+                        
+                        
                     </ul>
                 </li>
                 <li className="nav-item item">
@@ -122,6 +146,15 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
+                                onClick={() => handleCreateTicket(navigate, adminId)}
+                                role="button"
+                            >
+                                Crear
+                            </a>
+                        </li>
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
                                 onClick={() => handleTicket(navigate, adminId)}
                                 role="button"
                             >
@@ -131,12 +164,13 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
-                                onClick={() => handleCreateTicket(navigate, adminId)}
+                                // onClick={() => handleArchiveTickets(navigate, adminId)}
                                 role="button"
                             >
-                                Crear
+                                Archivados
                             </a>
                         </li>
+                        
                     </ul>
                 </li>
                 <li className="nav-item item">
@@ -149,13 +183,13 @@ export function NavbarFragmentAll() {
                     <ul className="list-unstyled ps-3 sub-menu">
                         <li className="ms-4">
                             <a className="nav-link"
-                                onClick={() => handlePackages(navigate, adminId)}
-                                role="button">Ver</a>
+                                onClick={() => handleCreatePackages(navigate, adminId)}
+                                role="button">Crear</a>
                         </li>
                         <li className="ms-4">
                             <a className="nav-link"
-                                onClick={() => handleCreatePackages(navigate, adminId)}
-                                role="button">Crear</a>
+                                onClick={() => handlePackages(navigate, adminId)}
+                                role="button">Ver</a>
                         </li>
                     </ul>
                 </li>
