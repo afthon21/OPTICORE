@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiRequest from '../../hooks/apiRequest.jsx';
-import { RegionContext } from '../../../hooks/RegionContext.jsx';
+import { useRegion } from '../../../hooks/RegionContext.jsx';
 
 import Swal from "sweetalert2";
 import { handleHome, handleRecoveryPassword } from "../../fragments/js/Routes.js";
@@ -32,7 +32,7 @@ function LoginComponent() {
 
     /** Hooks */
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
-    const { setRegion } = useContext(RegionContext);
+    const { setRegion } = useRegion();
     const [formValues, setFormValues] = useState({
         Email: '',
         Password: ''
