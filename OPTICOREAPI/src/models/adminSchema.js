@@ -39,6 +39,12 @@ const adminSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    Region: {
+        type: String,
+        required: true,
+        enum: ['Estado de México', 'Puebla'],
+        default: 'Estado de México'
+    },
     Date: {
         type: Date,
         default: Date.now,

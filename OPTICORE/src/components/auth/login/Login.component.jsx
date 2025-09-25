@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiRequest from '../../hooks/apiRequest.jsx';
+import { RegionContext } from '../../../hooks/RegionContext.jsx';
 
 import Swal from "sweetalert2";
 import { handleHome, handleRecoveryPassword } from "../../fragments/js/Routes.js";
@@ -31,6 +32,7 @@ function LoginComponent() {
 
     /** Hooks */
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const { setRegion } = useContext(RegionContext);
     const [formValues, setFormValues] = useState({
         Email: '',
         Password: ''
@@ -112,7 +114,13 @@ function LoginComponent() {
             sessionStorage.setItem('adminId', res.adminId);
             sessionStorage.setItem('token', res.token);
             sessionStorage.setItem('userName', res.userName);
+            sessionStorage.setItem('adminRegion', res.region);
             sessionStorage.setItem('loginSuccess', true);
+
+            // Configurar la región del administrador en el contexto global
+            if (res.region) {
+                setRegion(res.region);
+            }
 
             // Guardamos el id del perfil
             const adminId = sessionStorage.getItem('adminId');

@@ -17,7 +17,8 @@ export const registerUser = async (req, res) => {
         },
         Email,
         Password,
-        Role
+        Role,
+        Region
     } = req.body;
 
     try {
@@ -42,7 +43,8 @@ export const registerUser = async (req, res) => {
             },
             Email,
             Password: hashedPassword,
-            Role
+            Role,
+            Region: Region || 'Estado de México' // Valor por defecto si no se proporciona
         });
 
         //Creamos el nombre de usuario
@@ -79,7 +81,12 @@ export const loginUser = async (req, res) => {
         }
 
         const token = jwt.sign({ id: User._id }, process.env.JWT_SECRET);
-        return res.status(200).json({ token, adminId: User._id, userName: User.UserName });
+        return res.status(200).json({ 
+            token, 
+            adminId: User._id, 
+            userName: User.UserName,
+            region: User.Region 
+        });
 
 
     } catch (error) {

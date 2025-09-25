@@ -2,6 +2,7 @@ export const handleLogout = (navigate) => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userName');
     sessionStorage.removeItem('adminId');
+    sessionStorage.removeItem('adminRegion');
     navigate('/')
 }
 
