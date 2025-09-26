@@ -71,32 +71,69 @@ export function NavbarFragmentAll() {
                 </p>
             </div>
 
-
-            {/* Selector de Estado - Solo para administradores */}
-            <div className="mb-3">
-                <label className="form-label fw-bold">Región:</label>
-                {canChangeRegion ? (
-                    <select
-                        className="form-select"
-                        value={region}
-                        onChange={e => {
-                            console.log('🎯 Intentando cambiar región desde navbar:', e.target.value);
-                            setRegion(e.target.value);
-                        }}
-                    >
-                        <option value="Estado de México">Estado de México</option>
-                        <option value="Puebla">Puebla</option>
-                    </select>
-                ) : (
-                    <div>
-                        <div className="form-control text-muted" style={{backgroundColor: '#f8f9fa'}}>
-                            {region}
-                        </div>
-                    </div>
-                )}
-            </div>
-
             <ul className="nav flex-column mb-auto">
+                
+                {/* Selector de Región - Estilo navegación */}
+                <li className="nav-item item">
+                    <a
+                        className="nav-link d-flex align-items-center item-link"
+                        role="button">
+                        <i className="bi bi-geo-alt me-2"></i>
+                        <span className="item-title">Región</span>
+                    </a>
+                    <ul className="list-unstyled ps-3 sub-menu">
+                        {canChangeRegion ? (
+                            // Para administradores: pueden cambiar de región
+                            <>
+                                <li className="ms-4">
+                                    <a
+                                        className={`nav-link ${region === 'Estado de México' ? 'active' : ''}`}
+                                        onClick={() => {
+                                            console.log('🎯 Cambiando región a Estado de México');
+                                            setRegion('Estado de México');
+                                        }}
+                                        role="button"
+                                        style={{
+                                            color: region === 'Estado de México' ? '#0d6efd' : '',
+                                            fontWeight: region === 'Estado de México' ? 'bold' : 'normal'
+                                        }}
+                                    >
+                                        Estado de México {region === 'Estado de México' && '✓'}
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a
+                                        className={`nav-link ${region === 'Puebla' ? 'active' : ''}`}
+                                        onClick={() => {
+                                            console.log('🎯 Cambiando región a Puebla');
+                                            setRegion('Puebla');
+                                        }}
+                                        role="button"
+                                        style={{
+                                            color: region === 'Puebla' ? '#0d6efd' : '',
+                                            fontWeight: region === 'Puebla' ? 'bold' : 'normal'
+                                        }}
+                                    >
+                                        Puebla {region === 'Puebla' && '✓'}
+                                    </a>
+                                </li>
+                            </>
+                        ) : (
+                            // Para no-administradores: solo muestran su región asignada
+                            <li className="ms-4">
+                                <span
+                                    className="nav-link text-muted"
+                                    style={{
+                                        cursor: 'default',
+                                        color: '#6c757d !important'
+                                    }}
+                                >
+                                    {region} (Asignada)
+                                </span>
+                            </li>
+                        )}
+                    </ul>
+                </li>
                 
                 <li className="nav-item item">
                     <a
