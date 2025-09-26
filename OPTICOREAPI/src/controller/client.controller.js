@@ -54,7 +54,9 @@ export const newClient = async (req, res) => {
                 InNumber,
                 Latitude,
                 Length
-            }
+            },
+            // Status por defecto (el schema ya lo coloca, pero lo dejamos explícito si llega en body)
+            Status: req.body.Status ? req.body.Status : undefined
         });
 
 
@@ -123,7 +125,8 @@ export const editClient = async (req, res) => {
             InNumber: (value) => { UpdateQuery['Location.InNumber'] = value },
             Latitude: (value) => { UpdateQuery['Location.Latitude'] = value },
             Length: (value) => { UpdateQuery['Location.Length'] = value },
-            PhoneNumber: (value) => { UpdateQuery['PhoneNumber'] = value }
+            PhoneNumber: (value) => { UpdateQuery['PhoneNumber'] = value },
+            Status: (value) => { UpdateQuery['Status'] = value }
         }
 
         for (const [key, updateFunction] of Object.entries(fields)) {
