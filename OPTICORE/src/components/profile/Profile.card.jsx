@@ -1,4 +1,5 @@
 import styleCard from './css/profileCard.module.css'
+import { API_BASE_URL } from '../../config/api.js';
 
 import { useState } from 'react';
 
@@ -131,7 +132,7 @@ function ProfileCard({ profile }) {
                         ConfirmPassword: values.ConfirmPassword,
                     };
 
-            const res = await fetch(`http://localhost:3000/api/profile/edit`, {
+            const res = await fetch(`${API_BASE_URL}/profile/edit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

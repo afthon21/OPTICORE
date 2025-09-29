@@ -10,14 +10,14 @@ import ClientNotes from './notes/client.notes';
 import Swal from 'sweetalert2';
 import ClientLocation from './location/location.map';
 
-function ClientsInfo({ client }) {
+function ClientsInfo({ client, initialActiveTab = 'personal' }) {
     const [show, setShow] = useState({
-        personal: true,
-        payments: false,
-        documents: false,
-        location: false,
-        tickets: false,
-        notes: false
+        personal: initialActiveTab === 'personal',
+        payments: initialActiveTab === 'payments',
+        documents: initialActiveTab === 'documents',
+        location: initialActiveTab === 'location',
+        tickets: initialActiveTab === 'tickets',
+        notes: initialActiveTab === 'notes'
     });
 
     // Estado local para el cliente seleccionado
@@ -27,6 +27,18 @@ function ClientsInfo({ client }) {
     useEffect(() => {
         setCurrentClient(client);
     }, [client]);
+
+    // Actualizar la pestaña activa cuando cambie initialActiveTab
+    useEffect(() => {
+        setShow({
+            personal: initialActiveTab === 'personal',
+            payments: initialActiveTab === 'payments',
+            documents: initialActiveTab === 'documents',
+            location: initialActiveTab === 'location',
+            tickets: initialActiveTab === 'tickets',
+            notes: initialActiveTab === 'notes'
+        });
+    }, [initialActiveTab]);
 
     const toggleData = (data) => {
         if (!currentClient) {
