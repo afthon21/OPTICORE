@@ -206,3 +206,19 @@ export const deleteTicket = async (req, res) => {
         return res.status(500).json({ message: 'Server Error!' });
     }
 }
+//Archivar ticket
+export const archiveTicket = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const idTicket = await ticket.findById(id)
+        if (!idTicket) {
+            return res.status(404).json({ message: 'Ticket doesnt exist' });
+        }
+        await idTicket.save();
+        return res.status(200).json({ message: 'Ticket archived', ticket: idTicket});
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
+
+    }
+}

@@ -4,7 +4,7 @@ import { useRegion } from '../../hooks/RegionContext';
 
 import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket } from './js/Routes.js';
 import { handleClients, handleCreateClient, handlePayments, handleCreatePayment } from './js/Routes.js';
-import { handlePackages, handleCreatePackages } from './js/Routes.js';
+import { handlePackages, handleCreatePackages, handleArchiveClients} from './js/Routes.js';
 
 export function NavbarFragmentAll() {
     const navigate = useNavigate();
@@ -83,7 +83,7 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
-                                // onClick={() => handleArchiveClients(navigate, adminId)}
+                                onClick={()=> handleArchiveClients(navigate, adminId)}
                                 role="button"
                             >
                                 Archivados
@@ -121,15 +121,7 @@ export function NavbarFragmentAll() {
                                 Ver
                             </a>
                         </li>
-                         <li className="ms-4">
-                            <a
-                                className="nav-link"
-                                // onClick={() => handleArchivePayments(navigate, adminId)}
-                                role="button"
-                            >
-                                Archivados
-                            </a>
-                        </li>
+                         
                         
                         
                     </ul>
