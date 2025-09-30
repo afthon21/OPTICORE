@@ -40,7 +40,11 @@
 
         "chart.js": "^4.5.0",
 
+        "chartjs-plugin-datalabels": "^2.2.0",
+
         "dotenv": "^17.2.2",
+
+        "leaflet": "^1.9.4",
 
         "nodemon": "^3.1.10",
 

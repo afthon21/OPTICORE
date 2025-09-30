@@ -1,6 +1,137 @@
+import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
+import ApiRequest from '../hooks/apiRequest'; //importacion de la API
+import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
+import ErrorDisplay from './ErrorDisplay.jsx';
+import FibraChart from './FibraChart.jsx';
+import RadioChart from './RadioChart.jsx';
+
+// SweetAlert2 popup size custom CSS
+const swalSmallStyle = document.createElement('style');
+swalSmallStyle.innerHTML = `
+    .swal2-small-popup {
+        font-size: 0.95rem !important;
+        padding: 1.2em 1.2em 1em 1.2em !important;
+    }
+`;
+if (!document.getElementById('swal2-small-popup-style')) {
+    swalSmallStyle.id = 'swal2-small-popup-style';
+    document.head.appendChild(swalSmallStyle);
+}
+
+function HomeComponent() {
+    const [tickets, setTickets] = useState([]);
+    const [showAllClients, setShowAllClients] = useState(false);
+    const [showAllTicketsState, setShowAllTicketsState] = useState(false);
+    const [userName, setUserName] = useState('');
+    const [clients, setClients] = useState([]);
+    const [clientDocuments, setClientDocuments] = useState({});
+    // Estado para los colores de cada recuadro
+    const [boxColors, setBoxColors] = useState({
+        clientes: '#ecebebff',
+        admins: '#ecebebff',
+        red: '#ecebebff',
+        errores: '#ecebebff',
+        radio: '#ecebebff',
+        fibra: '#ecebebff',
+        tickets: '#ecebebff',
+        pendientes: '#ecebebff',
+    });
+    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
     // Función para mostrar detalles del cliente en un modal
     const handleShowClientDetails = (client) => {
-        // ...existing code...
+        // Mostrar la dirección exactamente como la ingresó el usuario
+        let direccion = 'Sin dirección';
+        // Buscar dirección en Address o en Location
+        if (client.Address) {
+            if (typeof client.Address === 'string') {
+                direccion = client.Address;
+            } else if (typeof client.Address === 'object') {
+                const municipio = client.Address.City || client.Address.Municipio || '';
+                const calle = client.Address.Street || '';
+                const cp = client.Address.PostalCode || client.Address.CP || '';
+                direccion = [municipio, calle, cp].filter(Boolean).join(', ');
+            }
+        } else if (client.Location) {
+            // Algunos clientes pueden tener la dirección en Location
+            const municipio = client.Location.Municipality || '';
+            const calle = client.Location.Address || '';
+            const cp = client.Location.ZIP || '';
+            direccion = [municipio, calle, cp].filter(Boolean).join(', ');
+        }
+        if (!direccion || direccion === ', , ') direccion = 'Sin dirección';
+
+        // Obtener la foto de fachada del cliente (ya cargada previamente)
+        const fotoFachada = clientDocuments[client._id];
+
+        // Crear el HTML para la foto de fachada
+        const fotoFachadaHTML = fotoFachada 
+            ? `<div style="margin-bottom: 8px; display: flex; justify-content: center;">
+                 <img src="${fotoFachada}" alt="Foto de Fachada" 
+                      style="width: 300px; height: 260px; object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6;" />
+               </div>`
+            : `<div style="margin-bottom: 8px; display: flex; justify-content: center;">
+                 <div style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; 
+                             background-color: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px; color: #6c757d; font-size: 10px;">
+                   Sin foto
+                 </div>
+               </div>`;
+
+        // Crear contenido HTML para el modal
+        const clientInfoHTML = `
+            <div style="text-align: center;">
+                <div style="margin-bottom: 10px;">
+                    <i class="bi bi-house-check-fill text-success" style="font-size: 2rem;"></i>
+                </div>
+                ${fotoFachadaHTML}
+                <h4 style="font-weight: 600; margin-bottom: 15px; color: #333;">
+                    ${[
+                        client.Name.FirstName,
+                        client.Name.SecondName,
+                        client.LastName.FatherLastName,
+                        client.LastName.MotherLastName
+                    ].filter(Boolean).join(' ').toUpperCase()}
+                </h4>
+                <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                    <p><strong>Tel:</strong> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}</p>
+                    <p><strong>Dirección:</strong> ${direccion}</p>
+                    ${fotoFachada ? `<div style="text-align: center; margin-top: 15px;">
+                        <button id="download-foto-btn" style="background-color: #28a745; color: white; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 14px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0 auto;" title="Descargar Foto de Fachada">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+
+        const clientName = [
+            client.Name.FirstName,
+            client.Name.SecondName,
+            client.LastName.FatherLastName,
+            client.LastName.MotherLastName
+        ].filter(Boolean).join(' ');
+
+        Swal.fire({
+            html: clientInfoHTML,
+            showCloseButton: true,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cerrar',
+            cancelButtonColor: '#404040',
+            background: '#ededed',
+            width: 400,
+            padding: '2em',
+            didOpen: () => {
+                // Agregar evento de clic al botón de descarga
+                const downloadBtn = document.getElementById('download-foto-btn');
+                if (downloadBtn && fotoFachada) {
+                    downloadBtn.addEventListener('click', () => {
+                        handleDownloadFotoFachada(fotoFachada, clientName);
+                    });
+                }
+            }
+        });
     };
 
     // Función para mostrar detalles del ticket en un modal
@@ -33,45 +164,54 @@
             }
         });
     };
-// SweetAlert2 popup size custom CSS
-const swalSmallStyle = document.createElement('style');
-swalSmallStyle.innerHTML = `
-    .swal2-small-popup {
-        font-size: 0.95rem !important;
-        padding: 1.2em 1.2em 1em 1.2em !important;
-    }
-`;
-if (!document.getElementById('swal2-small-popup-style')) {
-    swalSmallStyle.id = 'swal2-small-popup-style';
-    document.head.appendChild(swalSmallStyle);
-}
-import React, { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import ApiRequest from '../hooks/apiRequest'; //importacion de la API
-import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
-import ErrorDisplay from './ErrorDisplay.jsx';
-
-function HomeComponent() {
-    const [tickets, setTickets] = useState([]);
-    const [showAllTickets, setShowAllTickets] = useState(false);
-    const [userName, setUserName] = useState('');
-    const [clients, setClients] = useState([]);
-    // Estado para los colores de cada recuadro
-    const [boxColors, setBoxColors] = useState({
-        clientesNuevos: '#ecebebff',
-        admins: '#ecebebff',
-        red: '#ecebebff',
-        errores: '#ecebebff',
-        radio: '#ecebebff',
-        fibra: '#ecebebff',
-        tickets: '#ecebebff',
-        pendientes: '#ecebebff',
-    });
-    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     // Función para cambiar color
     const handleColorChange = (box, color) => {
         setBoxColors(prev => ({ ...prev, [box]: color }));
+    };
+
+    // Función para descargar la foto de fachada
+    const handleDownloadFotoFachada = async (url, clientName) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            // Usar el nombre del cliente como nombre del archivo
+            const fileName = `Foto_Fachada_${clientName.replace(/\s+/g, '_')}.${url.split('.').pop()}`;
+            link.download = fileName;
+            
+            link.click();
+            
+            // Limpia la URL para evitar problemas de memoria
+            URL.revokeObjectURL(link.href);
+        } catch (error) {
+            console.error('Error al descargar la foto:', error);
+        }
+    };
+
+    // Función para obtener la foto de fachada de un cliente
+    const getFotoFachada = async (clientId) => {
+        try {
+            const documents = await makeRequest(`/document/all/${clientId}`);
+            const fotoFachada = documents.find(doc => doc.Description === 'Foto de Fachada');
+            return fotoFachada ? fotoFachada.Document : null;
+        } catch (error) {
+            console.log('Error obteniendo foto de fachada:', error);
+            return null;
+        }
+    };
+
+    // Función para cargar todas las fotos de fachada
+    const loadFotosFachada = async (clientsList) => {
+        const documentsMap = {};
+        for (const client of clientsList) {
+            const fotoFachada = await getFotoFachada(client._id);
+            documentsMap[client._id] = fotoFachada;
+        }
+        setClientDocuments(documentsMap);
     };
 
     useEffect(() => {
@@ -111,6 +251,10 @@ function HomeComponent() {
             try {
                 const res = await makeRequest('/client/all');
                 setClients(res || []);
+                // Cargar fotos de fachada después de obtener los clientes
+                if (res && res.length > 0) {
+                    await loadFotosFachada(res);
+                }
             } catch (error) {
                 console.log(error);
             }
@@ -124,31 +268,25 @@ function HomeComponent() {
         t => t.Status === 'En espera'
     );
 
-    // Filtrar clientes nuevos (últimos 30 días) y ordenar de reciente a antiguo
-    const clientesNuevos = clients
-        .filter(client => {
-            if (!client.CreateDate) return false;
-            const fechaRegistro = new Date(client.CreateDate);
-            const fechaActual = new Date();
-            const diasDiferencia = (fechaActual - fechaRegistro) / (1000 * 60 * 60 * 24);
-            return diasDiferencia <= 30;
-        })
+    // Ordenar todos los clientes de reciente a antiguo
+    const todosLosClientes = clients
+        .filter(client => client.CreateDate) // Solo clientes con fecha válida
         .sort((a, b) => new Date(b.CreateDate) - new Date(a.CreateDate));
 
     return (
         <div className="content mt-3" style={{ marginLeft: '70px' }}>
             {/* Primera fila */}
             <div className="dashboard-row" style={{ minHeight: '250px' }}>
-                <div className="dashboard-card" style={{ background: boxColors.clientesNuevos }}>
+                <div className="dashboard-card" style={{ background: boxColors.clientes }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Clientes Nuevos</h5>
+                        <h5 className="border-bottom">Clientes</h5>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
-                        {clientesNuevos.length === 0 ? (
-                            <span className="text-muted">No hay clientes nuevos</span>
+                        {todosLosClientes.length === 0 ? (
+                            <span className="text-muted">No hay clientes registrados</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {(showAllTickets ? clientesNuevos : clientesNuevos.slice(0, 8)).map(client => (
+                                {(showAllClients ? todosLosClientes : todosLosClientes.slice(0, 8)).map(client => (
                                     <li
                                         key={client._id}
                                         className="list-group-item py-1 px-2"
@@ -159,7 +297,7 @@ function HomeComponent() {
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
-                                                    <i className="bi bi-person-plus-fill text-success me-1"></i>
+                                                    <i className="bi bi-person-fill text-info me-1"></i>
                                                     {[
                                                         client.Name.FirstName,
                                                         client.Name.SecondName,
@@ -170,18 +308,30 @@ function HomeComponent() {
                                                 <br />
                                                 <small className="text-muted">{client.CreateDate ? new Date(client.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</small>
                                             </div>
-                                            <span className="badge bg-primary">Nuevo</span>
+                                            {(() => {
+                                                // Calcular si es cliente nuevo (últimos 30 días)
+                                                if (!client.CreateDate) return <span className="badge bg-secondary">Sin fecha</span>;
+                                                const fechaRegistro = new Date(client.CreateDate);
+                                                const fechaActual = new Date();
+                                                const diasDiferencia = (fechaActual - fechaRegistro) / (1000 * 60 * 60 * 24);
+                                                
+                                                if (diasDiferencia <= 30) {
+                                                    return <span className="badge bg-success">Nuevo</span>;
+                                                } else {
+                                                    return <span className="badge bg-info">Cliente</span>;
+                                                }
+                                            })()}
                                         </div>
                                     </li>
                                 ))}
-                                {clientesNuevos.length > 8 && (
+                                {todosLosClientes.length > 8 && (
                                     <li className="list-group-item py-1 px-2 text-center">
                                         <button
                                             className="btn btn-link btn-sm p-0 text-decoration-none"
-                                            onClick={() => setShowAllTickets(!showAllTickets)}
+                                            onClick={() => setShowAllClients(!showAllClients)}
                                             style={{ fontSize: '0.8rem' }}
                                         >
-                                            {showAllTickets ? (
+                                            {showAllClients ? (
                                                 <>
                                                     <i className="bi bi-chevron-up me-1"></i>
                                                     Mostrar menos
@@ -189,7 +339,7 @@ function HomeComponent() {
                                             ) : (
                                                 <>
                                                     <i className="bi bi-chevron-down me-1"></i>
-                                                    +{clientesNuevos.length - 8} clientes más...
+                                                    +{todosLosClientes.length - 8} clientes más...
                                                 </>
                                             )}
                                         </button>
@@ -226,7 +376,7 @@ function HomeComponent() {
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Estado de Red</h6>
                     </div>
-                    <div className="flex-grow-1">
+                    <div className="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
                         <EstadoRedResumen />
                     </div>
                 </div>
@@ -246,7 +396,7 @@ function HomeComponent() {
                     </div>
                     <p>Total de Clientes: </p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                        {/* Aquí va tu gráfica circular */}
+                        <RadioChart />
                     </div>
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.fibra }}>
@@ -255,20 +405,19 @@ function HomeComponent() {
                     </div>
                     <p>Total de Clientes: </p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                        {/* Aquí va tu gráfica circular */}
+                        <FibraChart />
                     </div>
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.tickets }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Todos los Tickets</h6>
+                        <h6 className="border-bottom">Tickets</h6>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {tickets.length === 0 ? (
                             <span className="text-muted">No hay tickets registrados</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {(showAllTickets ? tickets : tickets.slice(0, 8)).map(ticket => (
-                                    
+                                {(showAllTicketsState ? tickets : tickets.slice(0, 8)).map(ticket => (
                                     <li
                                         key={ticket._id}
                                         className="list-group-item py-1 px-2"
@@ -308,19 +457,19 @@ function HomeComponent() {
                                     <li className="list-group-item py-1 px-2 text-center">
                                         <button
                                             className="btn btn-link btn-sm p-0 text-decoration-none"
-                                            onClick={() => setShowAllTickets(!showAllTickets)}
+                                            onClick={() => setShowAllTicketsState(!showAllTicketsState)}
                                             style={{ fontSize: '0.8rem' }}
                                         >
-                                            {showAllTickets ? (
-                                                <span>
+                                            {showAllTicketsState ? (
+                                                <>
                                                     <i className="bi bi-chevron-up me-1"></i>
                                                     Mostrar menos
-                                                </span>
+                                                </>
                                             ) : (
-                                                <span>
+                                                <>
                                                     <i className="bi bi-chevron-down me-1"></i>
                                                     +{tickets.length - 8} tickets más...
-                                                </span>
+                                                </>
                                             )}
                                         </button>
 

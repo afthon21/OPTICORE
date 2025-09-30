@@ -5,7 +5,7 @@ import payment from '../models/paymentsSchema.js';
 import ticket from '../models/ticketsSchema.js';
 
 //Create a new client
-export const newClient = async (req, res) => {
+export const newClient = async(req, res) => {
     const {
         Name: {
             FirstName,
@@ -67,7 +67,7 @@ export const newClient = async (req, res) => {
 }
 
 //View all clients
-export const viewAllClient = async (req, res) => {
+export const viewAllClient = async(req, res) => {
     try {
         const allClients = await client.find();
         return res.status(200).json(allClients);
@@ -78,7 +78,7 @@ export const viewAllClient = async (req, res) => {
 }
 
 //View id Client
-export const viewIdClient = async (req, res) => {
+export const viewIdClient = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -95,7 +95,7 @@ export const viewIdClient = async (req, res) => {
 }
 
 //Editar el cliente
-export const editClient = async (req, res) => {
+export const editClient = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -142,7 +142,7 @@ export const editClient = async (req, res) => {
 }
 
 //Eliminar cliente
-export const deleteClient = async (req, res) => {
+export const deleteClient = async(req, res) => {
     const id = req.params.id;
 
     try {

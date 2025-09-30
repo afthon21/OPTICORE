@@ -40,7 +40,12 @@ import ArchivedTickets from './components/tickets/Ticket.Archived.jsx';
 function App() {
   return (
     <RegionProvider>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <NavbarFragmentAll />
         <div className="container d-flex content">
           <Routes>

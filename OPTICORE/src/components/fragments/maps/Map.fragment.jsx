@@ -24,7 +24,15 @@ function MapGoogle({ position }) {
 
     return (
         <APIProvider apiKey={API_KEY}>
-            <div style={{ width: "100%", height: "400px" }}>
+            <div style={{ 
+                width: "100%", 
+                height: "400px", 
+                borderRadius: "0px", 
+                overflow: "hidden", 
+                border: "none",
+                margin: "0",
+                padding: "0"
+            }}>
                 <Map 
                     mapId={mapId}
                     defaultZoom={15} 

@@ -1,3 +1,6 @@
+import { useRegion } from "../../hooks/RegionContext";
+import { useEffect, useState } from "react";
+
 function Topologia() {
     return (
         <div>

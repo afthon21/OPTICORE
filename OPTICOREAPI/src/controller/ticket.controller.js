@@ -52,7 +52,7 @@ export const createTicket = async (req, res) => {
 export const viewAllTickets = async (req, res) => {
     try {
         const allTickets = await ticket.find()
-            .populate('Client', 'Name LastName')
+            .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
             .populate('tecnico')
             .exec();

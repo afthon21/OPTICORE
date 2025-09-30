@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import ApiRequest from "../hooks/apiRequest";
 import Swal from 'sweetalert2'; // Asegúrate de tener esta importación
 import Select from 'react-select';
+import { useRegion, RegionProvider } from '../../hooks/RegionContext.jsx';
+
+
 
 const fiberPackages = [
   { name: "50 Megas", price: 349 },
@@ -53,6 +56,7 @@ const platforms = [
 const whatsappLogo = "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
 
 export default function Card({ onPackageCreated }) {
+  const { region } = useRegion();
   const [type, setType] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
@@ -61,6 +65,14 @@ export default function Card({ onPackageCreated }) {
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [packages, setPackages] = useState([]);
+
+  const getFilteredPackages = (packageType) => {
+    const packages = packageType === "fiber" ? fiberPackages : radioPackages;
+      if (region === "Puebla") {
+        return packages.filter(pkg => pkg.name !== "50 Megas");
+      }
+      return packages;
+  };
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -257,7 +269,8 @@ export default function Card({ onPackageCreated }) {
             marginBottom: 60,
           }}
         >
-          {(type === "fiber" ? fiberPackages : radioPackages).map((pkg) => (
+          
+          {getFilteredPackages(type).map((pkg) => (
             <div
               key={pkg.name}
               onClick={() => {

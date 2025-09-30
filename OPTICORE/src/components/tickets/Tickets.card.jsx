@@ -2,8 +2,10 @@ import styleCard from './css/ticketsCard.module.css';
 import styleTable from './css/ticketsCard.module.css';
 
 import { useState } from 'react';
+import { useRegion } from '../../hooks/RegionContext';
 
 function TicketsCard({ tickets = [], onSelected }) {
+    const { region } = useRegion();
     const [search, setSearch] = useState('');
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('');
@@ -12,8 +14,26 @@ function TicketsCard({ tickets = [], onSelected }) {
         setSearch(e.target.value);
     };
 
+    // Filtro por región primero
+    const ticketsByRegion = tickets.filter(ticket => {
+        // Si no hay región seleccionada, mostrar todos
+        if (!region) return true;
+        
+        // Verificar que el ticket tenga cliente y ubicación
+        if (!ticket.Client || !ticket.Client.Location) return false;
+        
+        // Filtrar por el estado de la ubicación del cliente
+        const matches = ticket.Client.Location.State === region;
+        if (matches) {
+            console.log(`Ticket ${ticket.Folio} del cliente en ${ticket.Client.Location.State} coincide con región ${region}`);
+        }
+        return matches;
+    });
+
+    console.log(`Filtrado tickets por región: ${ticketsByRegion.length}/${tickets.length} tickets para región: ${region}`);
+
     // Filtro por estado, folio, fecha y cliente
-    const filteredName = tickets.filter(ticket => {
+    const filteredName = ticketsByRegion.filter(ticket => {
         const folio = ticket.Folio?.toString().toLowerCase() || '';
         const estado = ticket.Status?.toLowerCase() || '';
         const fecha = ticket.CreateDate?.split("T")[0] || '';
