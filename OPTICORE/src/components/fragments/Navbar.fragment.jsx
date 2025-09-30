@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useRegion } from '../../hooks/RegionContext';
 
-import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket } from './js/Routes.js';
+import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket, handleArchiveTickets} from './js/Routes.js';
 import { handleClients, handleCreateClient, handlePayments, handleCreatePayment } from './js/Routes.js';
 import { handlePackages, handleCreatePackages, handleArchiveClients} from './js/Routes.js';
 
@@ -156,7 +156,7 @@ export function NavbarFragmentAll() {
                         <li className="ms-4">
                             <a
                                 className="nav-link"
-                                // onClick={() => handleArchiveTickets(navigate, adminId)}
+                                onClick={() => handleArchiveTickets(navigate, adminId)}
                                 role="button"
                             >
                                 Archivados

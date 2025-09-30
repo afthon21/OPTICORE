@@ -67,3 +67,7 @@ export const handleResetPassword = (navigate) => {
 export const handleArchiveClients = (navigate, adminId) => {
     navigate(`/clients/archived/${adminId}`);
 };
+export const handleArchiveTickets = (navigate, adminId) => {
+    navigate(`/tickets/archived/${adminId}`);
+
+}

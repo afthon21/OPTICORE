@@ -6,7 +6,6 @@ function ArchivedClients() {
   const [clients, setClients] = useState([]);
   const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
   const { adminId } = useParams();
-  
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -34,25 +33,47 @@ function ArchivedClients() {
   };
 
   return (
-    <div className="archived-clients-list">
-      <h2>Clientes Archivados</h2>
-      {/* Puedes mostrar el adminId si lo necesitas: <div>Admin: {adminId}</div> */}
+    <div className="archived-clients-list mt-4">
+      <h2 className="mb-4">Clientes Archivados</h2>
       {clients.length === 0 ? (
         <p>No hay clientes archivados.</p>
       ) : (
-        <ul className="list-group">
-          {clients.map(client => (
-            <li key={client._id} className="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <strong>{client.Name.FirstName} {client.Name.SecondName} {client.LastName.FatherLastName} {client.LastName.MotherLastName}</strong><br/>
-                <span>{client.Email}</span>
-              </div>
-              <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(client._id)}>
-                Desarchivar
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="table-responsive">
+          <table className="table table-striped table-hover align-middle">
+            <thead className="table-dark">
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clients.map(client => (
+                <tr key={client._id}>
+                  <td>
+                    <strong>{client.Name.FirstName} {client.Name.SecondName} {client.LastName.FatherLastName} {client.LastName.MotherLastName}</strong>
+                  </td>
+                  <td>{client.Email}</td>
+                  <td>{Array.isArray(client.PhoneNumber) ? client.PhoneNumber.join(', ') : client.PhoneNumber}</td>
+                  <td>
+                    {client.Location ? (
+                      <span>
+                        {client.Location.State}, {client.Location.Municipality}, {client.Location.Address}
+                      </span>
+                    ) : 'Sin dirección'}
+                  </td>
+                  <td>
+                    <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(client._id)}>
+                      Desarchivar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

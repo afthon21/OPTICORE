@@ -32,6 +32,7 @@ import OltPorts from './components/network/OltPorts';
 import NetworkHealth from './components/network/NetworkHealth';
 import Onus from './components/network/Onus.jsx';
 import ArchivedClients from './components/clients/ArchivedClients.jsx';
+import ArchivedTickets from './components/tickets/Ticket.Archived.jsx';
 
 
 
@@ -49,6 +50,7 @@ function App() {
             {/* tickets rutas */}
             <Route path='/ticket/:adminId' element={<ProtectedRoute> <TicketComponent /> </ProtectedRoute>}></Route>
             <Route path='/ticket/create/:adminId' element={<ProtectedRoute> <CreateTicket /> </ProtectedRoute>}></Route>
+            <Route path='/ticket/archived/:adminId' element={<ProtectedRoute><ArchivedTickets /> </ProtectedRoute>}></Route>
             {/* clientes rutas */}
             <Route path='/clients/:adminId' element={<ProtectedRoute> <ClientsComponent /> </ProtectedRoute>}></Route>
             <Route path='/clients/register/:adminId' element={<ProtectedRoute> <CreateClient /> </ProtectedRoute>}></Route>
