@@ -18,29 +18,45 @@ function ClientData({ client, onUpdateClient }) {
     const toggleStatus = async () => {
         if (!currentClient?._id) return;
         const newStatus = currentClient.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-        const updated = await makeRequest(`/client/edit/${currentClient._id}`,'POST',{ Status: newStatus });
-        if (updated) {
-            setCurrentClient(updated);
-            if (onUpdateClient) onUpdateClient(updated);
-            Swal.fire({
-                icon: 'success',
-                title: 'Estado actualizado',
-                text: `El cliente ahora está ${newStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}`,
-                timer: 1200,
-                position: 'top',
-                showConfirmButton: false,
-                toast: true
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo actualizar el estado',
-                timer: 1500,
-                showConfirmButton: false,
-                position: 'top',
-                toast: true
-            });
+        const actionText = newStatus === 'ACTIVE' ? 'activar' : 'desactivar';
+        const clientName = `${currentClient.Name.FirstName} ${currentClient.Name.SecondName || ''} ${currentClient.LastName.FatherLastName} ${currentClient.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim();
+        
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `¿Quieres ${actionText} al cliente ${clientName}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: newStatus === 'ACTIVE' ? '#28a745' : '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Sí, ${actionText}`,
+            cancelButtonText: 'Cancelar'
+        });
+        
+        if (result.isConfirmed) {
+            const updated = await makeRequest(`/client/edit/${currentClient._id}`,'POST',{ Status: newStatus });
+            if (updated) {
+                setCurrentClient(updated);
+                if (onUpdateClient) onUpdateClient(updated);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Estado actualizado',
+                    text: `El cliente ahora está ${newStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}`,
+                    timer: 1200,
+                    position: 'top',
+                    showConfirmButton: false,
+                    toast: true
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    position: 'top',
+                    toast: true
+                });
+            }
         }
     }
 

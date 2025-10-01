@@ -32,59 +32,62 @@ function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
     }, [client]);
 
     const toggleData = (data) => {
-        if (!currentClient) {
-            Swal.fire({
-                icon: 'warning',
-                iconColor: 'red',
-                title: 'Advertencia',
-                text: 'Seleccione un cliente',
-                timer: 700,
-                toast: true,
-                position: 'top',
-                showConfirmButton: false
-            })
-        } else {
-            setShow({
-                personal: false,
-                payments: false,
-                documents: false,
-                location: false,
-                tickets: false,
-                notes: false,
-                active: false,
-                [data]: true
-            })
-        }
+        setShow({
+            personal: false,
+            payments: false,
+            documents: false,
+            location: false,
+            tickets: false,
+            notes: false,
+            active: false,
+            [data]: true
+        })
     }
 
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     const toggleStatusFromActive = async (item) => {
         const newStatus = item.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-        const updated = await makeRequest(`/client/edit/${item._id}`,'POST',{ Status: newStatus });
-        if (updated) {
-            if (onGlobalUpdate) onGlobalUpdate(updated);
-            // si el cliente mostrado es el que se actualizó, reflejarlo
-            setCurrentClient(prev => prev && prev._id === updated._id ? updated : prev);
-            Swal.fire({
-                icon: 'success',
-                title: 'Estado actualizado',
-                text: `Cliente ahora ${newStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}`,
-                timer: 1100,
-                toast: true,
-                position: 'top',
-                showConfirmButton: false
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo actualizar el estado',
-                timer: 1400,
-                toast: true,
-                position: 'top',
-                showConfirmButton: false
-            });
+        const actionText = newStatus === 'ACTIVE' ? 'activar' : 'desactivar';
+        const clientName = `${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim();
+        
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `¿Quieres ${actionText} al cliente ${clientName}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: newStatus === 'ACTIVE' ? '#28a745' : '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Sí, ${actionText}`,
+            cancelButtonText: 'Cancelar'
+        });
+        
+        if (result.isConfirmed) {
+            const updated = await makeRequest(`/client/edit/${item._id}`,'POST',{ Status: newStatus });
+            if (updated) {
+                if (onGlobalUpdate) onGlobalUpdate(updated);
+                // si el cliente mostrado es el que se actualizó, reflejarlo
+                setCurrentClient(prev => prev && prev._id === updated._id ? updated : prev);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Estado actualizado',
+                    text: `Cliente ahora ${newStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}`,
+                    timer: 1100,
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado',
+                    timer: 1400,
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false
+                });
+            }
         }
     }
 
@@ -214,17 +217,17 @@ function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
                     {show.active && (
                         <div className="mt-2">
                             <h5>Clientes Activos</h5>
-                            <table className="table table-sm">
-                                <thead>
+                            <table className="table table-hover justify-content-center">
+                                <thead className={styleCard['head-table']}>
                                     <tr>
                                         <th>Nombre</th>
                                         <th>Estado</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className={`text-wrap ${styleCard['table-body']}`}>
                                     {clients.filter(c => c.Status === 'ACTIVE').map(item => (
-                                        <tr key={item._id} style={{ cursor:'pointer' }}>
+                                        <tr key={item._id} className={styleCard['selected-row']}>
                                             <td onClick={()=>{ setCurrentClient(item); setShow(s=>({...s, personal:true, active:false})); }}>
                                                 {`${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g,' ').trim()}
                                             </td>
@@ -239,7 +242,7 @@ function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
                                         </tr>
                                     ))}
                                     {clients.filter(c => c.Status === 'ACTIVE').length === 0 && (
-                                        <tr><td colSpan="3">No hay clientes activos.</td></tr>
+                                        <tr><td colSpan="3" className="text-center text-muted">No hay clientes activos.</td></tr>
                                     )}
                                 </tbody>
                             </table>
