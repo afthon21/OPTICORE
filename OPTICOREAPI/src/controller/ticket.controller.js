@@ -1,3 +1,13 @@
+// Obtener solo tickets archivados
+export const viewArchivedTickets = async (req, res) => {
+    try {
+        const archivedTickets = await ticket.find({ Archived: true });
+        return res.status(200).json(archivedTickets);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error finding archived tickets' });
+    }
+}
 import ticket from '../models/ticketsSchema.js';
 import client from "../models/clientSchema.js";
 
