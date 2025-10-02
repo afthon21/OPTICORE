@@ -66,3 +66,6 @@ export const handleResetPassword = (navigate) => {
     const resetPassUrl = '/reset-password-new';
     navigate(resetPassUrl);
 }
+export const handleArchiveClients = (navigate, adminId) => {
+    navigate(`/clients/archived/${adminId}`);
+};
