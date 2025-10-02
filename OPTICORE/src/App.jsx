@@ -70,6 +70,12 @@ function App() {
             <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
             {/* Monitoreo de red */}
             <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
+            <Route path='/network/radiofrecuencia/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/mapa/:adminId' element={<ProtectedRoute><Mapa /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/topologia/:adminId' element={<ProtectedRoute><Topologia /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/logs/:adminId' element={<ProtectedRoute><Logs /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/onus/:adminId' element={<ProtectedRoute><Onus /></ProtectedRoute>}></Route>
             <Route path='/network/fibra-optica/:adminId' element={<FibraOptica />}></Route>
             <Route path='/network/fibra-optica/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
             <Route path='/network/fibra-optica/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>
