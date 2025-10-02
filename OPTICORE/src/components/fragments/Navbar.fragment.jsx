@@ -289,14 +289,14 @@ export function NavbarFragmentAll() {
                 </li>
                 {/* NetWork con submenú */}
                 <li className="nav-item item">
-                    <a
-                        className="nav-link d-flex align-items-center item-link"
+                    <a className="nav-link d-flex align-items-center item-link"
                         role="button">
                         <i className="bi bi-wifi me-2"></i>
                         <span className="item-title">Network</span>
                     </a>
+                    
                     <ul className="list-unstyled ps-3 sub-menu">
-                        <li className="ms-4">
+                        <li className="ms-4 item">
                             <a
                                 className="nav-link"
                                 onClick={() => navigate(`/network/radiofrecuencia/${adminId}`)}
@@ -304,8 +304,31 @@ export function NavbarFragmentAll() {
                             >
                                 Radiofrecuencia
                             </a>
+                            
+                            <ul className="list-unstyled ps-3 sub-menu">
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/radiofrecuencia/mapa/${adminId}`)} role="button">
+                                        Mapa
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/radiofrecuencia/topologia/${adminId}`)} role="button">
+                                        Topología
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/radiofrecuencia/onus/${adminId}`)} role="button">
+                                        Onus
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a className="nav-link" onClick={() => navigate(`/network/radiofrecuencia/logs/${adminId}`)} role="button">
+                                        Logs
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li className="ms-4">
+                        <li className="ms-4 item">
                             <a
                                 className="nav-link"
                                 onClick={() => navigate(`/network/fibra-optica/${adminId}`)}
@@ -313,6 +336,7 @@ export function NavbarFragmentAll() {
                             >
                                 Fibra Óptica
                             </a>
+                            
                             <ul className="list-unstyled ps-3 sub-menu">
                                 <li className="ms-4">
                                     <a className="nav-link" onClick={() => navigate(`/network/fibra-optica/mapa/${adminId}`)} role="button">

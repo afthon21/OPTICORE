@@ -93,6 +93,35 @@
     transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* Hover anidado: submenús dentro de submenús */
+.sub-menu .item:focus-within > .sub-menu,
+.sub-menu .item:hover > .sub-menu {
+    max-height: 400px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Asegurar que los submenús anidados estén ocultos por defecto - MÁS ESPECÍFICO */
+.item .sub-menu .sub-menu {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    transform: translateY(-30px);
+    transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+    display: none !important;
+}
+
+/* Solo mostrar submenús anidados cuando se hace hover específicamente en su padre directo */
+.item .sub-menu .item:hover > .sub-menu {
+    max-height: 400px !important;
+    opacity: 1 !important;
+    transform: translateY(0);
+    display: block !important;
+}
+
+
+
 .border-div {
     border: none;
     border-top: 2px solid #002b5b;
