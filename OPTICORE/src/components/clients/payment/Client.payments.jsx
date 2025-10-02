@@ -1,6 +1,7 @@
 import stylePayment from '../css/clientPayments.module.css'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import PropTypes from 'prop-types';
 import ApiRequest from '../../hooks/apiRequest.jsx';
 
 import { LoadFragment } from '../../fragments/Load.fragment.jsx';
@@ -14,18 +15,24 @@ function ClientPayments({ client }) {
     const [sortColumn, setSortColumn] = useState(null); // 'Folio', 'Method', 'CreateDate'
     const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
+        if (!client) return; // No hacer fetch si no hay cliente
         try {
             const res = await makeRequest(`/pay/all/${client}`);
             setData(res);
         } catch (error) {
             console.log(error);
         }
-    }
+    }, [client, makeRequest]);
 
     useEffect(() => {
         fetchData();
-    }, [makeRequest, client]);
+    }, [fetchData]);
+    
+    // Mostrar mensaje si no hay cliente seleccionado
+    if (!client) {
+        return <p>Seleccione un cliente para ver sus pagos.</p>;
+    }
     
     const handleSort = (column) => {
         if (sortColumn === column) {
@@ -131,3 +138,7 @@ function ClientPayments({ client }) {
 }
 
 export default ClientPayments;
+
+ClientPayments.propTypes = {
+    client: PropTypes.string
+};

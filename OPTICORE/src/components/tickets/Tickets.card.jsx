@@ -186,6 +186,23 @@ function TicketsCard({ tickets = [], onSelected }) {
                             </td>
                             <td>{item.Status}</td>
                             <td>{item.CreateDate.split("T")[0]}</td>
+                            <td>
+                                {!item.Archived && (
+                                    <button className="btn btn-outline-danger btn-sm" onClick={e => {
+                                        e.stopPropagation();
+                                        if (window.confirm('¿Seguro que quieres archivar este ticket?')) {
+                                            fetch(`/api/ticket/archive/${item._id}`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' }
+                                            }).then(() => {
+                                                window.location.reload();
+                                            });
+                                        }
+                                    }}>
+                                        Archivar
+                                    </button>
+                                )}
+                            </td>
                         </tr>
                     ))}
                 </tbody>

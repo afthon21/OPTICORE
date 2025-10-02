@@ -1,6 +1,7 @@
 import styleTickets from '../css/clientTickets.module.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import CreateTicket from './CreateTicket.modal.jsx';
 import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import ApiRequest from '../../hooks/apiRequest.jsx';
@@ -12,36 +13,38 @@ function ClientTickets({ client }) {
     const [select, setSelect] = useState(null);
     const [technicians, setTechnicians] = useState([]); 
 
-    
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
+        if (!client) return; // No hacer fetch si no hay cliente
         try {
             const res = await makeRequest(`/ticket/all/${client}`);
             setData(res);
         } catch (error) {
             console.log(error);
         }
-    }
+    }, [client, makeRequest]);
    
+    const fetchTechnicians = useCallback(async () => {
+        try {
+            const res = await makeRequest('/technician/all');
+            setTechnicians(res);
+        } catch (error) {
+            console.log(error);
+        }
+    }, [makeRequest]);
 
-const fetchTechnicians = async () => {
-    try {
-        const res = await makeRequest('/technician/all');
-        setTechnicians(res);
-    } catch (error) {
-        console.log(error);
+    useEffect(() => {
+        fetchData();
+        fetchTechnicians();
+    }, [fetchData, fetchTechnicians]);
+
+    // Mostrar mensaje si no hay cliente seleccionado
+    if (!client) {
+        return <p>Seleccione un cliente para ver sus tickets.</p>;
     }
-};
-
-useEffect(() => {
-    fetchData();
-    fetchTechnicians();
-}, [makeRequest]);
-
     
     if (loading) return <LoadFragment />
 
-    if (error) return <p>Error!</p>
+    if (error) return <p>Error cargando tickets!</p>
 
     return (
         <>
@@ -88,5 +91,9 @@ useEffect(() => {
         </>
     );
 }
+
+ClientTickets.propTypes = {
+    client: PropTypes.string
+};
 
 export default ClientTickets;

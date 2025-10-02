@@ -13,14 +13,14 @@ function ClientsComponent() {
     const [select, setSelect] = useState(null);
     const [activeTab, setActiveTab] = useState('personal');
 
-    const handleLoad = async () => {
+    const handleLoad = useCallback(async () => {
         try {
             const res = await makeRequest('/client/all');
             setData(res);
         } catch (error) {
             console.log(error);
         }
-    }
+    }, [makeRequest]);
 
     useEffect(() => {
         handleLoad();
@@ -37,6 +37,11 @@ function ClientsComponent() {
     if (loading) return <LoadFragment />
 
     if (error) return <p>Error!</p>
+
+    const handleUpdateClient = (updated) => {
+        setData(prev => prev.map(c => c._id === updated._id ? updated : c));
+        setSelect(prev => prev && prev._id === updated._id ? updated : prev);
+    }
 
     return (
         <div className="container-fluid d-flex mt-1 ms-4">
