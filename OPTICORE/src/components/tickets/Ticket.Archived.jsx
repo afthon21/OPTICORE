@@ -10,8 +10,8 @@ function ArchivedTickets() {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const res = await makeRequest('/ticket/all');
-        setTickets((res || []).filter(t => t.Archived === true));
+        const res = await makeRequest('/ticket/archived');
+        setTickets(res || []);
       } catch (error) {
         setTickets([]);
       }

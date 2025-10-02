@@ -191,7 +191,7 @@ function TicketsCard({ tickets = [], onSelected }) {
                                     <button className="btn btn-outline-danger btn-sm" onClick={e => {
                                         e.stopPropagation();
                                         if (window.confirm('¿Seguro que quieres archivar este ticket?')) {
-                                            fetch(`/api/ticket/archive/${item._id}`, {
+                                            fetch(`/ticket/archive/${item._id}`, {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' }
                                             }).then(() => {
