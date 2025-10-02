@@ -1,8 +1,8 @@
 import MapGoogle from "../../fragments/maps/Map.fragment";
-<<<<<<< HEAD
 
 import ApiRequest from "../../hooks/apiRequest";
 import { useState, useEffect } from "react";
+
 
 function ClientLocation({ client }) {
     const [marker, setMarker] = useState({
@@ -108,20 +108,9 @@ function ClientLocation({ client }) {
                 <small className="text-muted">Google Maps no disponible</small>
             </div>
         );
-=======
-import PropTypes from 'prop-types';
-
-function ClientLocation({ client }) {
-    // Mostrar mensaje si no hay cliente seleccionado
-    if (!client) {
-        return <p>Seleccione un cliente para ver su ubicación.</p>;
     }
 
-    const marker = {
-        lat: client.Location.Latitude,
-        lng: client.Location.Length
->>>>>>> origin/Eric
-    }
+
 
     return (
         <div style={{ 
@@ -133,13 +122,4 @@ function ClientLocation({ client }) {
     );
 }
 
-export default ClientLocation;
-
-ClientLocation.propTypes = {
-    client: PropTypes.shape({
-        Location: PropTypes.shape({
-            Latitude: PropTypes.number,
-            Length: PropTypes.number
-        })
-    })
-};
+export default ClientLocation
