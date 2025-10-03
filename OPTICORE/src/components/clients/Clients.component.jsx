@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import ClientsCard from './Clients.card';
@@ -24,7 +24,7 @@ function ClientsComponent() {
 
     useEffect(() => {
         handleLoad();
-    }, []);
+    }, [handleLoad]);
 
     // Manejar navegación desde otros componentes
     useEffect(() => {

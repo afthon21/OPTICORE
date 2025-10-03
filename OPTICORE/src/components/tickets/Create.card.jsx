@@ -12,6 +12,10 @@ import { DropdownTechnicians } from '../fragments/Dropdown.technician.jsx';
 
 
 export function CardCreateTicket({ clients = [], technician = [] }) {
+    console.log('📋 CardCreateTicket renderizado:');
+    console.log('  - Clientes:', clients.length);
+    console.log('  - Técnicos:', technician.length);
+    console.log('  - Lista de técnicos:', technician);
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -96,8 +100,10 @@ export function CardCreateTicket({ clients = [], technician = [] }) {
     setIsTechOpen(true);
 };
 const handleTechOptionClick = (option) => {
-    const techName = `${option.nombre} ${option.apellidoP || ''}`.replace(/\s+/g, ' ').trim();
-    // setSelectedTech(techName); // <-- Elimina esta línea
+    // Manejar ambas estructuras de datos
+    const techName = option.apellidoP 
+        ? `${option.nombre} ${option.apellidoP} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim()
+        : option.nombre;
     setFormValues((prev) => ({ ...prev, tecnico: techName }));
     setSearchTech(techName);
     setIsTechOpen(false);
@@ -105,7 +111,10 @@ const handleTechOptionClick = (option) => {
 
     const filteredTechOptions = technician.filter((option) => {
         if (!option.nombre) return false; // Validar que existe el nombre
-        const techName = `${option.nombre} ${option.apellidoP || ''}`.replace(/\s+/g, ' ').trim();
+        // Manejar ambas estructuras de datos
+        const techName = option.apellidoP 
+            ? `${option.nombre} ${option.apellidoP} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim()
+            : option.nombre;
         // Si searchTech está vacío, mostrar todos los técnicos
         if (!searchTech || searchTech.trim() === '') return true;
         return techName.toLowerCase().includes(searchTech.toLowerCase());

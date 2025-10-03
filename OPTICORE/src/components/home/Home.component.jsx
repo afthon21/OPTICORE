@@ -28,6 +28,11 @@ function HomeComponent() {
     const [userName, setUserName] = useState('');
     const [clients, setClients] = useState([]);
     const [clientDocuments, setClientDocuments] = useState({});
+    const [packages, setPackages] = useState([]);
+    const [chartData, setChartData] = useState({
+        fibra: { labels: [], data: [], total: 0 },
+        radio: { labels: [], data: [], total: 0 }
+    });
     // Estado para el modal de detalles de dirección
     const [addressDetailModalOpen, setAddressDetailModalOpen] = useState(false);
     const [selectedClientForAddressDetail, setSelectedClientForAddressDetail] = useState(null);
@@ -46,6 +51,81 @@ function HomeComponent() {
         pendientes: '#ecebebff',
     });
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
+    // Función para obtener paquetes
+    const fetchPackages = async () => {
+        try {
+            const res = await makeRequest('/packages/all');
+            if (res) {
+                setPackages(res);
+                processChartData(res, clients);
+            }
+        } catch (error) {
+            console.error('Error fetching packages:', error);
+        }
+    };
+
+    // Función para procesar datos de las gráficas
+    const processChartData = (packagesData, clientsData) => {
+        // Inicializar contadores
+        const fibraStats = {
+            '50 Megas': 0,
+            '100 Megas': 0, 
+            '200 Megas': 0,
+            '300 Megas': 0
+        };
+        
+        const radioStats = {
+            '10 Megas': 0,
+            '15 Megas': 0,
+            '20 Megas': 0
+        };
+        
+        let fibraTotal = 0;
+        let radioTotal = 0;
+        
+        // Contar paquetes por tipo y velocidad
+        packagesData.forEach(pkg => {
+            const speed = pkg.type || 'No especificado';
+            const connectionType = pkg.connectionType || '';
+            
+            if (connectionType.includes('Fibra')) {
+                if (fibraStats.hasOwnProperty(speed)) {
+                    fibraStats[speed]++;
+                    fibraTotal++;
+                }
+            } else if (connectionType.includes('Radio')) {
+                if (radioStats.hasOwnProperty(speed)) {
+                    radioStats[speed]++;
+                    radioTotal++;
+                }
+            }
+        });
+        
+        // Convertir a porcentajes basado en cada tipo específico
+        const fibraLabels = Object.keys(fibraStats).filter(key => fibraStats[key] > 0);
+        const fibraData = fibraLabels.map(key => 
+            fibraTotal > 0 ? Math.round((fibraStats[key] / fibraTotal) * 100) : 0
+        );
+        
+        const radioLabels = Object.keys(radioStats).filter(key => radioStats[key] > 0);
+        const radioData = radioLabels.map(key => 
+            radioTotal > 0 ? Math.round((radioStats[key] / radioTotal) * 100) : 0
+        );
+        
+        setChartData({
+            fibra: {
+                labels: fibraLabels.length > 0 ? fibraLabels : ['Sin datos'],
+                data: fibraData.length > 0 ? fibraData : [0],
+                total: fibraTotal
+            },
+            radio: {
+                labels: radioLabels.length > 0 ? radioLabels : ['Sin datos'],
+                data: radioData.length > 0 ? radioData : [0],
+                total: radioTotal
+            }
+        });
+    };
 
     // Función para mostrar detalles del cliente en un modal
     const handleShowClientDetails = (client) => {
@@ -353,14 +433,37 @@ function HomeComponent() {
                 if (res && res.length > 0) {
                     await loadFotosFachada(res);
                 }
+                return res || [];
             } catch (error) {
                 console.log(error);
+                return [];
             }
         };
 
-        fetchTickets();
-        fetchClients();
+        const loadInitialData = async () => {
+            fetchTickets();
+            const clientsData = await fetchClients();
+            // Cargar paquetes después de obtener clientes para calcular porcentajes
+            try {
+                const packagesRes = await makeRequest('/packages/all');
+                if (packagesRes) {
+                    setPackages(packagesRes);
+                    processChartData(packagesRes, clientsData);
+                }
+            } catch (error) {
+                console.error('Error fetching packages:', error);
+            }
+        };
+
+        loadInitialData();
     }, []);
+
+    // Recargar datos cuando cambien los clientes
+    useEffect(() => {
+        if (packages.length > 0 && clients.length > 0) {
+            processChartData(packages, clients);
+        }
+    }, [clients, packages]);
 
     const pendientes = tickets.filter(
         t => t.Status === 'En espera'
@@ -494,18 +597,18 @@ function HomeComponent() {
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Radio Frecuencia - Paquetes</h6>
                     </div>
-                    <p>Total de Clientes: </p>
+                    <p>Total de Clientes: <strong>{chartData.radio.total}</strong></p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                        <RadioChart />
+                        <RadioChart data={chartData.radio} />
                     </div>
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.fibra }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Fibra Optica - Paquetes</h6>
                     </div>
-                    <p>Total de Clientes: </p>
+                    <p>Total de Clientes: <strong>{chartData.fibra.total}</strong></p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                        <FibraChart />
+                        <FibraChart data={chartData.fibra} />
                     </div>
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.tickets }}>

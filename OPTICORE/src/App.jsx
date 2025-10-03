@@ -17,7 +17,7 @@ import ClientsComponent from './components/clients/Clients.component.jsx';
 import CreateClient from './components/clients/Create.client.jsx';
 import PaymentComponent from './components/payments/Payment.component.jsx';
 import CreatePayment from './components/payments/Create.payment.jsx';
-import ServicePackagesComponent from './components/services packages/services.component.jsx';
+import PackagesContainer from './components/services packages/PackagesContainer.jsx';
 import CreatePackage from './components/services packages/Create.Packages.jsx';
 import RecoveryPwdComponent from './components/auth/recoveryPwd/recovery.component.jsx';
 import ResetPwdComponent from './components/auth/recoveryPwd/resetPwd.components.jsx';
@@ -66,7 +66,7 @@ function App() {
             <Route path='/payment/:adminId' element={<ProtectedRoute> <PaymentComponent /> </ProtectedRoute>}></Route>
             <Route path='/payment/create/:adminId' element={<ProtectedRoute> <CreatePayment /> </ProtectedRoute>}></Route>
             {/* Paquetes rutas */}
-            <Route path='/packageServices/:id' element={<ProtectedRoute> <ServicePackagesComponent /> </ProtectedRoute>}></Route>
+            <Route path='/packageServices/:id' element={<ProtectedRoute> <PackagesContainer /> </ProtectedRoute>}></Route>
             <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
             {/* Monitoreo de red */}
             <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>

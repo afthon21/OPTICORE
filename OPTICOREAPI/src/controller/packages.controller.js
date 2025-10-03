@@ -3,35 +3,98 @@ import Package from '../models/packagesSchema.js';
 
 // Crear paquete
 export const createPackage = async(req, res) => {
+    console.log('=== CREATING PACKAGE ===');
+    console.log('Request body:', req.body);
+    console.log('Admin ID:', req.adminId);
+    
     try {
-        const { name, price, description } = req.body;
-        const admin = req.adminId; // si estás manejando admins en el token
+        const { name, price, description, clientId } = req.body;
+        const admin = req.adminId;
+
+        // Validaciones
+        if (!name) {
+            console.log('ERROR: Missing name');
+            return res.status(400).json({ message: 'El nombre del paquete es requerido' });
+        }
+        
+        if (!price) {
+            console.log('ERROR: Missing price');
+            return res.status(400).json({ message: 'El precio del paquete es requerido' });
+        }
+        
+        if (!clientId) {
+            console.log('ERROR: Missing clientId');
+            return res.status(400).json({ message: 'Se requiere seleccionar un cliente' });
+        }
+
+        // Generar folio único
+        const folio = `PKG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        
+        // Extraer información estructurada del nombre del paquete
+        const packageSpeed = req.body.packageSpeed || 'No especificado';
+        const connectionType = req.body.type || 'No especificado';
+        const simpleName = `${packageSpeed} - ${connectionType}`;
+        
+        console.log('Creating package with data:', { folio, simpleName, packageSpeed, connectionType, price, description, clientId, admin });
 
         const newPackage = new Package({
-            name,
+            folio,
+            name: simpleName,
+            type: packageSpeed, // Aquí guardamos la velocidad (100 Megas, etc.)
+            connectionType: connectionType, // Aquí guardamos el tipo de conexión
             price,
             description,
+            platforms: req.body.platforms || [],
+            Client: clientId,
             Admin: admin || null
         });
 
-        await newPackage.save();
-        return res.status(201).json({ message: 'Paquete creado correctamente' });
+        console.log('Saving package...');
+        const savedPackage = await newPackage.save();
+        console.log('Package saved successfully:', savedPackage._id);
+        
+        console.log('Populating client data...');
+        await savedPackage.populate('Client', 'Name LastName Email Location');
+        console.log('Package populated:', savedPackage);
+        
+        return res.status(201).json({ 
+            message: 'Paquete creado correctamente',
+            package: savedPackage
+        });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error al crear el paquete' });
+        console.error('ERROR creating package:', error);
+        console.error('Error details:', error.message);
+        return res.status(500).json({ 
+            message: 'Error al crear el paquete', 
+            error: error.message,
+            details: error.stack
+        });
     }
 };
 
 // Obtener todos los paquetes
 export const getAllPackages = async(req, res) => {
+    console.log('=== GET ALL PACKAGES REQUEST ===');
+    console.log('Request from user:', req.adminId);
+    
     try {
+        console.log('Searching for packages in database...');
         const packages = await Package.find()
-            .populate('Admin', 'UserName') // solo si existe relación con Admin
+            .populate('Client', 'Name LastName Email Location')
+            .populate('Admin', 'UserName')
             .exec();
 
+        console.log('Found packages count:', packages.length);
+        console.log('Packages data:', packages.map(p => ({
+            id: p._id,
+            name: p.name,
+            client: p.Client ? `${p.Client.Name?.FirstName} ${p.Client.LastName?.FatherLastName}` : 'No client',
+            price: p.price
+        })));
+        
         return res.status(200).json(packages);
     } catch (error) {
-        console.error(error);
+        console.error('ERROR getting packages:', error);
         return res.status(500).json({ message: 'Error al obtener los paquetes' });
     }
 };

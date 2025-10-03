@@ -9,6 +9,11 @@ function PackagesCard({ packages = [], onSelected }) {
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
 
+  console.log("=== PACKAGES CARD RENDER ===");
+  console.log("Packages prop:", packages);
+  console.log("Packages length:", packages.length);
+  console.log("Region:", region);
+
   const handleInputSearch = (e) => {
     setSearch(e.target.value);
   };
@@ -22,32 +27,27 @@ function PackagesCard({ packages = [], onSelected }) {
     }
   };
 
-    // Filtro por región primero
+    // Filtrar paquetes por región si está definida
     const packagesByRegion = packages.filter(pkg => {
-        // Si no hay región seleccionada, mostrar todos
         if (!region) return true;
         
-        // Verificar que el paquete tenga cliente y ubicación
-        if (!pkg.Client || !pkg.Client.Location) return false;
-        
-        // Filtrar por el estado de la ubicación del cliente
-        const matches = pkg.Client.Location.State === region;
-        if (matches) {
-            console.log(`Paquete ${pkg.Folio} del cliente en ${pkg.Client.Location.State} coincide con región ${region}`);
+        // Si el paquete tiene cliente y el cliente tiene ubicación
+        if (pkg.Client && pkg.Client.Location && pkg.Client.Location.State) {
+            return pkg.Client.Location.State === region;
         }
-        return matches;
+        
+        return true; // Si no hay información de ubicación, mostrar el paquete
     });
 
-    console.log(`Filtrado paquetes por región: ${packagesByRegion.length}/${packages.length} paquetes para región: ${region}`);
-
     const filteredData = packagesByRegion.filter(pkg => {
-    const folio = pkg.Folio?.toString() ?? '';
-    const clientName = `${pkg.Client?.Name?.FirstName ?? ''} ${pkg.Client?.Name?.SecondName ?? ''} ${pkg.Client?.LastName?.FatherLastName ?? ''} ${pkg.Client?.LastName?.MotherLastName ?? ''}`.trim();
-    const packageName = pkg.Name ?? '';
-    const type = pkg.Type ?? '';
-    const price = pkg.Price?.toString() ?? '';
-    const platforms = pkg.Platforms?.map(p => p.name).join(", ") ?? '';
-    const combined = `${folio} ${clientName} ${packageName} ${type} ${price} ${platforms}`.toLowerCase();
+    const folio = pkg.folio ?? '';
+    const packageName = (pkg.type || '') + ' - ' + (pkg.connectionType || '');
+    const type = pkg.type ?? '';
+    const connectionType = pkg.connectionType ?? '';
+    const price = pkg.price?.toString() ?? '';
+    const platforms = pkg.platforms?.map(p => p.name || p).join(' ') ?? '';
+    const clientName = pkg.Client ? `${pkg.Client.Name?.FirstName || ''} ${pkg.Client.Name?.SecondName || ''} ${pkg.Client.LastName?.FatherLastName || ''} ${pkg.Client.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim() : '';
+    const combined = `${folio} ${packageName} ${type} ${connectionType} ${price} ${platforms} ${clientName}`.toLowerCase();
     return combined.includes(search.toLowerCase());
   });
 
@@ -56,24 +56,28 @@ function PackagesCard({ packages = [], onSelected }) {
     let aValue, bValue;
     switch (sortField) {
       case 'Folio':
-        aValue = a.Folio ?? '';
-        bValue = b.Folio ?? '';
+        aValue = a.folio ?? '';
+        bValue = b.folio ?? '';
         break;
       case 'Cliente':
-        aValue = `${a.Client?.Name?.FirstName ?? ''} ${a.Client?.Name?.SecondName ?? ''} ${a.Client?.LastName?.FatherLastName ?? ''} ${a.Client?.LastName?.MotherLastName ?? ''}`.trim();
-        bValue = `${b.Client?.Name?.FirstName ?? ''} ${b.Client?.Name?.SecondName ?? ''} ${b.Client?.LastName?.FatherLastName ?? ''} ${b.Client?.LastName?.MotherLastName ?? ''}`.trim();
+        aValue = a.Client ? `${a.Client.Name?.FirstName || ''} ${a.Client.Name?.SecondName || ''} ${a.Client.LastName?.FatherLastName || ''} ${a.Client.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim() : '';
+        bValue = b.Client ? `${b.Client.Name?.FirstName || ''} ${b.Client.Name?.SecondName || ''} ${b.Client.LastName?.FatherLastName || ''} ${b.Client.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim() : '';
         break;
-      case 'Nombre del paquete':
-        aValue = a.Name ?? '';
-        bValue = b.Name ?? '';
+      case 'Nombre':
+        aValue = (a.type || '') + ' - ' + (a.connectionType || '');
+        bValue = (b.type || '') + ' - ' + (b.connectionType || '');
         break;
       case 'Tipo':
-        aValue = a.Type ?? '';
-        bValue = b.Type ?? '';
+        aValue = a.type ?? '';
+        bValue = b.type ?? '';
         break;
-      case 'Costo':
-        aValue = a.Price ?? 0;
-        bValue = b.Price ?? 0;
+      case 'Precio':
+        aValue = a.price ?? 0;
+        bValue = b.price ?? 0;
+        break;
+      case 'Plataformas':
+        aValue = a.platforms?.map(p => p.name).join(', ') ?? '';
+        bValue = b.platforms?.map(p => p.name).join(', ') ?? '';
         break;
       default:
         aValue = '';
@@ -111,17 +115,17 @@ function PackagesCard({ packages = [], onSelected }) {
             <th onClick={() => handleHeaderClick('Cliente')} style={{ cursor: 'pointer' }}>
               Cliente {sortField === 'Cliente' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
             </th>
-            <th onClick={() => handleHeaderClick('Nombre del paquete')} style={{ cursor: 'pointer' }}>
-              Nombre del paquete {sortField === 'Nombre del paquete' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+            <th onClick={() => handleHeaderClick('Nombre')} style={{ cursor: 'pointer' }}>
+              Nombre Paquete {sortField === 'Nombre' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
             </th>
             <th onClick={() => handleHeaderClick('Tipo')} style={{ cursor: 'pointer' }}>
               Tipo {sortField === 'Tipo' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
             </th>
-            <th onClick={() => handleHeaderClick('Costo')} style={{ cursor: 'pointer' }}>
-              Costo {sortField === 'Costo' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+            <th onClick={() => handleHeaderClick('Precio')} style={{ cursor: 'pointer' }}>
+              Costo {sortField === 'Precio' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
             </th>
-            <th>
-              Plataformas adicionales
+            <th onClick={() => handleHeaderClick('Plataformas')} style={{ cursor: 'pointer' }}>
+              Plataformas Adicionales {sortField === 'Plataformas' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
             </th>
           </tr>
         </thead>
@@ -129,15 +133,22 @@ function PackagesCard({ packages = [], onSelected }) {
           {sortedData.length > 0 ? (
             sortedData.map(pkg => (
               <tr className={styleTable['selected-row']}
-                key={pkg._id} onClick={() => onSelected?.(pkg)}>
-                <td>{pkg.Folio}</td>
-                <td>{`${pkg.Client?.Name?.FirstName ?? ''} ${pkg.Client?.Name?.SecondName ?? ''} ${pkg.Client?.LastName?.FatherLastName ?? ''} ${pkg.Client?.LastName?.MotherLastName ?? ''}`}</td>
-                <td>{pkg.Name}</td>
-                <td>{pkg.Type}</td>
-                <td>{pkg.Price}</td>
-                <td>{pkg.Platforms && pkg.Platforms.length > 0
-                  ? pkg.Platforms.map(p => p.name).join(", ")
-                  : "Sin plataformas"}
+                key={pkg._id}>
+                <td>{pkg.folio || 'Sin folio'}</td>
+                <td>
+                  {pkg.Client ? 
+                    `${pkg.Client.Name?.FirstName || ''} ${pkg.Client.Name?.SecondName || ''} ${pkg.Client.LastName?.FatherLastName || ''} ${pkg.Client.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim()
+                    : 'Sin cliente'
+                  }
+                </td>
+                <td>{(pkg.type || 'No especificado') + ' - ' + (pkg.connectionType || 'No especificado')}</td>
+                <td>{pkg.type || 'No especificado'}</td>
+                <td>${pkg.price}</td>
+                <td>
+                  {pkg.platforms && pkg.platforms.length > 0 
+                    ? pkg.platforms.map(p => p.name || p).join(', ')
+                    : 'Ninguna'
+                  }
                 </td>
               </tr>
             ))

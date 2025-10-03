@@ -31,7 +31,7 @@ const configureRoutes = (app) => {
     // ❌ borramos la línea de servicesRoutes
     app.use(`${principal}/logs`, logRoutes);
     app.use(`${principal}/network`, networkRoutes);
-    app.use(`${principal}/technician`, technicianRoutes);
+    app.use(`${principal}/tecnicos`, technicianRoutes);
 }
 
 export default configureRoutes;

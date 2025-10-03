@@ -11,14 +11,21 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 // Registrar los componentes necesarios
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const FibraChart = () => {
-  // Datos de Fibra Óptica: 50 MG, 100 MG, 200 MG, 300 MG
+const FibraChart = ({ data: chartDataProp }) => {
+  // Datos dinámicos de Fibra Óptica o datos de ejemplo por defecto
+  const defaultData = {
+    labels: ['50 Megas', '100 Megas', '200 Megas', '300 Megas'],
+    data: [35, 28, 22, 15]
+  };
+  
+  const dataToUse = chartDataProp || defaultData;
+  
   const data = {
-    labels: ['50 MG', '100 MG', '200 MG', '300 MG'],
+    labels: dataToUse.labels,
     datasets: [
       {
         label: 'Clientes por Plan',
-        data: [35, 28, 22, 15], // Porcentajes de ejemplo
+        data: dataToUse.data,
         backgroundColor: [
           '#FF6384',
           '#36A2EB',

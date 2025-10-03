@@ -11,14 +11,21 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 // Registrar los componentes necesarios
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const RadioChart = () => {
-  // Datos de Radio Frecuencia: 10 Megas, 15 Megas, 20 Megas
-  const data = {
+const RadioChart = ({ data: chartDataProp }) => {
+  // Datos dinámicos de Radio Frecuencia o datos de ejemplo por defecto
+  const defaultData = {
     labels: ['10 Megas', '15 Megas', '20 Megas'],
+    data: [45, 32, 23]
+  };
+  
+  const dataToUse = chartDataProp || defaultData;
+  
+  const data = {
+    labels: dataToUse.labels,
     datasets: [
       {
         label: 'Clientes por Plan',
-        data: [45, 32, 23], // Porcentajes de ejemplo
+        data: dataToUse.data,
         backgroundColor: [
           '#FF9F40',
           '#9966FF',

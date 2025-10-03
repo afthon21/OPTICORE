@@ -19,10 +19,13 @@ function CreateTicket() {
 
     const handleLoadTechnicians = async () => {
         try {
-            const result = await makeRequest('/technician/all', 'GET', null, { requiresAuth: false });
+            console.log('🔍 Cargando técnicos...');
+            const result = await makeRequest('/tecnicos/all');
+            console.log('✅ Técnicos obtenidos:', result);
             setTechnicians(result || []);
         } catch (error) {
-            console.error('Error al cargar técnicos:', error);
+            console.error('❌ Error al cargar técnicos:', error);
+            setTechnicians([]);
         }
     };
 
