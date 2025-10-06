@@ -4,7 +4,7 @@ import { useRegion } from '../../hooks/RegionContext';
 
 import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket, handleArchiveTickets} from './js/Routes.js';
 import { handleClients, handleCreateClient, handlePayments, handleCreatePayment } from './js/Routes.js';
-import { handlePackages, handleCreatePackages, handleArchiveClients} from './js/Routes.js';
+import { handlePackages, handleCreatePackages, handleArchiveClients, handleArchivePayments} from './js/Routes.js';
 
 export function NavbarFragmentAll() {
     const navigate = useNavigate();
@@ -20,6 +20,7 @@ export function NavbarFragmentAll() {
     console.log('🎭 Navbar - Región actual:', region);
 
     // Función de debug para verificar sessionStorage
+    // eslint-disable-next-line no-unused-vars
     const debugSessionStorage = () => {
         console.log('🔍 DEBUG SESSION STORAGE:');
         console.log('adminRole:', sessionStorage.getItem('adminRole'));
@@ -29,6 +30,7 @@ export function NavbarFragmentAll() {
     };
 
     // Función para forzar actualización del nombre
+    // eslint-disable-next-line no-unused-vars
     const refreshUserName = () => {
         const currentName = sessionStorage.getItem('userName');
         console.log('🔄 Forzando actualización de nombre:', currentName);
@@ -60,6 +62,7 @@ export function NavbarFragmentAll() {
         const interval = setInterval(checkForChanges, 500);
 
         return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Solo se ejecuta una vez
 
     return (
@@ -213,6 +216,15 @@ export function NavbarFragmentAll() {
                                 role="button"
                             >
                                 Ver
+                            </a>
+                        </li>
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => handleArchivePayments(navigate, adminId)}
+                                role="button"
+                            >
+                                Archivados
                             </a>
                         </li>
                          

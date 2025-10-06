@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import ClientsCard from './Clients.card';
@@ -24,7 +24,7 @@ function ClientsComponent() {
 
     useEffect(() => {
         handleLoad();
-    }, []);
+    }, [handleLoad]);
 
     // Manejar navegación desde otros componentes
     useEffect(() => {
@@ -47,7 +47,11 @@ function ClientsComponent() {
         <div className="container-fluid d-flex mt-1 ms-4">
             <ClientsCard clients={data ? data : []} onSelected={setSelect} />
 
-            <ClientsInfo client={select ? select: ''} initialActiveTab={activeTab} />
+            <ClientsInfo 
+                client={select ? select: ''} 
+                initialActiveTab={activeTab} 
+                onGlobalUpdate={handleUpdateClient}
+            />
         </div>
     );
 }

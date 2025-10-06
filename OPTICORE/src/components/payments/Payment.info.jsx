@@ -2,6 +2,7 @@ import styleInfo from './css/paymentInfo.module.css';
 import ApiRequest from '../hooks/apiRequest';
 import Swal from 'sweetalert2';
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 function PaymentInfo({ payment: paymentProp, onStatusChange }) {
     const [payment, setPayment] = useState(paymentProp);
@@ -10,7 +11,7 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
         setPayment(paymentProp);
     }, [paymentProp]);
 
-    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const { makeRequest, error } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     const states = [
         { id: '0', name: 'Exitoso' },
@@ -19,6 +20,63 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
         { id: '3', name: 'Rechazado' },
         { id: '4', name: 'Vencido' }
     ];
+
+    const handleArchive = async () => {
+        const clientName = payment?.Client?.Name
+            ? `${payment.Client.Name.FirstName || ''} ${payment.Client.Name.SecondName || ''} ${payment.Client.LastName?.FatherLastName || ''} ${payment.Client.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim()
+            : 'Cliente no disponible';
+
+        const result = await Swal.fire({
+            title: '¿Archivar pago?',
+            text: `¿Estás seguro de que quieres archivar el pago de ${clientName} (Folio: ${payment.Folio})?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, archivar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await makeRequest(`/pay/archive/${payment._id}`);
+                console.log('Respuesta del archivado:', response);
+
+                // Actualizar el estado local
+                const updatedPayment = { ...payment, Archived: true };
+                setPayment(updatedPayment);
+
+                // Notificar al componente padre
+                if (onStatusChange) {
+                    onStatusChange(updatedPayment);
+                }
+
+                await Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'El pago ha sido archivado correctamente',
+                    icon: 'success',
+                    toast: true,
+                    position: 'top',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+
+            } catch (error) {
+                console.error('Error al archivar:', error);
+                await Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo archivar el pago',
+                    icon: 'error',
+                    toast: true,
+                    position: 'top',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        }
+    };
 
     const handleChange = async (value) => {
         const data = { Status: value };
@@ -259,6 +317,12 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
                     <div className="modal-footer">
                         <button 
                             type="button" 
+                            className="btn btn-warning me-2"
+                            onClick={handleArchive}>
+                            <i className="fas fa-archive"></i> Archivar
+                        </button>
+                        <button 
+                            type="button" 
                             className={styleInfo['btn-exit']}
                             data-bs-dismiss="modal">Cerrar</button>
                     </div>
@@ -267,5 +331,28 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
         </div>
     );
 }
+
+PaymentInfo.propTypes = {
+    payment: PropTypes.shape({
+        _id: PropTypes.string,
+        Folio: PropTypes.string,
+        Status: PropTypes.string,
+        Method: PropTypes.string,
+        Amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        Note: PropTypes.string,
+        Archived: PropTypes.bool,
+        Client: PropTypes.shape({
+            Name: PropTypes.shape({
+                FirstName: PropTypes.string,
+                SecondName: PropTypes.string
+            }),
+            LastName: PropTypes.shape({
+                FatherLastName: PropTypes.string,
+                MotherLastName: PropTypes.string
+            })
+        })
+    }),
+    onStatusChange: PropTypes.func
+};
 
 export default PaymentInfo;

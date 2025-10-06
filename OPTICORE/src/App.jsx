@@ -33,6 +33,7 @@ import NetworkHealth from './components/network/NetworkHealth';
 import Onus from './components/network/Onus.jsx';
 import ArchivedClients from './components/clients/ArchivedClients.jsx';
 import ArchivedTickets from './components/tickets/Ticket.Archived.jsx';
+import ArchivedPayments from './components/payments/ArchivedPayments.jsx';
 
 
 
@@ -65,6 +66,7 @@ function App() {
             {/* pagos rutas */}
             <Route path='/payment/:adminId' element={<ProtectedRoute> <PaymentComponent /> </ProtectedRoute>}></Route>
             <Route path='/payment/create/:adminId' element={<ProtectedRoute> <CreatePayment /> </ProtectedRoute>}></Route>
+            <Route path='/payment/archived/:adminId' element={<ProtectedRoute><ArchivedPayments /> </ProtectedRoute>}></Route>
             {/* Paquetes rutas */}
             <Route path='/packageServices/:id' element={<ProtectedRoute> <ServicePackagesComponent /> </ProtectedRoute>}></Route>
             <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
