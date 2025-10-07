@@ -21,19 +21,31 @@ function ApiRequest(baseUrl) {
             if (!isFormData) headers['Content-Type'] = 'application/json';
             if (requiresAuth && token) headers['Authorization'] = `Bearer ${token}`;
 
+            console.log(`🔍 Making request to: ${baseUrl}${endpoint}`);
+            console.log(`🔍 Method: ${method}`);
+            console.log(`🔍 Headers:`, headers);
+            console.log(`🔍 Body:`, body);
+            console.log(`🔍 Token present:`, !!token);
+
             const res = await fetch(`${baseUrl}${endpoint}`, {
                 method,
                 headers,
                 body: isFormData ? body : body ? JSON.stringify(body) : null
             });
 
+            console.log(`🔍 Response status: ${res.status}`);
+            console.log(`🔍 Response ok: ${res.ok}`);
+
             if (!res.ok) {
                 const errorDetails = await res.json();
+                console.log(`❌ Error details:`, errorDetails);
                 setError(errorDetails.message);
-                return;
+                return null;
             }
 
-            return await res.json();
+            const responseData = await res.json();
+            console.log(`✅ Response data:`, responseData);
+            return responseData;
         } catch (error) {
             setError(error.message);
             return null;

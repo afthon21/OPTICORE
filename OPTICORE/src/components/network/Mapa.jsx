@@ -1,6 +1,5 @@
 import { useRegion } from '../../hooks/RegionContext';
 import { useEffect, useState } from 'react';
-import 'leaflet/dist/leaflet.css';
 
 function Mapa() {
     const { region } = useRegion();

@@ -143,6 +143,8 @@ export default function Card({ onPackageCreated }) {
       };
 
       console.log("Creating package with data:", packageData);
+      console.log("Selected client ID:", selectedClient);
+      console.log("API endpoint:", '/packages/new');
 
       // Crear el paquete usando el endpoint de packages
       const response = await makeRequest('/packages/new', 'POST', packageData);
@@ -153,6 +155,11 @@ export default function Card({ onPackageCreated }) {
       // Verificar si hay error en el hook
       if (error) {
         throw new Error(error);
+      }
+
+      // Verificar si la respuesta es null o undefined (indica error en makeRequest)
+      if (!response) {
+        throw new Error('No se recibió respuesta del servidor');
       }
 
       if (response && response.message) {
@@ -182,17 +189,17 @@ export default function Card({ onPackageCreated }) {
       }
 
     } catch (error) {
-      console.error('Error al crear paquete:', error);
+      console.error('Error detallado al crear paquete:', error);
       
-      // Mostrar mensaje de error
+      // Mostrar mensaje de error con más detalles
       await Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Hubo un error al crear el paquete. Por favor, intenta de nuevo.',
-        timer: 2000,
-        showConfirmButton: false,
-        toast: true,
-        position: 'top',
+        title: 'Error al crear paquete',
+        text: error.message || 'Hubo un error al crear el paquete. Por favor, intenta de nuevo.',
+        timer: 4000,
+        showConfirmButton: true,
+        toast: false,
+        position: 'center',
         timerProgressBar: true,
       });
     }

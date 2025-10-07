@@ -1,5 +1,6 @@
 // controllers/packageController.js
 import Package from '../models/packagesSchema.js';
+import Client from '../models/clientSchema.js';
 
 // Crear paquete
 export const createPackage = async(req, res) => {
@@ -27,19 +28,27 @@ export const createPackage = async(req, res) => {
             return res.status(400).json({ message: 'Se requiere seleccionar un cliente' });
         }
 
+        // Verificar que el cliente existe
+        const clientExists = await Client.findById(clientId);
+        if (!clientExists) {
+            console.log('ERROR: Client not found with ID:', clientId);
+            return res.status(404).json({ message: 'El cliente seleccionado no existe' });
+        }
+        console.log('✅ Client found:', clientExists.Name);
+
         // Generar folio único
         const folio = `PKG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         
         // Extraer información estructurada del nombre del paquete
         const packageSpeed = req.body.packageSpeed || 'No especificado';
         const connectionType = req.body.type || 'No especificado';
-        const simpleName = `${packageSpeed} - ${connectionType}`;
+        const fullName = name; // Usar el nombre completo que incluye timestamp y plataformas
         
-        console.log('Creating package with data:', { folio, simpleName, packageSpeed, connectionType, price, description, clientId, admin });
+        console.log('Creating package with data:', { folio, fullName, packageSpeed, connectionType, price, description, clientId, admin });
 
         const newPackage = new Package({
             folio,
-            name: simpleName,
+            name: fullName, // Usar el nombre completo para evitar duplicados
             type: packageSpeed, // Aquí guardamos la velocidad (100 Megas, etc.)
             connectionType: connectionType, // Aquí guardamos el tipo de conexión
             price,
