@@ -1,10 +1,20 @@
 import styleCard from './css/ticketsCard.module.css';
 import styleTable from './css/ticketsCard.module.css';
-
+import ApiRequest from '../hooks/apiRequest.jsx';
 import { useState } from 'react';
 import { useRegion } from '../../hooks/RegionContext';
 
 function TicketsCard({ tickets = [], onSelected }) {
+ 
+    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
+    const [archivedIds, setArchivedIds] = useState([]);
+    const handleArchive = async (id) => {
+        if (window.confirm('¿Seguro que quieres archivar este ticket?')) {
+            await makeRequest(`/ticket/archive/${id}`, 'POST');
+            setArchivedIds(prev => [...prev, id]);
+        }
+    };
     const { region } = useRegion();
     const [search, setSearch] = useState('');
     const [sortField, setSortField] = useState('');
@@ -165,7 +175,9 @@ function TicketsCard({ tickets = [], onSelected }) {
                 </thead>
                 
                 <tbody className={`text-wrap ${styleCard['table-body']}`}>
-                    {sortedTickets.map((item) => (
+                    {sortedTickets
+                        .filter(item => !item.Archived && !archivedIds.includes(item._id))
+                        .map((item) => (
                         <tr 
                             className={`${styleTable['selected-row']}`}
                             key={item._id} 
@@ -187,17 +199,10 @@ function TicketsCard({ tickets = [], onSelected }) {
                             <td>{item.Status}</td>
                             <td>{item.CreateDate.split("T")[0]}</td>
                             <td>
-                                {!item.Archived && (
+                                {item.Status === 'Cerrado' && (
                                     <button className="btn btn-outline-danger btn-sm" onClick={e => {
                                         e.stopPropagation();
-                                        if (window.confirm('¿Seguro que quieres archivar este ticket?')) {
-                                            fetch(`/ticket/archive/${item._id}`, {
-                                                method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' }
-                                            }).then(() => {
-                                                window.location.reload();
-                                            });
-                                        }
+                                        handleArchive(item._id);
                                     }}>
                                         Archivar
                                     </button>

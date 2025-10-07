@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 import { useParams } from 'react-router-dom';
+import styleCard from './css/ticketsCard.module.css';
+import styleTable from './css/ticketsCard.module.css';
 
 function ArchivedTickets() {
   const [tickets, setTickets] = useState([]);
@@ -21,11 +23,8 @@ function ArchivedTickets() {
 
   const handleUnarchive = async (id) => {
     try {
-      await makeRequest(`/ticket/edit/${id}`, {
-        method: 'POST',
-        body: JSON.stringify({ Archived: false }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const res = await makeRequest(`/ticket/edit/${id}`, 'POST', { Archived: false });
+      console.log('Respuesta desarchivar:', res);
       setTickets(prev => prev.filter(t => t._id !== id));
     } catch (error) {
       console.error('Error unarchiving ticket:', error);
@@ -33,46 +32,53 @@ function ArchivedTickets() {
   };
 
   return (
-    <div className="archived-tickets-list mt-4">
-      <h2 className="mb-4">Tickets Archivados</h2>
-      {tickets.length === 0 ? (
-        <p>No hay tickets archivados.</p>
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-striped table-hover align-middle">
-            <thead className="table-dark">
-              <tr>
-                <th>Folio</th>
-                <th>Cliente</th>
-                <th>Fecha</th>
-                <th>Asunto</th>
-                <th>Acción</th>
+    <div className="d-flex justify-content-center align-content-center row">
+      <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}> 
+        <span className={`me-2 ${styleCard['title']}`}>Tickets Archivados</span>
+        <span className="text-primary"><i className="bi bi-archive-fill"></i></span>
+      </div>
+      <table className="table table-hover justify-content-center">
+        <thead className={styleCard['head-table']}>
+          <tr>
+            <th>Folio</th>
+            <th>Cliente</th>
+            <th>Prioridad</th>
+            <th>Asunto</th>
+            <th>Técnico</th>
+            <th>Creado por</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody className={`text-wrap ${styleCard['table-body']}`}>
+          {tickets.length === 0 ? (
+            <tr><td colSpan={9} className="text-center">No hay tickets archivados.</td></tr>
+          ) : (
+            tickets.map(ticket => (
+              <tr key={ticket._id} className={styleTable['selected-row']}>
+                <td>{ticket.Folio}</td>
+                <td>{ticket.ClientName
+                  ? ticket.ClientName
+                  : (ticket.Client && ticket.Client.Name)
+                    ? `${ticket.Client.Name.FirstName} ${ticket.Client.Name.SecondName || ''} ${ticket.Client.LastName.FatherLastName || ''} ${ticket.Client.LastName.MotherLastName || ''}`
+                    : 'Sin cliente'}</td>
+                <td>{ticket.Priority || '-'}</td>
+                <td>{ticket.Issue || <span className="text-muted">Sin asunto</span>}</td>
+                <td>{ticket.tecnico || '-'}</td>
+                <td>{ticket.Admin?.UserName ?? 'Sin asignar'}</td>
+                <td><span className="badge bg-warning text-dark">Archivado</span></td>
+                <td>{ticket.CreateDate ? ticket.CreateDate.split("T")[0] : '-'}</td>
+                <td>
+                  <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(ticket._id)}>
+                    <i className="bi bi-arrow-bar-up me-1"></i> Desarchivar
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {tickets.map(ticket => (
-                <tr key={ticket._id}>
-                  <td>{ticket.Folio}</td>
-                  <td>
-                    {ticket.ClientName
-                      ? ticket.ClientName
-                      : (ticket.Client && ticket.Client.Name)
-                        ? `${ticket.Client.Name.FirstName} ${ticket.Client.Name.SecondName || ''} ${ticket.Client.LastName.FatherLastName || ''} ${ticket.Client.LastName.MotherLastName || ''}`
-                        : 'Sin cliente'}
-                  </td>
-                  <td>{ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</td>
-                  <td>{ticket.Issue || 'Sin asunto'}</td>
-                  <td>
-                    <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(ticket._id)}>
-                      Desarchivar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
