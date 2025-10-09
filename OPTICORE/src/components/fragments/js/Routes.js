@@ -72,8 +72,6 @@ export const handleArchiveClients = (navigate, adminId) => {
 export const handleArchiveTickets = (navigate, adminId) => {
     navigate(`/ticket/archived/${adminId}`);
 }
-
-    
 export const handleArchivePayments = (navigate, adminId) => {
     navigate(`/payment/archived/${adminId}`);
 };

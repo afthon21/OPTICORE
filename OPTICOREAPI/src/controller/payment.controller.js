@@ -1,3 +1,16 @@
+// Ver pagos archivados
+export const viewArchivedPayments = async (req, res) => {
+    try {
+        const archivedPayments = await payment.find({ Archived: true })
+            .populate('Client', 'Name LastName Location')
+            .populate('Admin', 'UserName')
+            .exec();
+        return res.status(200).json(archivedPayments);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error finding archived payments' });
+    }
+}
 import payment from "../models/paymentsSchema.js";
 import client from "../models/clientSchema.js";
 import admin from '../models/adminSchema.js';

@@ -263,8 +263,11 @@ function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) 
 
                     {/* Estado Activo */}
                     {show.active && (
-                        <div className="mt-2">
-                            <h5>Clientes Activos</h5>
+                        <div className="d-flex justify-content-center align-content-center row mt-2">
+                            <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}> 
+                                <span className={`me-2 ${styleCard['title']}`}>Clientes Activos</span>
+                                <span className="text-primary"><i className="bi bi-person-lines-fill"></i></span>
+                            </div>
                             <table className="table table-hover justify-content-center">
                                 <thead className={styleCard['head-table']}>
                                     <tr>
@@ -274,23 +277,32 @@ function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) 
                                     </tr>
                                 </thead>
                                 <tbody className={`text-wrap ${styleCard['table-body']}`}>
-                                    {clients.filter(c => c.Status === 'ACTIVE').map(item => (
-                                        <tr key={item._id} className={styleCard['selected-row']}>
-                                            <td onClick={()=>{ setCurrentClient(item); setShow(s=>({...s, personal:true, active:false})); }}>
-                                                {`${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g,' ').trim()}
-                                            </td>
-                                            <td>
-                                                <span className={`badge ${item.Status === 'ACTIVE' ? 'bg-success':'bg-secondary'}`}>{item.Status === 'ACTIVE' ? 'Activo':'Inactivo'}</span>
-                                            </td>
-                                            <td>
-                                                <button className={`btn btn-sm ${item.Status === 'ACTIVE' ? 'btn-outline-danger':'btn-outline-success'}`} onClick={()=>toggleStatusFromActive(item)}>
-                                                    {item.Status === 'ACTIVE' ? 'Desactivar':'Activar'}
-                                                </button>
+                                    {clients.filter(c => c.Status === 'ACTIVE').length === 0 ? (
+                                        <tr>
+                                            <td colSpan="3" className="text-center text-danger">
+                                                <div>
+                                                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                                    No hay clientes activos o no se cargaron datos.<br/>
+                                                    <span className="text-muted">Verifica la respuesta de la API y el estado de los datos.</span>
+                                                </div>
                                             </td>
                                         </tr>
-                                    ))}
-                                    {clients.filter(c => c.Status === 'ACTIVE').length === 0 && (
-                                        <tr><td colSpan="3" className="text-center text-muted">No hay clientes activos.</td></tr>
+                                    ) : (
+                                        clients.filter(c => c.Status === 'ACTIVE').map(item => (
+                                            <tr key={item._id} className={styleCard['selected-row']}>
+                                                <td onClick={()=>{ setCurrentClient(item); setShow(s=>({...s, personal:true, active:false})); }}>
+                                                    {`${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g,' ').trim()}
+                                                </td>
+                                                <td>
+                                                    <span className={`badge ${item.Status === 'ACTIVE' ? 'bg-success':'bg-secondary'}`}>{item.Status === 'ACTIVE' ? 'Activo':'Inactivo'}</span>
+                                                </td>
+                                                <td>
+                                                    <button className={`btn btn-sm ${item.Status === 'ACTIVE' ? 'btn-outline-danger':'btn-outline-success'}`} onClick={()=>toggleStatusFromActive(item)}>
+                                                        {item.Status === 'ACTIVE' ? 'Desactivar':'Activar'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
                                     )}
                                 </tbody>
                             </table>

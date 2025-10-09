@@ -1,93 +1,33 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 import Swal from 'sweetalert2';
+import styleCard from './css/paymentCard.module.css';
+import styleTable from './css/paymentCard.module.css';
 
 function ArchivedPayments() {
   const [payments, setPayments] = useState([]);
+  const [error, setError] = useState(null); // Estado para errores
   const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
   useEffect(() => {
     const fetchPayments = async () => {
-      setLoading(true);
-      setError(null);
-      
       try {
-        console.log('🔍 Iniciando fetch de pagos...');
-        console.log('🔍 API Base URL:', import.meta.env.VITE_API_BASE);
-        console.log('🔍 Región actual:', region);
-        
-        if (!region) {
-          console.warn('⚠️ No hay región definida, saltando fetch');
-          setLoading(false);
-          return;
-        }
-
-        const res = await makeRequest('/pay/all');
-        console.log('📊 Respuesta completa de la API:', res);
-        console.log('📊 Tipo de respuesta:', typeof res);
-        console.log('📊 Es array:', Array.isArray(res));
-        
-        if (!res) {
-          console.warn('⚠️ No se obtuvieron datos de la API');
-          setPayments([]);
-          setDebugInfo({ 
-            totalPayments: 0, 
-            archivedCount: 0, 
-            region: region,
-            apiResponse: false,
-            error: 'No hay datos de la API'
-          });
-          setLoading(false);
-          return;
-        }
-
-        // Convertir a array si no lo es
-        const paymentsArray = Array.isArray(res) ? res : [];
-        console.log('📊 Cantidad total de pagos:', paymentsArray.length);
-
-        // Debug: Mostrar algunos pagos de ejemplo
-        if (paymentsArray.length > 0) {
-          console.log('📊 Ejemplo de pago (primero):', paymentsArray[0]);
-          console.log('📊 Campos del primer pago:', Object.keys(paymentsArray[0]));
-        }
-
-        // Filtrar pagos archivados
-        const archivedPayments = paymentsArray.filter(p => {
-          const isArchived = p.Archived === true;
-          const hasClient = !!p.Client;
-          const hasLocation = !!p.Client?.Location;
-          const paymentRegion = p.Client?.Location?.State;
-          const matchesRegion = paymentRegion === region;
-          
-          console.log(`🔍 Pago ${p.Folio}: Archivado=${isArchived}, TieneCliente=${hasClient}, TieneUbicacion=${hasLocation}, Region=${paymentRegion}, Coincide=${matchesRegion}`);
-          
-          return isArchived && matchesRegion;
-        });
-        
-        console.log('✅ Pagos archivados encontrados:', archivedPayments.length);
-        console.log('✅ Datos de pagos archivados:', archivedPayments);
-        
-        setDebugInfo({
-          totalPayments: paymentsArray.length,
-          archivedCount: archivedPayments.length,
-          region: region,
-          apiResponse: true,
-          samplePayment: paymentsArray[0] || null
-        });
-        
-        setPayments(archivedPayments);
-        
-      } catch (error) {
+  const res = await makeRequest('/pay/archived');
+        setPayments(res || []);
+        setError(null); // Limpiar error si carga bien
+      } catch (err) {
+        console.error('Error al obtener pagos archivados:', err);
         setPayments([]);
+        setError('No se pudieron cargar los pagos archivados.');
       }
     };
     fetchPayments();
-  }, [makeRequest, region]);
+  }, [makeRequest]);
 
   const handleUnarchive = async (id) => {
     const payment = payments.find(p => p._id === id);
     const clientName = `${payment.Client?.Name?.FirstName || ''} ${payment.Client?.Name?.SecondName || ''} ${payment.Client?.LastName?.FatherLastName || ''} ${payment.Client?.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim();
-    
+
     const result = await Swal.fire({
       title: '¿Desarchivar pago?',
       text: `¿Estás seguro de que quieres desarchivar el pago de ${clientName} (Folio: ${payment.Folio})?`,
@@ -101,10 +41,7 @@ function ArchivedPayments() {
 
     if (result.isConfirmed) {
       try {
-        const response = await makeRequest(`/pay/unarchive/${id}`);
-        console.log('Respuesta del desarchivado:', response);
-
-        // Actualizar lista local
+        await makeRequest(`/pay/unarchive/${id}`);
         setPayments(prev => prev.filter(p => p._id !== id));
         await Swal.fire({
           title: '¡Éxito!',
@@ -116,8 +53,8 @@ function ArchivedPayments() {
           timerProgressBar: true,
           showConfirmButton: false
         });
-      } catch (error) {
-        console.error('Error al desarchivar:', error);
+      } catch (err) {
+        console.error('Error al desarchivar pago:', err);
         await Swal.fire({
           title: 'Error',
           text: 'No se pudo desarchivar el pago',
@@ -147,62 +84,58 @@ function ArchivedPayments() {
   };
 
   return (
-    <div className="container-fluid mt-3">
-      <div className="row">
-        <div className="col-12">
-          <h4 className="mb-3">Pagos Archivados ({payments.length})</h4>
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead className="table-dark">
-                <tr>
-                  <th>Folio</th>
-                  <th>Cliente</th>
-                  <th>Método</th>
-                  <th>Monto</th>
-                  <th>Fecha</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((payment) => {
-                  const clientName = `${payment.Client?.Name?.FirstName || ''} ${payment.Client?.Name?.SecondName || ''} ${payment.Client?.LastName?.FatherLastName || ''} ${payment.Client?.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim();
-                  
-                  return (
-                    <tr key={payment._id}>
-                      <td>{payment.Folio || 'N/A'}</td>
-                      <td>{clientName || 'N/A'}</td>
-                      <td>{payment.Method || 'N/A'}</td>
-                      <td>{formatAmount(payment.Amount)}</td>
-                      <td>{formatDate(payment.CreateDate)}</td>
-                      <td>
-                        <span className={`badge ${
-                          payment.Status === 'Exitoso' ? 'bg-success' :
-                          payment.Status === 'En proceso' ? 'bg-warning' :
-                          payment.Status === 'Pendiente' ? 'bg-secondary' :
-                          payment.Status === 'Rechazado' ? 'bg-danger' :
-                          payment.Status === 'Vencido' ? 'bg-dark' : 'bg-light'
-                        }`}>
-                          {payment.Status || 'N/A'}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => handleUnarchive(payment._id)}
-                          title="Desarchivar pago"
-                        >
-                          <i className="fas fa-undo"></i> Desarchivar
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <div className="d-flex justify-content-center align-content-center row">
+      <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}> 
+        <span className={`me-2 ${styleCard['title']}`}>Pagos Archivados</span>
+        <span className="text-primary"><i className="bi bi-archive-fill"></i></span>
       </div>
+      <table className="table table-hover justify-content-center">
+        <thead className={styleCard['head-table']}>
+          <tr>
+            <th>Folio</th>
+            <th>Cliente</th>
+            <th>Monto</th>
+            <th>Método</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody className={`text-wrap ${styleCard['table-body']}`}>
+          {payments.length === 0 ? (
+            <tr><td colSpan={7} className="text-center">No hay pagos archivados.</td></tr>
+          ) : (
+            payments.map(payment => {
+              const clientName = `${payment.Client?.Name?.FirstName || ''} ${payment.Client?.Name?.SecondName || ''} ${payment.Client?.LastName?.FatherLastName || ''} ${payment.Client?.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim();
+              return (
+                <tr key={payment._id} className={styleTable['selected-row']}>
+                  <td>{payment.Folio || 'N/A'}</td>
+                  <td>{clientName || 'Sin cliente'}</td>
+                  <td>{formatAmount(payment.Amount)}</td>
+                  <td>{payment.Method || 'N/A'}</td>
+                  <td>{formatDate(payment.CreateDate)}</td>
+                  <td>
+                    <span className={`badge ${
+                      payment.Status === 'Exitoso' ? 'bg-success' :
+                      payment.Status === 'En proceso' ? 'bg-warning' :
+                      payment.Status === 'Pendiente' ? 'bg-secondary' :
+                      payment.Status === 'Rechazado' ? 'bg-danger' :
+                      payment.Status === 'Vencido' ? 'bg-dark' : 'bg-light'
+                    }`}>
+                      {payment.Status || 'N/A'}
+                    </span>
+                  </td>
+                  <td>
+                    <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(payment._id)}>
+                      <i className="bi bi-arrow-bar-up me-1"></i> Desarchivar
+                    </button>
+                  </td>
+                </tr>
+              )
+            })
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

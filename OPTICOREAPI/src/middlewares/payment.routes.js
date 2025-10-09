@@ -1,8 +1,11 @@
-import { createPayment, viewAllPayments, viewOnePayment, createPaymentById, vieWClientPayments, deletePayment, editPayment, archivePayments, unarchivePayments } from "../controller/payment.controller.js";
+
+import { createPayment, viewAllPayments, viewOnePayment, createPaymentById, vieWClientPayments, deletePayment, editPayment, archivePayments, unarchivePayments, viewArchivedPayments } from "../controller/payment.controller.js";
 import { protectRoute, getProfile } from "../controller/auth.controller.js";
 import { Router } from "express";
 
+
 const payRoutes = Router();
+payRoutes.get('/archived', protectRoute, getProfile, viewArchivedPayments);
 
 payRoutes.post('/new', protectRoute, getProfile, createPayment);
 payRoutes.get('/all', protectRoute, getProfile, viewAllPayments);

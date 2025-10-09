@@ -5,6 +5,10 @@ const technicianSchema = new mongoose.Schema({
     apellidoP: { type: String, required: true },
     apellidoA: { type: String, required: true },
     activo: { type: Boolean, default: true },
+    Archived: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const technician = mongoose.model('technician', technicianSchema);

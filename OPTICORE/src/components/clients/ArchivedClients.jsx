@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import styleCard from './css/clientsCard.module.css';
 
 function ArchivedClients() {
   const [clients, setClients] = useState([]);
@@ -87,48 +88,45 @@ function ArchivedClients() {
   };
 
   return (
-    <div className="archived-clients-list mt-4">
-      <h2 className="mb-4">Clientes Archivados</h2>
-      {clients.length === 0 ? (
-        <p>No hay clientes archivados.</p>
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-striped table-hover align-middle">
-            <thead className="table-dark">
-              <tr>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Dirección</th>
-                <th>Acción</th>
+    <div className="d-flex justify-content-center align-content-center row mt-4">
+      <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}> 
+        <span className={`me-2 ${styleCard['title']}`}>Clientes Archivados</span>
+        <span className="text-primary"><i className="bi bi-archive-fill"></i></span>
+      </div>
+      <table className="table table-hover justify-content-center">
+        <thead className={styleCard['head-table']}>
+          <tr>
+            <th>Folio</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Paquete</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody className={`text-wrap ${styleCard['table-body']}`}>
+          {clients.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="text-center text-muted">No hay clientes archivados.</td>
+            </tr>
+          ) : (
+            clients.map(client => (
+              <tr key={client._id} className={styleCard['selected-row']}>
+                <td>{client._id}</td>
+                <td>
+                  <strong>{`${client.Name.FirstName} ${client.Name.SecondName || ''} ${client.LastName.FatherLastName || ''} ${client.LastName.MotherLastName || ''}`.replace(/\s+/g, ' ').trim()}</strong>
+                </td>
+                <td>{Array.isArray(client.PhoneNumber) ? client.PhoneNumber.join(', ') : client.PhoneNumber}</td>
+                <td>Sin paquete</td>
+                <td>
+                  <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(client._id)}>
+                    Desarchivar
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {clients.map(client => (
-                <tr key={client._id}>
-                  <td>
-                    <strong>{client.Name.FirstName} {client.Name.SecondName} {client.LastName.FatherLastName} {client.LastName.MotherLastName}</strong>
-                  </td>
-                  <td>{client.Email}</td>
-                  <td>{Array.isArray(client.PhoneNumber) ? client.PhoneNumber.join(', ') : client.PhoneNumber}</td>
-                  <td>
-                    {client.Location ? (
-                      <span>
-                        {client.Location.State}, {client.Location.Municipality}, {client.Location.Address}
-                      </span>
-                    ) : 'Sin dirección'}
-                  </td>
-                  <td>
-                    <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(client._id)}>
-                      Desarchivar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

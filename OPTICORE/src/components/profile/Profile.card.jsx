@@ -83,9 +83,6 @@ function ProfileCard({ profile }) {
   }
   return errors;
 };
-
-
-
     const handleChangue = (e) => {
         const { name, value } = e.target;
 
@@ -94,7 +91,6 @@ function ProfileCard({ profile }) {
             [name]: value
         }));
     }
-
    const handleSubmit = async (e, fieldGroup) => {
         e.preventDefault();
         const errors = validators(fieldGroup);
@@ -244,7 +240,6 @@ function ProfileCard({ profile }) {
                             </button>
                     )}
                 </div>
-
 
                 {/** Formulario para editar correo o contraseña */}
                 <div className="d-flex justify-content-between mt-4">

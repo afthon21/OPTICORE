@@ -7,7 +7,7 @@ import ApiRequest from '../hooks/apiRequest';
 
 import { useState } from 'react';
 
-function PaymentCard({ payments = [], onSelected, onPaymentUpdate }) {
+function PaymentCard({ payments = [], onSelected }) {
     const { region } = useRegion();
     const [search, setSearch] = useState('');
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
@@ -29,67 +29,19 @@ function PaymentCard({ payments = [], onSelected, onPaymentUpdate }) {
         }
     };
 
-    const handleArchivePayment = async (e, paymentId, paymentData) => {
-        e.stopPropagation(); // Prevenir que se abra el modal
-        
-        const clientName = `${paymentData.Client?.Name?.FirstName || ''} ${paymentData.Client?.Name?.SecondName || ''} ${paymentData.Client?.LastName?.FatherLastName || ''} ${paymentData.Client?.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim();
-
-        const result = await Swal.fire({
-            title: '¿Archivar pago?',
-            text: `¿Estás seguro de que quieres archivar el pago de ${clientName} (Folio: ${paymentData.Folio})?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, archivar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6'
-        });
-
-        if (result.isConfirmed) {
-            try {
-                const response = await makeRequest(`/pay/archive/${paymentId}`);
-                console.log('Respuesta del archivado:', response);
-
-                // Notificar al componente padre para actualizar la lista
-                if (onPaymentUpdate) {
-                    onPaymentUpdate(paymentId, { ...paymentData, Archived: true });
-                }
-
-                await Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'El pago ha sido archivado correctamente',
-                    icon: 'success',
-                    toast: true,
-                    position: 'top',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
-
-            } catch (error) {
-                console.error('Error al archivar:', error);
-                await Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo archivar el pago',
-                    icon: 'error',
-                    toast: true,
-                    position: 'top',
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
-            }
+    const [archivedIds, setArchivedIds] = useState([]);
+    const handleArchive = async (id) => {
+        if (window.confirm('¿Seguro que quieres archivar este pago?')) {
+            await makeRequest(`/pay/archive/${id}`);
+            setArchivedIds(prev => [...prev, id]);
         }
     };
 
     const filteredData = payments.filter(payment => {
-        // Filtrar pagos archivados
-        if (payment.Archived) return false;
-        
-        // Filtrar por región primero
+        if (payment.Archived || archivedIds.includes(payment._id)) return false;
+        // ...existing code...
         const matchesRegion = payment.Client?.Location?.State === region;
         if (!matchesRegion) return false;
-
         const folio = payment.Folio?.toString().toLowerCase() || '';
         const method = payment.Method?.toString().toLowerCase() || '';
         const amount =(payment.Amount ?? '').toString().toLowerCase();
@@ -100,7 +52,6 @@ function PaymentCard({ payments = [], onSelected, onPaymentUpdate }) {
         ${payment.Client?.LastName.MotherLastName}`
         .replace(/\s+/g, ' ').trim()
         .toLowerCase();
-
         const searchLower = search.toLowerCase();
         return (
             clientName.includes(searchLower) || 
@@ -170,9 +121,7 @@ function PaymentCard({ payments = [], onSelected, onPaymentUpdate }) {
                         <th onClick={() => handleHeaderClick('Folio')} style={{ cursor: 'pointer' }}>
                             Folio {sortField === 'Folio' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
-
                         <th>Estado</th>
-
                         <th onClick={() => handleHeaderClick('Cliente')} style={{ cursor: 'pointer' }}>
                             Cliente {sortField === 'Cliente' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
@@ -180,36 +129,35 @@ function PaymentCard({ payments = [], onSelected, onPaymentUpdate }) {
                             Método {sortField === 'Método' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
                         <th>Monto</th>
-                        {/* Nuevo encabezado */}
                         <th>Abono</th>
                         <th>Creado por</th>
                         <th onClick={() => handleHeaderClick('Fecha')} style={{ cursor: 'pointer' }}>
                             Fecha {sortField === 'Fecha' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
-                        <th>Acciones</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${styleCard['table-body']}`}>
                     {sortedData.map((item) => (
                         <tr className={styleTable['selected-row']}
-                            key={item._id} onClick={() => onSelected(item)}
-                            data-bs-toggle="modal" data-bs-target="#PaymentModal">
+                            key={item._id} onClick={() => onSelected(item)}>
                             <td>{item.Folio}</td>
                             <td>{item.Status}</td>
                             <td>{`${item.Client?.Name?.FirstName ?? ''} ${item.Client?.Name?.SecondName ?? ''} ${item.Client?.LastName?.FatherLastName ?? ''} ${item.Client?.LastName?.MotherLastName ?? ''}`}</td>
                             <td>{item.Method}</td>
                             <td>{item.Amount}</td>
                             <td>{item.Abono}</td>
-                            {/* Mostrar el administrador */}
                             <td>{item.Admin?.UserName ?? 'Sin asignar'}</td>
                             <td>{item.CreateDate?.split("T")[0]}</td>
                             <td>
                                 <button 
-                                    className="btn btn-sm btn-warning"
-                                    onClick={(e) => handleArchivePayment(e, item._id, item)}
-                                    title="Archivar pago"
+                                    className="btn btn-outline-danger btn-sm"
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        handleArchive(item._id);
+                                    }}
                                 >
-                                    <i className="fas fa-archive"></i>
+                                    Archivar
                                 </button>
                             </td>
                         </tr>

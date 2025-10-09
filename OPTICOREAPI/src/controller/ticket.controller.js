@@ -67,7 +67,11 @@ export const viewAllTickets = async (req, res) => {
 // Obtener solo tickets archivados
 export const viewArchivedTickets = async (req, res) => {
     try {
-        const archivedTickets = await ticket.find({ Archived: true });
+        const archivedTickets = await ticket.find({ Archived: true })
+            .populate('Client', 'Name LastName Location')
+            .populate('Admin', 'UserName')
+            .populate('tecnico')
+            .exec();
         return res.status(200).json(archivedTickets);
     } catch (error) {
         console.log(error);
