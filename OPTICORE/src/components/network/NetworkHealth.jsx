@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../../config/api.js';
 import { Box, Card, CardContent, Typography, LinearProgress, Grid, Divider } from '@mui/material';
 import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
@@ -24,14 +25,14 @@ export default function NetworkHealth() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/network/device-info')
+    fetch(`${API_BASE_URL}/network/device-info`)
       .then(res => res.json())
       .then(data => setDeviceInfo(data));
   }, []);
 
   useEffect(() => {
     const fetchHealth = () => {
-      fetch('http://localhost:3000/api/network/network-health-history')
+      fetch(`${API_BASE_URL}/network/network-health-history`)
         .then(res => res.json())
         .then(data => setHealthHistory(data));
     };

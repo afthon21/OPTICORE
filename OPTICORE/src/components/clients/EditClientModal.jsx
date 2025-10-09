@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import PropTypes from 'prop-types';
 
 const styles = {
   backdrop: {
@@ -408,5 +409,38 @@ function EditClientModal({ client, onClose, onSave }) {
     </div>
   );
 }
+
+EditClientModal.propTypes = {
+  client: PropTypes.shape({
+    _id: PropTypes.string,
+    Name: PropTypes.shape({
+      FirstName: PropTypes.string,
+      SecondName: PropTypes.string
+    }),
+    LastName: PropTypes.shape({
+      FatherLastName: PropTypes.string,
+      MotherLastName: PropTypes.string
+    }),
+    PhoneNumber: PropTypes.arrayOf(PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ])),
+    Email: PropTypes.string,
+    Location: PropTypes.shape({
+      State: PropTypes.string,
+      Municipality: PropTypes.string,
+      ZIP: PropTypes.string,
+      Address: PropTypes.string,
+      Cologne: PropTypes.string,
+      Locality: PropTypes.string,
+      OutNumber: PropTypes.string,
+      InNumber: PropTypes.string,
+      Latitude: PropTypes.string,
+      Length: PropTypes.string
+    })
+  }),
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired
+};
 
 export default EditClientModal;

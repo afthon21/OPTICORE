@@ -3,5 +3,4 @@ node_modules/
 .vscode/
 
 #Ignorar archivos de configuracion
-
-.vite/
+.vite/.env

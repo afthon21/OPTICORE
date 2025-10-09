@@ -2,6 +2,8 @@ export const handleLogout = (navigate) => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userName');
     sessionStorage.removeItem('adminId');
+    sessionStorage.removeItem('adminRegion');
+    sessionStorage.removeItem('adminRole');
     navigate('/')
 }
 
@@ -69,5 +71,10 @@ export const handleArchiveClients = (navigate, adminId) => {
 };
 export const handleArchiveTickets = (navigate, adminId) => {
     navigate(`/ticket/archived/${adminId}`);
-
 }
+
+    
+export const handleArchivePayments = (navigate, adminId) => {
+    navigate(`/payment/archived/${adminId}`);
+};
+

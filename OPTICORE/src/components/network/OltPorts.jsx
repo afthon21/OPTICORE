@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../../config/api.js';
 import { Line } from 'react-chartjs-2';
 import {
   Typography, Button, Box, List, ListItem, ListItemButton, ListItemText, Stack
@@ -37,7 +38,7 @@ export default function OltPorts() {
 
   useEffect(() => {
     const fetchData = () => {
-      fetch(`http://localhost:3000/api/network/olt-ports-snmp?type=${portType}`)
+      fetch(`${API_BASE_URL}/network/olt-ports-snmp?type=${portType}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {

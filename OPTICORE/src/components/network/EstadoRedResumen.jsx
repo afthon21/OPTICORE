@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Divider } from '@mui/material';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
+import { API_BASE_URL } from '../../config/api.js';
 
 export default function EstadoRedResumen() {
   const [deviceInfo, setDeviceInfo] = useState({
@@ -16,9 +17,21 @@ export default function EstadoRedResumen() {
   const [avgHealth, setAvgHealth] = useState(78);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/network/device-info')
-      .then(res => res.json())
-      .then(data => setDeviceInfo(data));
+    const fetchDeviceInfo = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/network/device-info`);
+        if (response.ok) {
+          const data = await response.json();
+          setDeviceInfo(data);
+        } else {
+          console.warn('Failed to fetch device info, using defaults');
+        }
+      } catch (error) {
+        console.error('Error fetching device info:', error);
+      }
+    };
+
+    fetchDeviceInfo();
   }, []);
 
   return (

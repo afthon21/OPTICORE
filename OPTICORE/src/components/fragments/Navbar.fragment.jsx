@@ -4,18 +4,66 @@ import { useRegion } from '../../hooks/RegionContext';
 
 import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket, handleArchiveTickets} from './js/Routes.js';
 import { handleClients, handleCreateClient, handlePayments, handleCreatePayment } from './js/Routes.js';
-import { handlePackages, handleCreatePackages, handleArchiveClients} from './js/Routes.js';
+import { handlePackages, handleCreatePackages, handleArchiveClients, handleArchivePayments} from './js/Routes.js';
 
 export function NavbarFragmentAll() {
     const navigate = useNavigate();
     const [name, setName] = useState(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const adminId = sessionStorage.getItem('adminId');
-    const { region, setRegion } = useRegion();
+    const { region, setRegion, isAdmin, canChangeRegion, userRole } = useRegion();
 
+    // Debug para el navbar
+    console.log('🎭 Navbar - Rol de usuario:', userRole);
+    console.log('🎭 Navbar - ¿Es admin?:', isAdmin);
+    console.log('🎭 Navbar - ¿Puede cambiar región?:', canChangeRegion);
+    console.log('🎭 Navbar - Región actual:', region);
+
+    // Función de debug para verificar sessionStorage
+    // eslint-disable-next-line no-unused-vars
+    const debugSessionStorage = () => {
+        console.log('🔍 DEBUG SESSION STORAGE:');
+        console.log('adminRole:', sessionStorage.getItem('adminRole'));
+        console.log('adminRegion:', sessionStorage.getItem('adminRegion'));
+        console.log('adminId:', sessionStorage.getItem('adminId'));
+        console.log('userName:', sessionStorage.getItem('userName'));
+    };
+
+    // Función para forzar actualización del nombre
+    // eslint-disable-next-line no-unused-vars
+    const refreshUserName = () => {
+        const currentName = sessionStorage.getItem('userName');
+        console.log('🔄 Forzando actualización de nombre:', currentName);
+        setName(currentName);
+        setRefreshTrigger(prev => prev + 1);
+    };
+
+    // Efecto principal para cargar el nombre inicial y cuando cambia el rol
     useEffect(() => {
         const name = sessionStorage.getItem('userName');
+        console.log('👤 Cargando nombre de usuario inicial:', name);
         setName(name);
-    }, []);
+    }, [userRole, refreshTrigger]); // Se actualiza cuando cambia el rol o el trigger
+
+    // Efecto para detectar cambios en sessionStorage con polling más inteligente
+    useEffect(() => {
+        let lastKnownName = name;
+        
+        const checkForChanges = () => {
+            const currentName = sessionStorage.getItem('userName');
+            if (currentName !== lastKnownName) {
+                console.log('👤 Cambio detectado - Anterior:', lastKnownName, '| Nuevo:', currentName);
+                setName(currentName);
+                lastKnownName = currentName;
+            }
+        };
+
+        // Verificar cambios cada 500ms (más responsivo)
+        const interval = setInterval(checkForChanges, 500);
+
+        return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Solo se ejecuta una vez
 
     return (
         <nav className="d-flex flex-column position-fixed shadow top-0 left-0 vh-100 px-2 py-3 main-menu" >
@@ -26,20 +74,69 @@ export function NavbarFragmentAll() {
                 </p>
             </div>
 
-            {/* Selector de Estado */}
-            <div className="mb-3">
-                <label className="form-label fw-bold">Región:</label>
-                <select
-                    className="form-select"
-                    value={region}
-                    onChange={e => setRegion(e.target.value)}
-                >
-                    <option value="Estado de México">Estado de México</option>
-                    <option value="Puebla">Puebla</option>
-                </select>
-            </div>
-
             <ul className="nav flex-column mb-auto">
+                
+                {/* Selector de Región - Estilo navegación */}
+                <li className="nav-item item">
+                    <a
+                        className="nav-link d-flex align-items-center item-link"
+                        role="button">
+                        <i className="bi bi-geo-alt me-2"></i>
+                        <span className="item-title">Región</span>
+                    </a>
+                    <ul className="list-unstyled ps-3 sub-menu">
+                        {canChangeRegion ? (
+                            // Para administradores: pueden cambiar de región
+                            <>
+                                <li className="ms-4">
+                                    <a
+                                        className={`nav-link ${region === 'Estado de México' ? 'active' : ''}`}
+                                        onClick={() => {
+                                            console.log('🎯 Cambiando región a Estado de México');
+                                            setRegion('Estado de México');
+                                        }}
+                                        role="button"
+                                        style={{
+                                            color: region === 'Estado de México' ? '#0d6efd' : '',
+                                            fontWeight: region === 'Estado de México' ? 'bold' : 'normal'
+                                        }}
+                                    >
+                                        Estado de México {region === 'Estado de México' && '✓'}
+                                    </a>
+                                </li>
+                                <li className="ms-4">
+                                    <a
+                                        className={`nav-link ${region === 'Puebla' ? 'active' : ''}`}
+                                        onClick={() => {
+                                            console.log('🎯 Cambiando región a Puebla');
+                                            setRegion('Puebla');
+                                        }}
+                                        role="button"
+                                        style={{
+                                            color: region === 'Puebla' ? '#0d6efd' : '',
+                                            fontWeight: region === 'Puebla' ? 'bold' : 'normal'
+                                        }}
+                                    >
+                                        Puebla {region === 'Puebla' && '✓'}
+                                    </a>
+                                </li>
+                            </>
+                        ) : (
+                            // Para no-administradores: solo muestran su región asignada
+                            <li className="ms-4">
+                                <span
+                                    className="nav-link text-muted"
+                                    style={{
+                                        cursor: 'default',
+                                        color: '#6c757d !important'
+                                    }}
+                                >
+                                    {region} (Asignada)
+                                </span>
+                            </li>
+                        )}
+                    </ul>
+                </li>
                 
                 <li className="nav-item item">
                     <a
@@ -119,6 +216,15 @@ export function NavbarFragmentAll() {
                                 role="button"
                             >
                                 Ver
+                            </a>
+                        </li>
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => handleArchivePayments(navigate, adminId)}
+                                role="button"
+                            >
+                                Archivados
                             </a>
                         </li>
                          

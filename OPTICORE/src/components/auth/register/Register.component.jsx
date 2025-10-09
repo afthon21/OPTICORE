@@ -30,7 +30,8 @@ function RegisterComponent() {
         MotherLastName: '',
         Email: '',
         Password: '',
-        ConfirmPassword: ''
+        ConfirmPassword: '',
+        Region: 'Estado de México' // Valor por defecto
     });
     const [formErrors, setFormErrors] = useState({});
 
@@ -45,7 +46,9 @@ function RegisterComponent() {
             MotherLastName: formValues.MotherLastName
         },
         Email: formValues.Email,
-        Password: formValues.Password
+        Password: formValues.Password,
+        Role: 'admin', // Valor por defecto
+        Region: formValues.Region
     }
 
     /** Validar Inputs */
@@ -84,7 +87,8 @@ function RegisterComponent() {
                 MotherLastName: '',
                 Email: '',
                 Password: '',
-                ConfirmPassword: ''
+                ConfirmPassword: '',
+                Region: 'Estado de México' // Valor por defecto
             });
             setFormErrors({});
         };
@@ -210,6 +214,7 @@ function RegisterComponent() {
                                     {formErrors?.Email && (<p style={{ color: 'red' }}>{formErrors.Email}</p>)}
 
                                 </div>
+
                                 <div className="input-group mb-3">
                                     <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Contraseña:</span>
 
@@ -228,6 +233,21 @@ function RegisterComponent() {
                                         onChange={(e) => setFormValues({ ...formValues, ConfirmPassword: e.target.value })} />
 
                                     {formErrors?.ConfirmPassword && (<p style={{ color: 'red' }}>{formErrors.ConfirmPassword}</p>)}
+
+                                </div>
+                                                                <div className="input-group mb-3">
+                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Región:</span>
+
+                                    <select 
+                                        className="form-control"
+                                        value={formValues.Region}
+                                        onChange={(e) => setFormValues({ ...formValues, Region: e.target.value })}
+                                    >
+                                        <option value="Estado de México">Estado de México</option>
+                                        <option value="Puebla">Puebla</option>
+                                    </select>
+
+                                    {formErrors?.Region && (<p style={{ color: 'red' }}>{formErrors.Region}</p>)}
 
                                 </div>
                                 <div className="d-flex justify-content-center" >

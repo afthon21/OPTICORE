@@ -5,6 +5,8 @@ import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
 import ErrorDisplay from './ErrorDisplay.jsx';
 import FibraChart from './FibraChart.jsx';
 import RadioChart from './RadioChart.jsx';
+import AddressModal from './AddressModal.jsx';
+import ClientAddressDetailModal from './ClientAddressDetailModal.jsx';
 
 // SweetAlert2 popup size custom CSS
 const swalSmallStyle = document.createElement('style');
@@ -26,6 +28,12 @@ function HomeComponent() {
     const [userName, setUserName] = useState('');
     const [clients, setClients] = useState([]);
     const [clientDocuments, setClientDocuments] = useState({});
+    // Estado para el modal de detalles de dirección
+    const [addressDetailModalOpen, setAddressDetailModalOpen] = useState(false);
+    const [selectedClientForAddressDetail, setSelectedClientForAddressDetail] = useState(null);
+    // Estado para el modal de mapa
+    const [addressModalOpen, setAddressModalOpen] = useState(false);
+    const [selectedClientForAddress, setSelectedClientForAddress] = useState(null);
     // Estado para los colores de cada recuadro
     const [boxColors, setBoxColors] = useState({
         clientes: '#ecebebff',
@@ -95,7 +103,7 @@ function HomeComponent() {
                 </h4>
                 <div style="text-align: left; font-size: 14px; line-height: 1.6;">
                     <p><strong>Tel:</strong> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}</p>
-                    <p><strong>Dirección:</strong> ${direccion}</p>
+                    <p><strong>Dirección:</strong> <button id="address-link" style="background: none; border: none; color: #2a9d8f; text-decoration: underline; cursor: pointer; padding: 2px 4px; font-size: inherit; font-family: inherit; border-radius: 4px; transition: all 0.2s ease;" title="Ver dirección completa" onmouseover="this.style.backgroundColor='rgba(42, 157, 143, 0.1)'; this.style.textDecoration='underline';" onmouseout="this.style.backgroundColor='transparent'; this.style.textDecoration='underline';">${direccion} <i class="bi bi-arrow-up-right-square" style="font-size: 12px; margin-left: 4px;"></i></button></p>
                     ${fotoFachada ? `<div style="text-align: center; margin-top: 15px;">
                         <button id="download-foto-btn" style="background-color: #28a745; color: white; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 14px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0 auto;" title="Descargar Foto de Fachada">
                             <i class="bi bi-download"></i>
@@ -130,9 +138,99 @@ function HomeComponent() {
                         handleDownloadFotoFachada(fotoFachada, clientName);
                     });
                 }
+                
+                // Agregar evento de clic al botón de dirección
+                const addressButton = document.getElementById('address-link');
+                if (addressButton) {
+                    addressButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Click en botón de dirección para cliente:', client.Name.FirstName);
+                        
+                        // Cerrar SweetAlert primero
+                        Swal.close();
+                        
+                        // Abrir el modal de detalles de dirección
+                        setTimeout(() => {
+                            if (window.openAddressDetailModal) {
+                                window.openAddressDetailModal(client);
+                            } else {
+                                console.error('window.openAddressDetailModal no está disponible');
+                            }
+                        }, 300);
+                    });
+                }
             }
         });
     };
+
+    // Funciones para manejar el modal de dirección
+    const handleOpenAddressModal = (client) => {
+        console.log('handleOpenAddressModal llamado con cliente:', client?.Name?.FirstName);
+        console.log('Estado actual - addressModalOpen:', addressModalOpen, 'selectedClientForAddress:', selectedClientForAddress?.Name?.FirstName);
+        setSelectedClientForAddress(client);
+        setAddressModalOpen(true);
+        console.log('Estados actualizados - modal será abierto');
+    };
+
+    const handleCloseAddressModal = () => {
+        console.log('Cerrando modal de mapa');
+        setAddressModalOpen(false);
+        setSelectedClientForAddress(null);
+    };
+
+    // Funciones para manejar el modal de detalles de dirección
+    const handleOpenAddressDetailModal = (client) => {
+        console.log('handleOpenAddressDetailModal llamado con cliente:', client?.Name?.FirstName);
+        setSelectedClientForAddressDetail(client);
+        setAddressDetailModalOpen(true);
+    };
+
+    const handleCloseAddressDetailModal = () => {
+        console.log('Cerrando modal de detalles de dirección');
+        setAddressDetailModalOpen(false);
+        setSelectedClientForAddressDetail(null);
+    };
+
+    // Función para abrir el modal de mapa desde el modal de detalles
+    const handleOpenMapFromDetails = (client) => {
+        console.log('Abriendo modal de mapa para cliente:', client?.Name?.FirstName);
+        // Cerrar el modal de detalles primero
+        setAddressDetailModalOpen(false);
+        setSelectedClientForAddressDetail(null);
+        // Abrir el modal de mapa
+        setTimeout(() => {
+            setSelectedClientForAddress(client);
+            setAddressModalOpen(true);
+        }, 300);
+    };
+
+    // Debug de estados
+    useEffect(() => {
+        console.log('Estado addressModalOpen cambió a:', addressModalOpen);
+    }, [addressModalOpen]);
+
+    useEffect(() => {
+        console.log('Estado selectedClientForAddress cambió a:', selectedClientForAddress?.Name?.FirstName);
+    }, [selectedClientForAddress]);
+
+    // Funciones globales para abrir modales (disponibles en window)
+    useEffect(() => {
+        window.openAddressDetailModal = (client) => {
+            console.log('window.openAddressDetailModal llamado con cliente:', client?.Name?.FirstName);
+            handleOpenAddressDetailModal(client);
+        };
+        
+        window.openAddressModal = (client) => {
+            console.log('window.openAddressModal llamado con cliente:', client?.Name?.FirstName);
+            handleOpenAddressModal(client);
+        };
+        
+        return () => {
+            delete window.openAddressDetailModal;
+            delete window.openAddressModal;
+        };
+    }, []);
 
     // Función para mostrar detalles del ticket en un modal
     const handleShowTicketDetails = (ticket) => {
@@ -275,6 +373,8 @@ function HomeComponent() {
 
     return (
         <div className="content mt-3" style={{ marginLeft: '70px' }}>
+
+            
             {/* Primera fila */}
             <div className="dashboard-row" style={{ minHeight: '250px' }}>
                 <div className="dashboard-card" style={{ background: boxColors.clientes }}>
@@ -520,6 +620,20 @@ function HomeComponent() {
                     </div>
                 </div>
             </div>
+            
+            {/* Modal de detalles de dirección */}
+            <ClientAddressDetailModal 
+                client={selectedClientForAddressDetail}
+                isOpen={addressDetailModalOpen}
+                onClose={handleCloseAddressDetailModal}
+            />
+            
+            {/* Modal de mapa */}
+            <AddressModal 
+                client={selectedClientForAddress}
+                isOpen={addressModalOpen}
+                onClose={handleCloseAddressModal}
+            />
         </div>
     );
 }

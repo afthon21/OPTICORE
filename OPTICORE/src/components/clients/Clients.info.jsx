@@ -1,7 +1,7 @@
 import styleCard from './css/clientInfo.module.css';
 import styleNav from './css/navbar.module.css';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ApiRequest from '../hooks/apiRequest.jsx';
 import Swal from 'sweetalert2';
@@ -12,24 +12,41 @@ import ClientTickets from './tickets/Client.tickets';
 import ClientNotes from './notes/client.notes';
 import ClientLocation from './location/location.map';
 
-function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
+function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) {
     const [show, setShow] = useState({
-        personal: true,
-        payments: false,
-        documents: false,
-        location: false,
-        tickets: false,
-        notes: false,
-        active: false
+        personal: initialActiveTab === 'personal',
+        payments: initialActiveTab === 'payments',
+        documents: initialActiveTab === 'documents',
+        location: initialActiveTab === 'location',
+        tickets: initialActiveTab === 'tickets',
+        notes: initialActiveTab === 'notes'
     });
 
     // Estado local para el cliente seleccionado
     const [currentClient, setCurrentClient] = useState(client);
+    
+    // Estado para la lista completa de clientes (necesario para el apartado "Activos")
+    const [clients, setClients] = useState([]);
+    
+    // Estado para controlar cuando refrescar la lista de activos
+    const [shouldRefreshActives, setShouldRefreshActives] = useState(false);
 
     // Si el prop client cambia (por ejemplo, seleccionas otro cliente), actualiza el estado local
     useEffect(() => {
         setCurrentClient(client);
     }, [client]);
+
+    // Actualizar la pestaña activa cuando cambie initialActiveTab
+    useEffect(() => {
+        setShow({
+            personal: initialActiveTab === 'personal',
+            payments: initialActiveTab === 'payments',
+            documents: initialActiveTab === 'documents',
+            location: initialActiveTab === 'location',
+            tickets: initialActiveTab === 'tickets',
+            notes: initialActiveTab === 'notes'
+        });
+    }, [initialActiveTab]);
 
     const toggleData = (data) => {
         setShow({
@@ -45,6 +62,32 @@ function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
     }
 
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
+    // Función para cargar todos los clientes (necesario para el apartado "Activos")
+    const loadAllClients = useCallback(async () => {
+        try {
+            const response = await makeRequest('/client/all');
+            setClients(response || []);
+        } catch (error) {
+            console.error('Error loading clients:', error);
+            setClients([]);
+        }
+    }, [makeRequest]);
+
+    // Cargar clientes cuando se abre el apartado "Activos" o cuando se necesita refresh
+    useEffect(() => {
+        if (show.active && (clients.length === 0 || shouldRefreshActives)) {
+            loadAllClients();
+            setShouldRefreshActives(false);
+        }
+    }, [show.active, clients.length, shouldRefreshActives, loadAllClients]);
+
+    // Detectar cuando el cliente actual cambia de estado para activar refresh
+    useEffect(() => {
+        if (currentClient && show.active) {
+            setShouldRefreshActives(true);
+        }
+    }, [currentClient, show.active]);
 
     const toggleStatusFromActive = async (item) => {
         const newStatus = item.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
@@ -68,6 +111,10 @@ function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
                 if (onGlobalUpdate) onGlobalUpdate(updated);
                 // si el cliente mostrado es el que se actualizó, reflejarlo
                 setCurrentClient(prev => prev && prev._id === updated._id ? updated : prev);
+                // Actualizar la lista de clientes en el apartado activos
+                setClients(prev => prev.map(c => c._id === updated._id ? updated : c));
+                // Marcar que necesitamos refrescar la lista
+                setShouldRefreshActives(true);
                 Swal.fire({
                     icon: 'success',
                     title: 'Estado actualizado',
@@ -184,7 +231,8 @@ function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
                     {show.personal && (
                         <ClientData
                             client={currentClient}
-                            onUpdateClient={(u)=>{ setCurrentClient(u); if(onGlobalUpdate) onGlobalUpdate(u);} }
+                            onUpdateClient={(u)=>{ setCurrentClient(u); 
+                                if(onGlobalUpdate) onGlobalUpdate(u);} }
                         />
                     )}
 
@@ -257,10 +305,7 @@ function ClientsInfo({ client, clients = [], onGlobalUpdate }) {
 export default ClientsInfo;
 
 ClientsInfo.propTypes = {
-    client: PropTypes.oneOfType([
-        PropTypes.object,
-        PropTypes.string
-    ]),
-    clients: PropTypes.array,
+    client: PropTypes.object,
+    initialActiveTab: PropTypes.string,
     onGlobalUpdate: PropTypes.func
 };

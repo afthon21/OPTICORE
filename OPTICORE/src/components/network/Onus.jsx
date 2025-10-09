@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../../config/api.js';
 import {
   Box,
   Card,
@@ -21,7 +22,7 @@ export default function Onus() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/network/onus')
+    fetch(`${API_BASE_URL}/network/onus`)
       .then((res) => {
         if (!res.ok) throw new Error('Error al obtener datos');
         return res.json();

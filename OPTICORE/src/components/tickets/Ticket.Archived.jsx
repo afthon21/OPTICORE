@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 import { useParams } from 'react-router-dom';
-import styleCard from './css/ticketsCard.module.css';
-import styleTable from './css/ticketsCard.module.css';
 
 function ArchivedTickets() {
   const [tickets, setTickets] = useState([]);

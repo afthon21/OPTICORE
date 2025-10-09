@@ -60,9 +60,59 @@ function ClientData({ client, onUpdateClient }) {
         }
     }
 
+    const archiveClient = async () => {
+        if (!currentClient?._id) return;
+        
+        const clientName = `${currentClient.Name.FirstName} ${currentClient.Name.SecondName || ''} ${currentClient.LastName.FatherLastName} ${currentClient.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim();
+        
+        const result = await Swal.fire({
+            title: '¿Archivar cliente?',
+            text: `¿Estás seguro de que quieres archivar a ${clientName}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, archivar',
+            cancelButtonText: 'Cancelar'
+        });
+        
+        if (result.isConfirmed) {
+            console.log('Archivando cliente:', currentClient._id); // Debug
+            // Usar el endpoint dedicado del backend para archivar
+            const updated = await makeRequest(`/client/archive/${currentClient._id}`,'POST');
+            console.log('Respuesta del servidor al archivar:', updated); // Debug
+            if (updated) {
+                const normalized = updated.client ?? updated; // asegurar forma consistente
+                setCurrentClient(normalized);
+                if (onUpdateClient) onUpdateClient(normalized);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cliente archivado',
+                    text: `${clientName} ha sido archivado exitosamente`,
+                    timer: 1500,
+                    position: 'top',
+                    showConfirmButton: false,
+                    toast: true
+                });
+                // Mantenerse en la misma página; no navegar automáticamente
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo archivar el cliente',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    position: 'top',
+                    toast: true
+                });
+            }
+        }
+    }
+
     const Indicators = () => (
         <div className={styleData['indicator-container']}>
             <div className={`${styleData['circle']} ${styleData['red']}`}
+                onClick={archiveClient}
                 style={{ cursor: 'pointer' }}
                 title="Archivar cliente"
             ></div>
