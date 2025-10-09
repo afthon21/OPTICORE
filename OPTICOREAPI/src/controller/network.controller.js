@@ -39,7 +39,6 @@ export async function detectarPuertos() {
     const sessionFlag = { closed: false };
 
     const timeout = setTimeout(() => {
-      console.log('🔧 SNMP timeout - usando datos simulados');
       safeCloseSession(session, sessionFlag);
       resolve({
         ethernet: [
