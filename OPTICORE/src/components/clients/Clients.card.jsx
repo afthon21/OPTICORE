@@ -1,6 +1,7 @@
 import styleCard from './css/clientsCard.module.css';
 import { useRegion } from '../../hooks/RegionContext';
 import styleTable from './css/clientsCard.module.css';
+import PropTypes from 'prop-types';
 
 import { useState } from 'react';
 
@@ -12,17 +13,18 @@ function ClientsCard({ clients = [], onSelected }) {
         setSearch(e.target.value);
     }
 
-    // Filtrar por nombre y por estado
+    // Filtrar por nombre, estado y excluir archivados
     const filteredName = clients.filter(client => {
         let clientName = `${client.Name.FirstName} 
         ${client.Name.SecondName || ''} 
         ${client.LastName.FatherLastName}  
         ${client.LastName.MotherLastName}`
             .replace(/\s+/g, ' ').trim();
-        // Filtrar por nombre y por estado
+        // Filtrar por nombre, región y excluir archivados
         const matchesName = clientName.toLowerCase().includes(search.toLowerCase());
         const matchesRegion = client.Location?.State === region;
-        return matchesName && matchesRegion;
+        const isNotArchived = !client.Archived; // Excluir clientes archivados
+        return matchesName && matchesRegion && isNotArchived;
     });
 
     return (
@@ -71,5 +73,10 @@ function ClientsCard({ clients = [], onSelected }) {
     );
 
 }
+
+ClientsCard.propTypes = {
+    clients: PropTypes.array,
+    onSelected: PropTypes.func
+};
 
 export default ClientsCard

@@ -1,7 +1,7 @@
 import styleCard from './css/clientInfo.module.css';
 import styleNav from './css/navbar.module.css';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ApiRequest from '../hooks/apiRequest.jsx';
 import Swal from 'sweetalert2';
@@ -12,7 +12,7 @@ import ClientTickets from './tickets/Client.tickets';
 import ClientNotes from './notes/client.notes';
 import ClientLocation from './location/location.map';
 
-function ClientsInfo({ client, initialActiveTab = 'personal' }) {
+function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) {
     const [show, setShow] = useState({
         personal: initialActiveTab === 'personal',
         payments: initialActiveTab === 'payments',
@@ -24,6 +24,12 @@ function ClientsInfo({ client, initialActiveTab = 'personal' }) {
 
     // Estado local para el cliente seleccionado
     const [currentClient, setCurrentClient] = useState(client);
+    
+    // Estado para la lista completa de clientes (necesario para el apartado "Activos")
+    const [clients, setClients] = useState([]);
+    
+    // Estado para controlar cuando refrescar la lista de activos
+    const [shouldRefreshActives, setShouldRefreshActives] = useState(false);
 
     // Si el prop client cambia (por ejemplo, seleccionas otro cliente), actualiza el estado local
     useEffect(() => {
@@ -57,6 +63,32 @@ function ClientsInfo({ client, initialActiveTab = 'personal' }) {
 
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
+    // Función para cargar todos los clientes (necesario para el apartado "Activos")
+    const loadAllClients = useCallback(async () => {
+        try {
+            const response = await makeRequest('/client/all');
+            setClients(response || []);
+        } catch (error) {
+            console.error('Error loading clients:', error);
+            setClients([]);
+        }
+    }, [makeRequest]);
+
+    // Cargar clientes cuando se abre el apartado "Activos" o cuando se necesita refresh
+    useEffect(() => {
+        if (show.active && (clients.length === 0 || shouldRefreshActives)) {
+            loadAllClients();
+            setShouldRefreshActives(false);
+        }
+    }, [show.active, clients.length, shouldRefreshActives, loadAllClients]);
+
+    // Detectar cuando el cliente actual cambia de estado para activar refresh
+    useEffect(() => {
+        if (currentClient && show.active) {
+            setShouldRefreshActives(true);
+        }
+    }, [currentClient, show.active]);
+
     const toggleStatusFromActive = async (item) => {
         const newStatus = item.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
         const actionText = newStatus === 'ACTIVE' ? 'activar' : 'desactivar';
@@ -79,6 +111,10 @@ function ClientsInfo({ client, initialActiveTab = 'personal' }) {
                 if (onGlobalUpdate) onGlobalUpdate(updated);
                 // si el cliente mostrado es el que se actualizó, reflejarlo
                 setCurrentClient(prev => prev && prev._id === updated._id ? updated : prev);
+                // Actualizar la lista de clientes en el apartado activos
+                setClients(prev => prev.map(c => c._id === updated._id ? updated : c));
+                // Marcar que necesitamos refrescar la lista
+                setShouldRefreshActives(true);
                 Swal.fire({
                     icon: 'success',
                     title: 'Estado actualizado',
@@ -195,7 +231,8 @@ function ClientsInfo({ client, initialActiveTab = 'personal' }) {
                     {show.personal && (
                         <ClientData
                             client={currentClient}
-                            onUpdateClient={(u)=>{ setCurrentClient(u); if(onGlobalUpdate) onGlobalUpdate(u);} }
+                            onUpdateClient={(u)=>{ setCurrentClient(u); 
+                                if(onGlobalUpdate) onGlobalUpdate(u);} }
                         />
                     )}
 
@@ -226,8 +263,11 @@ function ClientsInfo({ client, initialActiveTab = 'personal' }) {
 
                     {/* Estado Activo */}
                     {show.active && (
-                        <div className="mt-2">
-                            <h5>Clientes Activos</h5>
+                        <div className="d-flex justify-content-center align-content-center row mt-2">
+                            <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}> 
+                                <span className={`me-2 ${styleCard['title']}`}>Clientes Activos</span>
+                                <span className="text-primary"><i className="bi bi-person-lines-fill"></i></span>
+                            </div>
                             <table className="table table-hover justify-content-center">
                                 <thead className={styleCard['head-table']}>
                                     <tr>
@@ -237,23 +277,32 @@ function ClientsInfo({ client, initialActiveTab = 'personal' }) {
                                     </tr>
                                 </thead>
                                 <tbody className={`text-wrap ${styleCard['table-body']}`}>
-                                    {clients.filter(c => c.Status === 'ACTIVE').map(item => (
-                                        <tr key={item._id} className={styleCard['selected-row']}>
-                                            <td onClick={()=>{ setCurrentClient(item); setShow(s=>({...s, personal:true, active:false})); }}>
-                                                {`${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g,' ').trim()}
-                                            </td>
-                                            <td>
-                                                <span className={`badge ${item.Status === 'ACTIVE' ? 'bg-success':'bg-secondary'}`}>{item.Status === 'ACTIVE' ? 'Activo':'Inactivo'}</span>
-                                            </td>
-                                            <td>
-                                                <button className={`btn btn-sm ${item.Status === 'ACTIVE' ? 'btn-outline-danger':'btn-outline-success'}`} onClick={()=>toggleStatusFromActive(item)}>
-                                                    {item.Status === 'ACTIVE' ? 'Desactivar':'Activar'}
-                                                </button>
+                                    {clients.filter(c => c.Status === 'ACTIVE').length === 0 ? (
+                                        <tr>
+                                            <td colSpan="3" className="text-center text-danger">
+                                                <div>
+                                                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                                    No hay clientes activos o no se cargaron datos.<br/>
+                                                    <span className="text-muted">Verifica la respuesta de la API y el estado de los datos.</span>
+                                                </div>
                                             </td>
                                         </tr>
-                                    ))}
-                                    {clients.filter(c => c.Status === 'ACTIVE').length === 0 && (
-                                        <tr><td colSpan="3" className="text-center text-muted">No hay clientes activos.</td></tr>
+                                    ) : (
+                                        clients.filter(c => c.Status === 'ACTIVE').map(item => (
+                                            <tr key={item._id} className={styleCard['selected-row']}>
+                                                <td onClick={()=>{ setCurrentClient(item); setShow(s=>({...s, personal:true, active:false})); }}>
+                                                    {`${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g,' ').trim()}
+                                                </td>
+                                                <td>
+                                                    <span className={`badge ${item.Status === 'ACTIVE' ? 'bg-success':'bg-secondary'}`}>{item.Status === 'ACTIVE' ? 'Activo':'Inactivo'}</span>
+                                                </td>
+                                                <td>
+                                                    <button className={`btn btn-sm ${item.Status === 'ACTIVE' ? 'btn-outline-danger':'btn-outline-success'}`} onClick={()=>toggleStatusFromActive(item)}>
+                                                        {item.Status === 'ACTIVE' ? 'Desactivar':'Activar'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
                                     )}
                                 </tbody>
                             </table>
@@ -268,10 +317,7 @@ function ClientsInfo({ client, initialActiveTab = 'personal' }) {
 export default ClientsInfo;
 
 ClientsInfo.propTypes = {
-    client: PropTypes.oneOfType([
-        PropTypes.object,
-        PropTypes.string
-    ]),
-    clients: PropTypes.array,
+    client: PropTypes.object,
+    initialActiveTab: PropTypes.string,
     onGlobalUpdate: PropTypes.func
 };

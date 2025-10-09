@@ -177,9 +177,46 @@ export const archiveClient = async (req, res) => {
         if (!idClient) {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
+        // Archivar cliente
         idClient.Archived = true;
         await idClient.save();
-        return res.status(200).json({ message: 'Client archived', client: idClient });
+
+        // Archivar en cascada: tickets, pagos, notas y documentos
+        await Promise.all([
+            ticket.updateMany({ Client: id }, { $set: { Archived: true } }),
+            payment.updateMany({ Client: id }, { $set: { Archived: true } }),
+            notes.updateMany({ Client: id }, { $set: { Archived: true } }),
+            document.updateMany({ Client: id }, { $set: { Archived: true } })
+        ]);
+
+        return res.status(200).json({ message: 'Client archived (cascade)', client: idClient });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
+    }
+}
+
+// Desarchivar cliente
+export const unarchiveClient = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const idClient = await client.findById(id);
+        if (!idClient) {
+            return res.status(404).json({ message: 'Client does not exist yet' });
+        }
+        // Desarchivar cliente
+        idClient.Archived = false;
+        await idClient.save();
+
+        // Desarchivar en cascada: tickets, pagos, notas y documentos
+        await Promise.all([
+            ticket.updateMany({ Client: id }, { $set: { Archived: false } }),
+            payment.updateMany({ Client: id }, { $set: { Archived: false } }),
+            notes.updateMany({ Client: id }, { $set: { Archived: false } }),
+            document.updateMany({ Client: id }, { $set: { Archived: false } })
+        ]);
+
+        return res.status(200).json({ message: 'Client unarchived (cascade)', client: idClient });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server error!' });
