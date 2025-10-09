@@ -142,10 +142,6 @@ export default function Card({ onPackageCreated }) {
         clientId: selectedClient
       };
 
-      console.log("Creating package with data:", packageData);
-      console.log("Selected client ID:", selectedClient);
-      console.log("API endpoint:", '/packages/new');
-
       // Crear el paquete usando el endpoint de packages
       const response = await makeRequest('/packages/new', 'POST', packageData);
       

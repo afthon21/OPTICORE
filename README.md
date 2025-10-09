@@ -65,4 +65,4 @@ Antes de ejecutar el servidor, abre una terminal separada para cada proyecto:
 hay una instalacionq ue debemos poner en el frontend (OPTICORE) para que funcione correctamente:
   `````sh
 npm install html2canvas
-npm install leaflet chartjs-plugin-datalabels
+npm install chartjs-plugin-datalabels
