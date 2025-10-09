@@ -1,13 +1,4 @@
-// Obtener solo tickets archivados
-export const viewArchivedTickets = async (req, res) => {
-    try {
-        const archivedTickets = await ticket.find({ Archived: true });
-        return res.status(200).json(archivedTickets);
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Error finding archived tickets' });
-    }
-}
+
 import ticket from '../models/ticketsSchema.js';
 import client from "../models/clientSchema.js";
 
@@ -71,6 +62,20 @@ export const viewAllTickets = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error finding tickets' });
+    }
+}
+// Obtener solo tickets archivados
+export const viewArchivedTickets = async (req, res) => {
+    try {
+        const archivedTickets = await ticket.find({ Archived: true })
+            .populate('Client', 'Name LastName Location')
+            .populate('Admin', 'UserName')
+            .populate('tecnico')
+            .exec();
+        return res.status(200).json(archivedTickets);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error finding archived tickets' });
     }
 }
 
@@ -181,11 +186,12 @@ export const editTicket = async (req, res) => {
             Issue: (value) => { UpdateQuery['Issue'] = value },
             Description: (value) => { UpdateQuery['Description'] = value },
             Status: (value) => { UpdateQuery['Status'] = value },
-            Priority: (value) => { UpdateQuery['Priority'] = value }
+            Priority: (value) => { UpdateQuery['Priority'] = value },
+            Archived: (value) => { UpdateQuery['Archived'] = value }
         };
 
         for (const [key, updateFunction] of Object.entries(fields)) {
-            if (req.body[key]) {
+            if (req.body[key] !== undefined) {
                 await updateFunction(req.body[key]);
             }
         }

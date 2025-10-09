@@ -13,5 +13,5 @@ technicianRoutes.post('/edit/:id', protectRoute, getProfile, editTechnician);
 technicianRoutes.delete('/delete/:id', protectRoute, getProfile, deleteTechnician);
 technicianRoutes.get('/active', viewActiveTechnicians);
 technicianRoutes.get('/inactive', viewInactiveTechnicians);
-
+technicianRoutes.post('/archive/:id', protectRoute, getProfile, editTechnician);
 export default technicianRoutes;

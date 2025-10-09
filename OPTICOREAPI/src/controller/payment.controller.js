@@ -1,3 +1,16 @@
+// Ver pagos archivados
+export const viewArchivedPayments = async (req, res) => {
+    try {
+        const archivedPayments = await payment.find({ Archived: true })
+            .populate('Client', 'Name LastName Location')
+            .populate('Admin', 'UserName')
+            .exec();
+        return res.status(200).json(archivedPayments);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error finding archived payments' });
+    }
+}
 import payment from "../models/paymentsSchema.js";
 import client from "../models/clientSchema.js";
 import admin from '../models/adminSchema.js';
@@ -227,5 +240,24 @@ export const archivePayments = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error archiving payment' });
+    }
+}
+
+//Desarchivar pagos
+export const unarchivePayments = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const idPayment = await payment.findById(id);
+        if (!idPayment) {
+            return res.status(404).json({ message: 'Payment does not exist' });
+        }
+
+        idPayment.Archived = false;
+        await idPayment.save();
+
+        return res.status(200).json({ message: 'Payment unarchived successfully' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error unarchiving payment' });
     }
 }
