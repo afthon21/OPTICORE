@@ -115,7 +115,7 @@ export async function getOLTPorts(req, res) {
     // Timeout para evitar que se cuelgue
     const timeout = setTimeout(() => {
       if (!responseFlag.sent) {
-        console.log('🔧 SNMP timeout en getOLTPorts - enviando datos simulados');
+        
         responseFlag.sent = true;
         safeCloseSession(session, sessionFlag);
         res.json([

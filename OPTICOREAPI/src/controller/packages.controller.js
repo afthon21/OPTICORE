@@ -83,8 +83,7 @@ export const createPackage = async(req, res) => {
 
 // Obtener todos los paquetes
 export const getAllPackages = async(req, res) => {
-    console.log('=== GET ALL PACKAGES REQUEST ===');
-    console.log('Request from user:', req.adminId);
+
     
     try {
         console.log('Searching for packages in database...');
