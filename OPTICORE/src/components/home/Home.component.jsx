@@ -33,6 +33,7 @@
                 html: `
                     <b>Email:</b> ${client.Email || 'Sin email'}<br/>
                     <b>Tel:</b> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}<br/>
+                    <b>Región:</b> ${getClientRegion(client)}<br/>
                     <b>Registrado:</b> ${client.CreateDate ? new Date(client.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}<br/>
                     <b>Dirección:</b> ${direccion}<br/>
                 `,
@@ -67,12 +68,15 @@ import Swal from 'sweetalert2';
 import ApiRequest from '../hooks/apiRequest'; //importacion de la API
 import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
 import ErrorDisplay from './ErrorDisplay.jsx';
+import { useRegion, RegionProvider} from '../../hooks/RegionContext.jsx';
 
 function HomeComponent() {
     const [tickets, setTickets] = useState([]);
     const [showAllTickets, setShowAllTickets] = useState(false);
     const [userName, setUserName] = useState('');
     const [clients, setClients] = useState([]);
+    const {region} = useRegion();
+
     // Estado para los colores de cada recuadro
     const [boxColors, setBoxColors] = useState({
         clientesNuevos: '#ecebebff',
@@ -89,6 +93,29 @@ function HomeComponent() {
     // Función para cambiar color
     const handleColorChange = (box, color) => {
         setBoxColors(prev => ({ ...prev, [box]: color }));
+    };
+
+    const getClientRegion = (client) => {
+        if (!client) return 'Estado de México';
+        const regionFound = client.region ||
+                           client.Location?.region ||
+                           client.Address?.region ||
+                           'Estado de México';
+        return regionFound;
+    };
+
+    const getAdminRegion = (admin) => {
+        return admin.Region || admin.AssignedRegion || 'Estado de México';
+    };
+
+     const filterByRegion = (items, getRegionFunction) => {
+        if (!region || region === 'Estado de México' || !items) {
+            return items || [];
+        }
+        return items.filter(item => {
+            const itemRegion = getRegionFunction(item);
+            return itemRegion === region;
+        });
     };
 
     useEffect(() => {
@@ -137,9 +164,7 @@ function HomeComponent() {
         fetchClients();
     }, []);
 
-    const pendientes = tickets.filter(
-        t => t.Status === 'En espera'
-    );
+     const pendientes = tickets.filter(t => t.Status === 'En espera');
 
     // Filtrar clientes nuevos (últimos 30 días) y ordenar de reciente a antiguo
     const clientesNuevos = clients
@@ -152,20 +177,35 @@ function HomeComponent() {
         })
         .sort((a, b) => new Date(b.CreateDate) - new Date(a.CreateDate));
 
+    const clientesNuevosFiltrados = filterByRegion(clientesNuevos, getClientRegion);
+    const ticketsFiltrados = filterByRegion(tickets, (ticket) => {
+        const client = clients.find(c => c._id === ticket.Client);
+        return getClientRegion(client);
+    });
+
+    const pendientesFiltrados = filterByRegion(pendientes, (ticket) => {
+        const client = clients.find(c => c._id === ticket.Client);
+        return getClientRegion(client);
+    });
+
     return (
         <div className="content mt-3" style={{ marginLeft: '70px' }}>
+            <div className="mb-3 p-2 bg-light rounded">
+                <small className="text-muted">Región activa: </small>
+                <strong className="text-primary">{region}</strong>
+            </div>
             {/* Primera fila */}
             <div className="dashboard-row" style={{ minHeight: '250px' }}>
                 <div className="dashboard-card" style={{ background: boxColors.clientesNuevos }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Clientes Nuevos</h5>
+                        <h5 className="border-bottom">Clientes Nuevos ({region})</h5>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
-                        {clientesNuevos.length === 0 ? (
-                            <span className="text-muted">No hay clientes nuevos</span>
+                        {clientesNuevosFiltrados.length === 0 ? (
+                            <span className="text-muted">No hay clientes nuevos ({region})</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {(showAllTickets ? clientesNuevos : clientesNuevos.slice(0, 8)).map(client => (
+                                {(showAllTickets ? clientesNuevosFiltrados : clientesNuevosFiltrados.slice(0, 8)).map(client => (
                                     <li
                                         key={client._id}
                                         className="list-group-item py-1 px-2"
@@ -191,7 +231,7 @@ function HomeComponent() {
                                         </div>
                                     </li>
                                 ))}
-                                {clientesNuevos.length > 8 && (
+                                {clientesNuevosFiltrados.length > 8 && (
                                     <li className="list-group-item py-1 px-2 text-center">
                                         <button
                                             className="btn btn-link btn-sm p-0 text-decoration-none"
@@ -206,7 +246,7 @@ function HomeComponent() {
                                             ) : (
                                                 <>
                                                     <i className="bi bi-chevron-down me-1"></i>
-                                                    +{clientesNuevos.length - 8} clientes más...
+                                                    +{clientesNuevosFiltrados.length - 8} clientes más...
                                                 </>
                                             )}
                                         </button>
@@ -218,7 +258,7 @@ function HomeComponent() {
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.admins }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Administradores Activos</h5>
+                        <h5 className="border-bottom">Administradores Activos ({region})</h5>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {userName ? (
@@ -277,14 +317,14 @@ function HomeComponent() {
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.tickets }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Todos los Tickets</h6>
+                        <h6 className="border-bottom">Todos los Tickets ({region})</h6>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
-                        {tickets.length === 0 ? (
-                            <span className="text-muted">No hay tickets registrados</span>
+                        {ticketsFiltrados.length === 0 ? (
+                            <span className="text-muted">No hay tickets registrados en {region}</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {(showAllTickets ? tickets : tickets.slice(0, 8)).map(ticket => (
+                                {(showAllTickets ? ticketsFiltrados : ticketsFiltrados.slice(0, 8)).map(ticket => (
                                     <li
                                         key={ticket._id}
                                         className="list-group-item py-1 px-2"
@@ -310,7 +350,7 @@ function HomeComponent() {
                                         </div>
                                     </li>
                                 ))}
-                                {tickets.length > 8 && (
+                                {ticketsFiltrados.length > 8 && (
                                     <li className="list-group-item py-1 px-2 text-center">
                                         <button
                                             className="btn btn-link btn-sm p-0 text-decoration-none"
@@ -325,7 +365,7 @@ function HomeComponent() {
                                             ) : (
                                                 <>
                                                     <i className="bi bi-chevron-down me-1"></i>
-                                                    +{tickets.length - 8} tickets más...
+                                                    +{ticketsFiltrados.length - 8} tickets más...
                                                 </>
                                             )}
                                         </button>
@@ -337,14 +377,14 @@ function HomeComponent() {
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.pendientes }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Tickets Pendientes</h6>
+                        <h6 className="border-bottom">Tickets Pendientes ({region})</h6>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
-                        {pendientes.length === 0 ? (
-                            <span className="text-muted">Sin tickets pendientes</span>
+                        {pendientesFiltrados.length === 0 ? (
+                            <span className="text-muted">Sin tickets pendientes en {region}</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {pendientes.slice(0, 8).map(ticket => (
+                                {pendientesFiltrados.slice(0, 8).map(ticket => (
                                     <li
                                         key={ticket._id}
                                         className="list-group-item py-1 px-2"
