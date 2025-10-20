@@ -7,6 +7,7 @@ import FibraChart from './FibraChart.jsx';
 import RadioChart from './RadioChart.jsx';
 import AddressModal from './AddressModal.jsx';
 import ClientAddressDetailModal from './ClientAddressDetailModal.jsx';
+import ClientDetailsModal from './ClientDetailsModal.jsx';
 
 // SweetAlert2 popup size custom CSS
 const swalSmallStyle = document.createElement('style');
@@ -27,7 +28,6 @@ function HomeComponent() {
     const [showAllTicketsState, setShowAllTicketsState] = useState(false);
     const [userName, setUserName] = useState('');
     const [clients, setClients] = useState([]);
-    const [clientDocuments, setClientDocuments] = useState({});
     const [packages, setPackages] = useState([]);
     const [chartData, setChartData] = useState({
         fibra: { labels: [], data: [], total: 0 },
@@ -39,6 +39,9 @@ function HomeComponent() {
     // Estado para el modal de mapa
     const [addressModalOpen, setAddressModalOpen] = useState(false);
     const [selectedClientForAddress, setSelectedClientForAddress] = useState(null);
+    // Estado para el modal de detalles del cliente
+    const [clientDetailsModalOpen, setClientDetailsModalOpen] = useState(false);
+    const [selectedClientForDetails, setSelectedClientForDetails] = useState(null);
     // Estado para los colores de cada recuadro
     const [boxColors, setBoxColors] = useState({
         clientes: '#ecebebff',
@@ -127,123 +130,6 @@ function HomeComponent() {
         });
     };
 
-    // Función para mostrar detalles del cliente en un modal
-    const handleShowClientDetails = (client) => {
-        // Mostrar la dirección exactamente como la ingresó el usuario
-        let direccion = 'Sin dirección';
-        // Buscar dirección en Address o en Location
-        if (client.Address) {
-            if (typeof client.Address === 'string') {
-                direccion = client.Address;
-            } else if (typeof client.Address === 'object') {
-                const municipio = client.Address.City || client.Address.Municipio || '';
-                const calle = client.Address.Street || '';
-                const cp = client.Address.PostalCode || client.Address.CP || '';
-                direccion = [municipio, calle, cp].filter(Boolean).join(', ');
-            }
-        } else if (client.Location) {
-            // Algunos clientes pueden tener la dirección en Location
-            const municipio = client.Location.Municipality || '';
-            const calle = client.Location.Address || '';
-            const cp = client.Location.ZIP || '';
-            direccion = [municipio, calle, cp].filter(Boolean).join(', ');
-        }
-        if (!direccion || direccion === ', , ') direccion = 'Sin dirección';
-
-        // Obtener la foto de fachada del cliente (ya cargada previamente)
-        const fotoFachada = clientDocuments[client._id];
-
-        // Crear el HTML para la foto de fachada
-        const fotoFachadaHTML = fotoFachada 
-            ? `<div style="margin-bottom: 8px; display: flex; justify-content: center;">
-                 <img src="${fotoFachada}" alt="Foto de Fachada" 
-                      style="width: 300px; height: 260px; object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6;" />
-               </div>`
-            : `<div style="margin-bottom: 8px; display: flex; justify-content: center;">
-                 <div style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; 
-                             background-color: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px; color: #6c757d; font-size: 10px;">
-                   Sin foto
-                 </div>
-               </div>`;
-
-        // Crear contenido HTML para el modal
-        const clientInfoHTML = `
-            <div style="text-align: center;">
-                <div style="margin-bottom: 10px;">
-                    <i class="bi bi-house-check-fill text-success" style="font-size: 2rem;"></i>
-                </div>
-                ${fotoFachadaHTML}
-                <h4 style="font-weight: 600; margin-bottom: 15px; color: #333;">
-                    ${[
-                        client.Name.FirstName,
-                        client.Name.SecondName,
-                        client.LastName.FatherLastName,
-                        client.LastName.MotherLastName
-                    ].filter(Boolean).join(' ').toUpperCase()}
-                </h4>
-                <div style="text-align: left; font-size: 14px; line-height: 1.6;">
-                    <p><strong>Tel:</strong> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}</p>
-                    <p><strong>Dirección:</strong> <button id="address-link" style="background: none; border: none; color: #2a9d8f; text-decoration: underline; cursor: pointer; padding: 2px 4px; font-size: inherit; font-family: inherit; border-radius: 4px; transition: all 0.2s ease;" title="Ver dirección completa" onmouseover="this.style.backgroundColor='rgba(42, 157, 143, 0.1)'; this.style.textDecoration='underline';" onmouseout="this.style.backgroundColor='transparent'; this.style.textDecoration='underline';">${direccion} <i class="bi bi-arrow-up-right-square" style="font-size: 12px; margin-left: 4px;"></i></button></p>
-                    ${fotoFachada ? `<div style="text-align: center; margin-top: 15px;">
-                        <button id="download-foto-btn" style="background-color: #28a745; color: white; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 14px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0 auto;" title="Descargar Foto de Fachada">
-                            <i class="bi bi-download"></i>
-                        </button>
-                    </div>` : ''}
-                </div>
-            </div>
-        `;
-
-        const clientName = [
-            client.Name.FirstName,
-            client.Name.SecondName,
-            client.LastName.FatherLastName,
-            client.LastName.MotherLastName
-        ].filter(Boolean).join(' ');
-
-        Swal.fire({
-            html: clientInfoHTML,
-            showCloseButton: true,
-            showConfirmButton: false,
-            showCancelButton: true,
-            cancelButtonText: 'Cerrar',
-            cancelButtonColor: '#404040',
-            background: '#ededed',
-            width: 400,
-            padding: '2em',
-            didOpen: () => {
-                // Agregar evento de clic al botón de descarga
-                const downloadBtn = document.getElementById('download-foto-btn');
-                if (downloadBtn && fotoFachada) {
-                    downloadBtn.addEventListener('click', () => {
-                        handleDownloadFotoFachada(fotoFachada, clientName);
-                    });
-                }
-                
-                // Agregar evento de clic al botón de dirección
-                const addressButton = document.getElementById('address-link');
-                if (addressButton) {
-                    addressButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('Click en botón de dirección para cliente:', client.Name.FirstName);
-                        
-                        // Cerrar SweetAlert primero
-                        Swal.close();
-                        
-                        // Abrir el modal de detalles de dirección
-                        setTimeout(() => {
-                            if (window.openAddressDetailModal) {
-                                window.openAddressDetailModal(client);
-                            } else {
-                                console.error('window.openAddressDetailModal no está disponible');
-                            }
-                        }, 300);
-                    });
-                }
-            }
-        });
-    };
-
     // Funciones para manejar el modal de dirección
     const handleOpenAddressModal = (client) => {
         console.log('handleOpenAddressModal llamado con cliente:', client?.Name?.FirstName);
@@ -285,6 +171,19 @@ function HomeComponent() {
         }, 300);
     };
 
+    // Funciones para manejar el modal de detalles del cliente
+    const handleShowClientDetails = (client) => {
+        console.log('Abriendo modal de detalles para cliente:', client?.Name?.FirstName);
+        setSelectedClientForDetails(client);
+        setClientDetailsModalOpen(true);
+    };
+
+    const handleCloseClientDetailsModal = () => {
+        console.log('Cerrando modal de detalles del cliente');
+        setClientDetailsModalOpen(false);
+        setSelectedClientForDetails(null);
+    };
+
     // Debug de estados
     useEffect(() => {
         console.log('Estado addressModalOpen cambió a:', addressModalOpen);
@@ -315,18 +214,71 @@ function HomeComponent() {
     // Función para mostrar detalles del ticket en un modal
     const handleShowTicketDetails = (ticket) => {
         Swal.fire({
-            title: `<div style='display:flex;justify-content:center;align-items:center;'><i class="bi bi-ticket-perforated-fill text-primary" style="font-size:2.5rem;"></i></div>` +
-                `<div style="margin-top:10px;font-size:1.2rem;font-weight:600;">Folio: ${ticket.Folio || 'Sin folio'}</div>`,
+            title: `
+                <div style="
+                    background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+                    color: white;
+                    padding: 1.2rem 1.5rem;
+                    margin: -20px -20px 15px -20px;
+                    border-radius: 12px 12px 0 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 1.2rem;
+                    font-weight: 600;
+                ">
+                    <i class="bi bi-ticket-detailed-fill" style="font-size: 1.2rem;"></i>
+                    Información del Ticket
+                </div>
+            `,
             html: `
-                <b>Asunto:</b> ${ticket.Issue || 'Sin asunto'}<br/>
-                <b>Descripción:</b> ${ticket.Description || 'Sin descripción'}<br/>
-                <b>Estado:</b> ${ticket.Status || 'Sin estado'}<br/>
-                <b>Fecha de creación:</b> ${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}<br/>
-     
-                <b>Cliente:</b> ${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}<br/>
-                <b>Técnico:</b> ${ticket.tecnico || 'Sin técnico'}<br/>
-                <b>Prioridad: </b> ${ticket.Priority || 'Sin prioridad'}<br/>
-
+                <div style="text-align: left; padding: 10px;">
+                    <div style="display: grid; gap: 15px;">
+                        <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                            <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Folio</strong>
+                            <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Folio || 'Sin folio'}</p>
+                        </div>
+                        
+                        <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                            <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Asunto</strong>
+                            <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Issue || 'Sin asunto'}</p>
+                        </div>
+                        
+                        <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                            <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Descripción</strong>
+                            <p style="margin: 5px 0 0 0; color: #495057;">${ticket.Description || 'Sin descripción'}</p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                                <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Estado</strong>
+                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Status || 'Sin estado'}</p>
+                            </div>
+                            
+                            <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                                <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Prioridad</strong>
+                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Priority || 'Sin prioridad'}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                            <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Fecha de Creación</strong>
+                            <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                                <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Cliente</strong>
+                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}</p>
+                            </div>
+                            
+                            <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
+                                <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Técnico</strong>
+                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.tecnico || 'Sin técnico'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             `,
             icon: undefined,
             showClass: {
@@ -336,9 +288,20 @@ function HomeComponent() {
                 popup: 'swal2-hide'
             },
             confirmButtonText: 'Cerrar',
-            width: 350,
+            confirmButtonColor: '#17a2b8',
+            width: 600,
             customClass: {
-                popup: 'swal2-border-radius swal2-small-popup'
+                popup: 'swal2-border-radius',
+                title: 'swal2-title-custom',
+                htmlContainer: 'swal2-html-custom'
+            },
+            didOpen: () => {
+                // Estilos adicionales para el modal
+                const popup = Swal.getPopup();
+                if (popup) {
+                    popup.style.borderRadius = '15px';
+                    popup.style.boxShadow = '0 20px 60px rgba(23, 162, 184, 0.15)';
+                }
             }
         });
     };
@@ -346,50 +309,6 @@ function HomeComponent() {
     // Función para cambiar color
     const handleColorChange = (box, color) => {
         setBoxColors(prev => ({ ...prev, [box]: color }));
-    };
-
-    // Función para descargar la foto de fachada
-    const handleDownloadFotoFachada = async (url, clientName) => {
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            
-            // Usar el nombre del cliente como nombre del archivo
-            const fileName = `Foto_Fachada_${clientName.replace(/\s+/g, '_')}.${url.split('.').pop()}`;
-            link.download = fileName;
-            
-            link.click();
-            
-            // Limpia la URL para evitar problemas de memoria
-            URL.revokeObjectURL(link.href);
-        } catch (error) {
-            console.error('Error al descargar la foto:', error);
-        }
-    };
-
-    // Función para obtener la foto de fachada de un cliente
-    const getFotoFachada = async (clientId) => {
-        try {
-            const documents = await makeRequest(`/document/all/${clientId}`);
-            const fotoFachada = documents.find(doc => doc.Description === 'Foto de Fachada');
-            return fotoFachada ? fotoFachada.Document : null;
-        } catch (error) {
-            console.log('Error obteniendo foto de fachada:', error);
-            return null;
-        }
-    };
-
-    // Función para cargar todas las fotos de fachada
-    const loadFotosFachada = async (clientsList) => {
-        const documentsMap = {};
-        for (const client of clientsList) {
-            const fotoFachada = await getFotoFachada(client._id);
-            documentsMap[client._id] = fotoFachada;
-        }
-        setClientDocuments(documentsMap);
     };
 
     useEffect(() => {
@@ -429,10 +348,6 @@ function HomeComponent() {
             try {
                 const res = await makeRequest('/client/all');
                 setClients(res || []);
-                // Cargar fotos de fachada después de obtener los clientes
-                if (res && res.length > 0) {
-                    await loadFotosFachada(res);
-                }
                 return res || [];
             } catch (error) {
                 console.log(error);
@@ -736,6 +651,13 @@ function HomeComponent() {
                 client={selectedClientForAddress}
                 isOpen={addressModalOpen}
                 onClose={handleCloseAddressModal}
+            />
+
+            {/* Modal de detalles del cliente */}
+            <ClientDetailsModal 
+                client={selectedClientForDetails}
+                isOpen={clientDetailsModalOpen}
+                onClose={handleCloseClientDetailsModal}
             />
         </div>
     );

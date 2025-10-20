@@ -1,5 +1,3 @@
-import styleInfo from '../css/infoTickets.module.css';
-
 import ApiRequest from '../../hooks/apiRequest';
 import Swal from 'sweetalert2';
 
@@ -17,9 +15,7 @@ function TicketInfo({ ticket }) {
     const handleChange = async (value) => {
         const data = { Status: value };
 
-        /**
-         * Error al cambiar un ticket cerrado
-         */
+        // Error al cambiar un ticket cerrado
         if (ticket.Status === states[4].name) {
             Swal.fire({
                 icon: 'error',
@@ -31,13 +27,10 @@ function TicketInfo({ ticket }) {
                 timerProgressBar: true,
                 showConfirmButton: false
             });
-
-            return
+            return;
         }
 
-        /**
-         * Error al colocar el mismo estado
-         */
+        // Error al colocar el mismo estado
         if (value === ticket.Status) {
             Swal.fire({
                 icon: 'error',
@@ -49,30 +42,10 @@ function TicketInfo({ ticket }) {
                 timerProgressBar: true,
                 showConfirmButton: false
             });
-
-            return
+            return;
         }
 
-        /**
-         * Mostrar advertencia al cerrar un ticket
-         */
-        if (value === states[4].name) {
-            await Swal.fire({
-                icon: 'warning',
-                title: 'Precaución!',
-                text: 'No sera posible cambiar el estado después de que el ticket haya sido cerrado.',
-                toast: true,
-                position: 'top',
-                iconColor: '#002b5b',
-                timer: 1400,
-                timerProgressBar: true,
-                showConfirmButton: false
-            });
-        }
-
-        /**
-         * Cambiar el estado
-         */
+        // Cambiar el estado
         if (value !== ticket.Status) {
             const confirm = await Swal.fire({
                 icon: 'warning',
@@ -85,25 +58,29 @@ function TicketInfo({ ticket }) {
                 showCancelButton: true,
                 confirmButtonText: 'Aceptar',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2a9d8f'
+                confirmButtonColor: '#2a9d8f',
+                cancelButtonColor: '#404040'
             });
 
             if (confirm.isConfirmed) {
                 try {
-                    await makeRequest(`/ticket/edit/${ticket._id}`, 'POST', data);
+                    const response = await makeRequest(`/ticket/edit/${ticket._id}`, 'PUT', data);
 
-                    Swal.fire({
-                        toast: true,
-                        position: 'top',
-                        width: '30rem',
-                        icon: 'success',
-                        iconColor: '#2a9d8f',
-                        title: 'Completado',
-                        text: 'Estado actualizado',
-                        timer: 1200,
-                        timerProgressBar: true,
-                        showConfirmButton: false
-                    });
+                    if (response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Exito!',
+                            text: 'Estado actualizado',
+                            timer: 1200,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                        
+                        // Recargar la página para mostrar los cambios
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1300);
+                    }
 
                     if (error) {
                         Swal.fire({
@@ -114,8 +91,6 @@ function TicketInfo({ ticket }) {
                             position: 'top',
                             width: '30rem'
                         });
-
-                        return;
                     }
 
                 } catch (error) {
@@ -127,43 +102,100 @@ function TicketInfo({ ticket }) {
     
     return (
         <div className="modal fade" id="TicketClientModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-            <div className="modal-dialog">
-                <div className="modal-content">
-                    <div className="modal-header justify-content-between">
-                        <span className={`modal-title fs-5 ${styleInfo['title']}`}>
-                            <i className="bi bi-clipboard2-pulse-fill"></i>
-                            Ticket Details
-                        </span>
+            <div className="modal-dialog modal-lg">
+                <div className="modal-content" style={{
+                    borderRadius: '12px',
+                    border: 'none',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                }}>
+                    {/* Header estilo moderno */}
+                    <div className="modal-header" style={{
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        borderTopLeftRadius: '12px',
+                        borderTopRightRadius: '12px',
+                        borderBottom: 'none',
+                        padding: '1.5rem'
+                    }}>
+                        <div className="d-flex align-items-center">
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                backgroundColor: 'rgba(255,255,255,0.2)',
+                                borderRadius: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginRight: '12px'
+                            }}>
+                                <i className="bi bi-clipboard2-pulse-fill" style={{ fontSize: '20px' }}></i>
+                            </div>
+                            <div>
+                                <h5 className="modal-title mb-0" style={{ fontWeight: '600' }}>
+                                    Información del Ticket
+                                </h5>
+                                <small style={{ opacity: '0.9' }}>
+                                    Folio: {ticket?.Folio || 'Sin folio'}
+                                </small>
+                            </div>
+                        </div>
 
-                        <div className={styleInfo['tools']}>
-                            <div className={`dropdown ${styleInfo['circle']}`}>
-                                <span className={`${styleInfo['red']} ${styleInfo['box']}`}
-                                    role="button"
+                        {/* Opciones de estado en el header */}
+                        <div className="d-flex align-items-center gap-2">
+                            <small style={{ opacity: '0.9', marginRight: '8px' }}>OPCIONES:</small>
+                            
+                            <div className="dropdown">
+                                <button 
+                                    className="btn btn-sm"
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.2)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        padding: '6px 12px'
+                                    }}
+                                    type="button"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"></span>
-
+                                    aria-expanded="false"
+                                    title="Retener ticket">
+                                    <i className="bi bi-pause-circle me-1"></i>
+                                    Retener
+                                </button>
                                 <ul className="dropdown-menu">
                                     <li>
                                         <button className="dropdown-item"
                                             value={states[3].name}
                                             onClick={(e) => handleChange(e.target.value)}>
+                                            <i className="bi bi-pause-circle me-2"></i>
                                             Retener
                                         </button>
                                     </li>
                                 </ul>
                             </div>
 
-                            <div className={`dropdown ${styleInfo['circle']}`}>
-                                <span className={`${styleInfo['yellow']} ${styleInfo['box']}`}
-                                    role="button"
+                            <div className="dropdown">
+                                <button 
+                                    className="btn btn-sm"
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.2)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        padding: '6px 12px'
+                                    }}
+                                    type="button"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"></span>
-
+                                    aria-expanded="false"
+                                    title="Cambiar estado">
+                                    <i className="bi bi-arrow-repeat me-1"></i>
+                                    Estado
+                                </button>
                                 <ul className="dropdown-menu">
                                     <li>
                                         <button className="dropdown-item"
                                             value={states[1].name}
                                             onClick={(e) => handleChange(e.target.value)}>
+                                            <i className="bi bi-clock me-2"></i>
                                             En espera
                                         </button>
                                     </li>
@@ -171,79 +203,307 @@ function TicketInfo({ ticket }) {
                                         <button className="dropdown-item"
                                             value={states[2].name}
                                             onClick={(e) => handleChange(e.target.value)}>
+                                            <i className="bi bi-gear me-2"></i>
                                             En progreso
                                         </button>
                                     </li>
                                 </ul>
                             </div>
 
-                            <div className={`dropdown ${styleInfo['circle']}`}>
-                                <span className={`${styleInfo['green']} ${styleInfo['box']}`}
-                                    role="button"
+                            <div className="dropdown">
+                                <button 
+                                    className="btn btn-sm"
+                                    style={{
+                                        backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        padding: '6px 12px'
+                                    }}
+                                    type="button"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"></span>
-
+                                    aria-expanded="false"
+                                    title="Cerrar ticket">
+                                    <i className="bi bi-check-circle me-1"></i>
+                                    Cerrar
+                                </button>
                                 <ul className="dropdown-menu">
                                     <li>
                                         <button className="dropdown-item"
                                             value={states[4].name}
                                             onClick={(e) => handleChange(e.target.value)}>
-                                            Cerrar
+                                            <i className="bi bi-check-circle me-2"></i>
+                                            Cerrar ticket
                                         </button>
                                     </li>
                                 </ul>
                             </div>
+
+                            <button 
+                                type="button" 
+                                className="btn-close btn-close-white ms-3" 
+                                data-bs-dismiss="modal" 
+                                aria-label="Close"
+                                style={{
+                                    backgroundColor: 'rgba(255,255,255,0.2)',
+                                    borderRadius: '6px',
+                                    padding: '8px'
+                                }}>
+                            </button>
                         </div>
                     </div>
-                    <div className={`modal-body ${styleInfo['body']}`}>
 
-                        <div className="d-flex justify-content-between">
-                            <p className="form-label"><strong>Folio:</strong> {ticket.Folio || ''}</p>
+                    {/* Body estilo moderno */}
+                    <div className="modal-body" style={{ padding: '2rem' }}>
+                        {/* Información principal del ticket */}
+                        <div className="row g-4">
+                            <div className="col-md-6">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-hash me-2"></i>
+                                        Folio
+                                    </label>
+                                    <p style={{ 
+                                        margin: '0',
+                                        fontSize: '1.1rem',
+                                        fontWeight: '500'
+                                    }}>
+                                        {ticket?.Folio || 'Sin folio'}
+                                    </p>
+                                </div>
+                            </div>
 
-                            <p>Estado: {ticket.Status}</p>
+                            <div className="col-md-6">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-flag me-2"></i>
+                                        Estado
+                                    </label>
+                                    <p style={{ margin: '0' }}>
+                                        <span className={`badge ${
+                                            ticket?.Status === 'Abierto' ? 'bg-primary' :
+                                            ticket?.Status === 'En espera' ? 'bg-warning' :
+                                            ticket?.Status === 'En Progreso' ? 'bg-info' :
+                                            ticket?.Status === 'Retenido' ? 'bg-danger' :
+                                            ticket?.Status === 'Cerrado' ? 'bg-success' : 'bg-secondary'
+                                        }`} style={{ fontSize: '0.9rem' }}>
+                                            {ticket?.Status || 'Sin estado'}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="col-md-6">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-exclamation-triangle me-2"></i>
+                                        Prioridad
+                                    </label>
+                                    <p style={{ margin: '0' }}>
+                                        <span className={`badge ${
+                                            ticket?.Priority === 'Urgente' ? 'bg-danger' :
+                                            ticket?.Priority === 'Alta' ? 'bg-warning' :
+                                            ticket?.Priority === 'Media' ? 'bg-info' :
+                                            ticket?.Priority === 'Baja' ? 'bg-secondary' : 'bg-light text-dark'
+                                        }`} style={{ fontSize: '0.9rem' }}>
+                                            {ticket?.Priority || 'Sin prioridad'}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="col-md-6">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-calendar3 me-2"></i>
+                                        Fecha de Creación
+                                    </label>
+                                    <p style={{ margin: '0' }}>
+                                        {ticket?.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        }) : 'Sin fecha'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="col-12">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-person me-2"></i>
+                                        Cliente
+                                    </label>
+                                    <p style={{ margin: '0', fontSize: '1.1rem' }}>
+                                        {ticket?.Client ? 
+                                            `${ticket.Client.Name?.FirstName || ''} ${ticket.Client.Name?.SecondName || ''} ${ticket.Client.LastName?.FatherLastName || ''} ${ticket.Client.LastName?.MotherLastName || ''}`.trim()
+                                            : 'Sin cliente asignado'
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="col-md-6">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-tools me-2"></i>
+                                        Técnico Asignado
+                                    </label>
+                                    <p style={{ margin: '0' }}>
+                                        {ticket?.tecnico || 'Sin técnico asignado'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="col-md-6">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-person-badge me-2"></i>
+                                        Administrador
+                                    </label>
+                                    <p style={{ margin: '0' }}>
+                                        {ticket?.Admin?.UserName || 'Sin administrador asignado'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="col-12">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-chat-left-text me-2"></i>
+                                        Asunto
+                                    </label>
+                                    <p style={{ margin: '0', fontSize: '1.1rem' }}>
+                                        {ticket?.Issue || 'Sin asunto'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="col-12">
+                                <div style={{
+                                    backgroundColor: '#f8f9fa',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e9ecef'
+                                }}>
+                                    <label className="form-label" style={{ 
+                                        fontWeight: '600', 
+                                        color: '#495057',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <i className="bi bi-card-text me-2"></i>
+                                        Descripción
+                                    </label>
+                                    <div style={{
+                                        backgroundColor: 'white',
+                                        padding: '0.75rem',
+                                        borderRadius: '6px',
+                                        border: '1px solid #dee2e6',
+                                        minHeight: '100px',
+                                        maxHeight: '200px',
+                                        overflowY: 'auto'
+                                    }}>
+                                        <p style={{ margin: '0', whiteSpace: 'pre-wrap' }}>
+                                            {ticket?.Description || 'Sin descripción'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
-                        <br />
-                        <p className="form-label"><strong>Cliente:</strong></p>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                className={`form-control ${styleInfo['input']}`}
-                                value={ticket?.Client?.Name
-                                    ? `${ticket.Client.Name.FirstName || ''} 
-                            ${ticket.Client.Name.SecondName || ''} 
-                            ${ticket.Client.LastName?.FatherLastName || ''} 
-                            ${ticket.Client.LastName?.MotherLastName || ''}`
-                                        .replace(/\s+/g, ' ').trim()
-                                    : 'Información no disponible'}
-                                disabled
-                            />
-                        </div>
-                        <br />
-
-                        <p className="form-label"><strong>Asunto:</strong></p>
-                        <div className="d-flex input-group">
-                            <input type="text"
-                                className={`form-control ${styleInfo['input']}`}
-                                disabled
-                                value={ticket.Issue || ''} />
-                        </div>
-                        <br />
-
-                        <p className="form-label"><strong>Descripción:</strong></p>
-                        <div className="d-flex input-group">
-                            <textarea
-                                className={`form-control ${styleInfo['textarea']}`}
-                                disabled
-                                value={ticket.Description || ''}></textarea>
-                        </div>
-
                     </div>
-                    <div className="modal-footer">
+
+                    {/* Footer estilo moderno */}
+                    <div className="modal-footer" style={{
+                        backgroundColor: '#f8f9fa',
+                        borderTop: '1px solid #dee2e6',
+                        borderBottomLeftRadius: '12px',
+                        borderBottomRightRadius: '12px',
+                        padding: '1rem 2rem'
+                    }}>
                         <button 
                             type="button" 
-                            className={styleInfo['btn-exit']} 
-                            data-bs-dismiss="modal">Cerrar</button>
+                            className="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                            style={{
+                                borderRadius: '8px',
+                                padding: '0.5rem 1.5rem',
+                                fontWeight: '500'
+                            }}>
+                            <i className="bi bi-x-circle me-2"></i>
+                            Cerrar
+                        </button>
                     </div>
                 </div>
             </div>
