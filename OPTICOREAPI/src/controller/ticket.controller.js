@@ -4,12 +4,14 @@ export const viewArchivedTickets = async (req, res) => {
         const archivedTickets = await ticket.find({ Archived: true });
         return res.status(200).json(archivedTickets);
     } catch (error) {
+        await logError('Gestión de Tickets', 'Consultar Tickets Archivados', 'Error al obtener tickets archivados', error);
         console.log(error);
         return res.status(500).json({ message: 'Error finding archived tickets' });
     }
 }
 import ticket from '../models/ticketsSchema.js';
 import client from "../models/clientSchema.js";
+import { logError, logWarning, logInfo } from '../libs/logger.js';
 
 //Create a new Ticket
 export const createTicket = async (req, res) => {

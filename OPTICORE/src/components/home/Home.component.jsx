@@ -212,75 +212,288 @@ function HomeComponent() {
     }, []);
 
     // Función para mostrar detalles del ticket en un modal
-    const handleShowTicketDetails = (ticket) => {
+    const handleShowTicketDetails = (ticket, source = 'tickets') => {
+        // Definir colores según la fuente
+        const getColors = (source) => {
+            switch(source) {
+                case 'tickets':
+                    return {
+                        primary: '#26a69a',
+                        secondary: '#4db6ac',
+                        name: 'Tickets'
+                    };
+                case 'pendientes':
+                    return {
+                        primary: '#ff9800',
+                        secondary: '#ffb74d',
+                        name: 'Tickets Pendientes'
+                    };
+                default:
+                    return {
+                        primary: '#26a69a',
+                        secondary: '#4db6ac',
+                        name: 'Tickets'
+                    };
+            }
+        };
+
+        const colors = getColors(source);
+        
         Swal.fire({
-            title: `
-                <div style="
-                    background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
-                    color: white;
-                    padding: 1.2rem 1.5rem;
-                    margin: -20px -20px 15px -20px;
-                    border-radius: 12px 12px 0 0;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 1.2rem;
-                    font-weight: 600;
-                ">
-                    <i class="bi bi-ticket-detailed-fill" style="font-size: 1.2rem;"></i>
-                    Información del Ticket
-                </div>
-            `,
+            title: false,
             html: `
-                <div style="text-align: left; padding: 10px;">
-                    <div style="display: grid; gap: 15px;">
-                        <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                            <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Folio</strong>
-                            <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Folio || 'Sin folio'}</p>
+                <div style="margin: -29px -29px 0 -29px;">
+                    <!-- Encabezado con gradiente -->
+                    <div style="
+                        background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);
+                        color: white;
+                        padding: 20px 10px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        border-radius: 19px 15px 0 0;
+                    ">
+                        <div style="
+                            width: 35px;
+                            height: 35px;
+                            backgroundColor: rgba(255,255,255,0.2);
+                            borderRadius: 50%;
+                            display: flex;
+                            alignItems: center;
+                            justifyContent: center;
+                        ">
+                            <i class="bi bi-ticket-detailed-fill" style="font-size: 18px;"></i>
                         </div>
-                        
-                        <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                            <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Asunto</strong>
-                            <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Issue || 'Sin asunto'}</p>
-                        </div>
-                        
-                        <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                            <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Descripción</strong>
-                            <p style="margin: 5px 0 0 0; color: #495057;">${ticket.Description || 'Sin descripción'}</p>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                                <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Estado</strong>
-                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Status || 'Sin estado'}</p>
+                        <h5 style="margin: 0; fontWeight: 600; fontSize: 1.2rem;">
+                            Información del Ticket
+                        </h5>
+                    </div>
+                    
+                    <!-- Contenido del modal -->
+                    <div style="padding: 2rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-hash" style="margin-right: 8px;"></i>
+                                    Folio:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    font-size: 1.1rem;
+                                    font-weight: 500;
+                                    color: #333;
+                                ">
+                                    ${ticket.Folio || 'Sin folio'}
+                                </p>
                             </div>
                             
-                            <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                                <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Prioridad</strong>
-                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Priority || 'Sin prioridad'}</p>
-                            </div>
-                        </div>
-                        
-                        <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                            <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Fecha de Creación</strong>
-                            <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</p>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div style="border-left: 4px solid #20c997; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                                <strong style="color: #20c997; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Cliente</strong>
-                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}</p>
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-flag" style="margin-right: 8px;"></i>
+                                    Estado:
+                                </label>
+                                <span class="badge ${
+                                    ticket.Status === 'Abierto' ? 'bg-primary' :
+                                    ticket.Status === 'En espera' ? 'bg-warning' :
+                                    ticket.Status === 'En Progreso' || ticket.Status === 'En proceso' ? 'bg-info' :
+                                    ticket.Status === 'Retenido' ? 'bg-danger' :
+                                    ticket.Status === 'Cerrado' || ticket.Status === 'Resuelto' ? 'bg-success' : 'bg-secondary'
+                                }" style="font-size: 0.9rem; padding: 8px 12px;">
+                                    ${ticket.Status || 'Sin estado'}
+                                </span>
                             </div>
                             
-                            <div style="border-left: 4px solid #17a2b8; padding-left: 15px; background: #f8f9fa; padding: 12px; border-radius: 5px;">
-                                <strong style="color: #17a2b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Técnico</strong>
-                                <p style="margin: 5px 0 0 0; color: #495057; font-weight: 500;">${ticket.tecnico || 'Sin técnico'}</p>
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-exclamation-triangle" style="margin-right: 8px;"></i>
+                                    Prioridad:
+                                </label>
+                                <span class="badge ${
+                                    ticket.Priority === 'Urgente' ? 'bg-danger' :
+                                    ticket.Priority === 'Alta' ? 'bg-warning' :
+                                    ticket.Priority === 'Media' ? 'bg-info' :
+                                    ticket.Priority === 'Baja' ? 'bg-secondary' : 'bg-light text-dark'
+                                }" style="font-size: 0.9rem; padding: 8px 12px;">
+                                    ${ticket.Priority || 'Sin prioridad'}
+                                </span>
+                            </div>
+                            
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-calendar3" style="margin-right: 8px;"></i>
+                                    Fecha:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    color: #333;
+                                    font-weight: 500;
+                                ">
+                                    ${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    }) : 'Sin fecha'}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            border-left: 4px solid ${colors.primary};
+                            padding-left: 15px;
+                            padding-top: 5px;
+                            padding-bottom: 5px;
+                            margin-bottom: 1rem;
+                        ">
+                            <label style="
+                                color: ${colors.primary};
+                                font-weight: 600;
+                                font-size: 0.9rem;
+                                margin-bottom: 5px;
+                                display: flex;
+                                align-items: center;
+                            ">
+                                <i class="bi bi-card-text" style="margin-right: 8px;"></i>
+                                Asunto:
+                            </label>
+                            <p style="
+                                margin: 0;
+                                color: #333;
+                                font-weight: 500;
+                            ">
+                                ${ticket.Issue || 'Sin asunto'}
+                            </p>
+                        </div>
+                        
+                        <div style="
+                            border-left: 4px solid ${colors.primary};
+                            padding-left: 15px;
+                            padding-top: 5px;
+                            padding-bottom: 5px;
+                            margin-bottom: 1rem;
+                        ">
+                            <label style="
+                                color: ${colors.primary};
+                                font-weight: 600;
+                                font-size: 0.9rem;
+                                margin-bottom: 5px;
+                                display: flex;
+                                align-items: center;
+                            ">
+                                <i class="bi bi-file-text" style="margin-right: 8px;"></i>
+                                Descripción:
+                            </label>
+                            <p style="
+                                margin: 0;
+                                color: #333;
+                            ">
+                                ${ticket.Description || 'Sin descripción'}
+                            </p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-person" style="margin-right: 8px;"></i>
+                                    Cliente:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    color: #333;
+                                    font-weight: 500;
+                                ">
+                                    ${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}
+                                </p>
+                            </div>
+                            
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-tools" style="margin-right: 8px;"></i>
+                                    Técnico:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    color: #333;
+                                    font-weight: 500;
+                                ">
+                                    ${ticket.tecnico || 'Sin técnico'}
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             `,
-            icon: undefined,
             showClass: {
                 popup: 'swal2-show'
             },
@@ -288,11 +501,10 @@ function HomeComponent() {
                 popup: 'swal2-hide'
             },
             confirmButtonText: 'Cerrar',
-            confirmButtonColor: '#17a2b8',
-            width: 600,
+            confirmButtonColor: colors.primary,
+            width: 700,
             customClass: {
                 popup: 'swal2-border-radius',
-                title: 'swal2-title-custom',
                 htmlContainer: 'swal2-html-custom'
             },
             didOpen: () => {
@@ -300,7 +512,9 @@ function HomeComponent() {
                 const popup = Swal.getPopup();
                 if (popup) {
                     popup.style.borderRadius = '15px';
-                    popup.style.boxShadow = '0 20px 60px rgba(23, 162, 184, 0.15)';
+                    popup.style.boxShadow = `0 15px 35px rgba(0,0,0,0.15)`;
+                    popup.style.overflow = 'hidden';
+                    popup.style.padding = '0';
                 }
             }
         });
@@ -396,8 +610,14 @@ function HomeComponent() {
             {/* Primera fila */}
             <div className="dashboard-row" style={{ minHeight: '250px' }}>
                 <div className="dashboard-card" style={{ background: boxColors.clientes }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Clientes</h5>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h5 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Clientes</h5>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {todosLosClientes.length === 0 ? (
@@ -468,8 +688,14 @@ function HomeComponent() {
                     </div>
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.admins }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Administradores Activos</h5>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h5 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Administradores Activos</h5>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {userName ? (
@@ -491,16 +717,28 @@ function HomeComponent() {
                     </div>
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.red, flex: '2 1 400px' }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Estado de Red</h6>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Estado de Red</h6>
                     </div>
                     <div className="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
                         <EstadoRedResumen />
                     </div>
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.errores, flex: '1 1 200px' }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Registro de Errores</h5>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Registro de Errores</h6>
                     </div>
                     <ErrorDisplay />
                 </div>
@@ -509,8 +747,14 @@ function HomeComponent() {
             {/* Segunda fila */}
             <div className="dashboard-row" style={{ minHeight: '250px' }}>
                 <div className="dashboard-card" style={{ background: boxColors.radio }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Radio Frecuencia - Paquetes</h6>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Radio Frecuencia - Paquetes</h6>
                     </div>
                     <p>Total de Clientes: <strong>{chartData.radio.total}</strong></p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
@@ -518,8 +762,14 @@ function HomeComponent() {
                     </div>
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.fibra }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Fibra Optica - Paquetes</h6>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Fibra Optica - Paquetes</h6>
                     </div>
                     <p>Total de Clientes: <strong>{chartData.fibra.total}</strong></p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
@@ -527,8 +777,14 @@ function HomeComponent() {
                     </div>
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.tickets }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Tickets</h6>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Tickets</h6>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {tickets.length === 0 ? (
@@ -546,7 +802,7 @@ function HomeComponent() {
                                             marginBottom: '4px', 
                                             boxShadow: '0 1px 2px rgba(0,0,0,0.04)', 
                                             cursor: 'pointer' }}
-                                        onClick={() => handleShowTicketDetails(ticket)}
+                                        onClick={() => handleShowTicketDetails(ticket, 'tickets')}
                                         title="Ver detalles del ticket">
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
@@ -598,8 +854,14 @@ function HomeComponent() {
                     </div>
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.pendientes }}>
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Tickets Pendientes</h6>
+                    <div className="d-flex justify-content-between align-items-center" style={{
+                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                        color: 'white',
+                        padding: '12px 15px',
+                        margin: '-19px -16px 15px -16px',
+                        borderRadius: '12px 12px 0 0'
+                    }}>
+                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Tickets Pendientes</h6>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {pendientes.length === 0 ? (
@@ -617,7 +879,7 @@ function HomeComponent() {
                                         marginBottom: '4px', 
                                         boxShadow: '0 1px 2px rgba(0,0,0,0.04)', 
                                         cursor: 'pointer' }}
-                                    onClick={() => handleShowTicketDetails(ticket)} 
+                                    onClick={() => handleShowTicketDetails(ticket, 'pendientes')} 
                                     title="Ver detalles del ticket pendiente">
 
                                         <div className="d-flex justify-content-between align-items-center">

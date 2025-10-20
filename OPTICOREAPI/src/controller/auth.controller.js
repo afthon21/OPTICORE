@@ -2,7 +2,8 @@ import admin from '../models/adminSchema.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import resetCode from '../models/resetCodeSchema.js';
-import { transporter, mailOptions } from '../libs/nodemailer.js'
+import { transporter, mailOptions } from '../libs/nodemailer.js';
+import { logError, logWarning, logInfo } from '../libs/logger.js';
 
 //Registrar nuevo Administrador
 export const registerUser = async (req, res) => {
@@ -55,6 +56,7 @@ export const registerUser = async (req, res) => {
         return res.status(201).json({ message: 'User registered successfully' }); //Mensaje par comprobar
 
     } catch (error) {
+        await logError('Autenticación', 'Registro de Usuario', 'Error al registrar nuevo usuario', error);
         console.log(error);
         return res.status(500).json({ message: 'Error registering user' });
     }
@@ -71,16 +73,19 @@ export const loginUser = async (req, res) => {
         //Buscamos si existe el correo
         const User = await admin.findOne({ Email });
         if (!User) {
+            await logWarning('Autenticación', 'Intento de Login', `Intento de login con email no registrado: ${Email}`);
             return res.status(404).json({ message: 'User not found' }); //Mensaje de error
         }
 
         //Comparamos la contraseña
         const isMatch = await bcrypt.compare(Password, User.Password);
         if (!isMatch) {
+            await logWarning('Autenticación', 'Intento de Login', `Intento de login con contraseña incorrecta para: ${Email}`);
             return res.status(400).json({ message: 'Invalid password' }); //Mensaje de error
         }
 
         const token = jwt.sign({ id: User._id }, process.env.JWT_SECRET);
+        await logInfo('Autenticación', 'Inicio de Sesión', `Login exitoso para usuario: ${User.UserName} (${Email})`);
         return res.status(200).json({ 
             token, 
             adminId: User._id, 
@@ -91,6 +96,7 @@ export const loginUser = async (req, res) => {
 
 
     } catch (error) {
+        await logError('Autenticación', 'Inicio de Sesión', 'Error al iniciar sesión', error);
         console.log(error);
         return res.status(500).json({ message: 'Error login' });
     }

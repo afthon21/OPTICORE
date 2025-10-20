@@ -3,6 +3,7 @@ import document from '../models/documentSchema.js';
 import notes from '../models/notesSchema.js';
 import payment from '../models/paymentsSchema.js';
 import ticket from '../models/ticketsSchema.js';
+import { logError, logWarning, logInfo } from '../libs/logger.js';
 
 //Create a new client
 export const newClient = async(req, res) => {
@@ -61,8 +62,10 @@ export const newClient = async(req, res) => {
 
 
         await newClient.save();
+        await logInfo('Gestión de Clientes', 'Crear Cliente', `Cliente creado exitosamente: ${newClient.Name.FirstName} ${newClient.LastName.FatherLastName}`);
         return res.status(201).json({ message: 'Client created' });
     } catch (error) {
+        await logError('Gestión de Clientes', 'Crear Cliente', 'Error al registrar nuevo cliente', error);
         console.log(error);
         return res.status(500).json({ message: 'Error registering client' });
     }
@@ -74,6 +77,7 @@ export const viewAllClient = async(req, res) => {
         const allClients = await client.find();
         return res.status(200).json(allClients);
     } catch (error) {
+        await logError('Gestión de Clientes', 'Consultar Clientes', 'Error al obtener lista de clientes', error);
         console.log(error);
         return res.status(500).json({ message: 'Error finding clients' });
     }
