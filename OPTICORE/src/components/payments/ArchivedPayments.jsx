@@ -84,12 +84,18 @@ function ArchivedPayments() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-content-center row">
-      <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}> 
-        <span className={`me-2 ${styleCard['title']}`}>Pagos Archivados</span>
-        <span className="text-primary"><i className="bi bi-archive-fill"></i></span>
-      </div>
-      <table className="table table-hover justify-content-center">
+  <div className="container-fluid mt-4">
+    {/* Encabezado */}
+    <div className={`d-flex justify-content-between align-items-end flex-wrap mb-3 ${styleCard['header']}`}>
+      <span className={`fs-4 fw-semibold ${styleCard['title']}`}>Pagos Archivados</span>
+      <span className="text-primary">
+        <i className="bi bi-cash-stack"></i>
+      </span>
+    </div>
+
+    {/* Tabla */}
+    <div className="table-responsive">
+      <table className="table table-hover align-middle text-center shadow-sm border rounded-3 w-100">
         <thead className={styleCard['head-table']}>
           <tr>
             <th>Folio</th>
@@ -101,43 +107,64 @@ function ArchivedPayments() {
             <th>Acción</th>
           </tr>
         </thead>
+
         <tbody className={`text-wrap ${styleCard['table-body']}`}>
           {payments.length === 0 ? (
-            <tr><td colSpan={7} className="text-center">No hay pagos archivados.</td></tr>
+            <tr>
+              <td colSpan="7" className="text-center text-muted py-3">
+                No hay pagos archivados.
+              </td>
+            </tr>
           ) : (
             payments.map(payment => {
-              const clientName = `${payment.Client?.Name?.FirstName || ''} ${payment.Client?.Name?.SecondName || ''} ${payment.Client?.LastName?.FatherLastName || ''} ${payment.Client?.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim();
+              const clientName = `${payment.Client?.Name?.FirstName || ''} ${payment.Client?.Name?.SecondName || ''} ${payment.Client?.LastName?.FatherLastName || ''} ${payment.Client?.LastName?.MotherLastName || ''}`
+                .replace(/\s+/g, ' ')
+                .trim();
+
               return (
-                <tr key={payment._id} className={styleTable['selected-row']}>
+                <tr key={payment._id} className={styleCard['selected-row']}>
                   <td>{payment.Folio || 'N/A'}</td>
                   <td>{clientName || 'Sin cliente'}</td>
                   <td>{formatAmount(payment.Amount)}</td>
                   <td>{payment.Method || 'N/A'}</td>
                   <td>{formatDate(payment.CreateDate)}</td>
                   <td>
-                    <span className={`badge ${
-                      payment.Status === 'Exitoso' ? 'bg-success' :
-                      payment.Status === 'En proceso' ? 'bg-warning' :
-                      payment.Status === 'Pendiente' ? 'bg-secondary' :
-                      payment.Status === 'Rechazado' ? 'bg-danger' :
-                      payment.Status === 'Vencido' ? 'bg-dark' : 'bg-light'
-                    }`}>
+                    <span
+                      className={`badge ${
+                        payment.Status === 'Exitoso'
+                          ? 'bg-success'
+                          : payment.Status === 'En proceso'
+                          ? 'bg-warning'
+                          : payment.Status === 'Pendiente'
+                          ? 'bg-secondary'
+                          : payment.Status === 'Rechazado'
+                          ? 'bg-danger'
+                          : payment.Status === 'Vencido'
+                          ? 'bg-dark'
+                          : 'bg-light'
+                      }`}
+                    >
                       {payment.Status || 'N/A'}
                     </span>
                   </td>
                   <td>
-                    <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(payment._id)}>
-                      <i className="bi bi-arrow-bar-up me-1"></i> Desarchivar
+                    <button
+                      className="btn btn-outline-success btn-sm"
+                      onClick={() => handleUnarchive(payment._id)}
+                    >
+                      <i className="bi bi-arrow-bar-up me-1"></i>
+                      Desarchivar
                     </button>
                   </td>
                 </tr>
-              )
+              );
             })
           )}
         </tbody>
       </table>
     </div>
-  );
+  </div>
+);
 }
 
 export default ArchivedPayments;

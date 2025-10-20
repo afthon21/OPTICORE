@@ -87,13 +87,19 @@ function ArchivedClients() {
     }
   };
 
-  return (
-    <div className="d-flex justify-content-center align-content-center row mt-4">
-      <div className={`d-flex justify-content-between align-items-end ${styleCard['header']}`}> 
-        <span className={`me-2 ${styleCard['title']}`}>Clientes Archivados</span>
-        <span className="text-primary"><i className="bi bi-archive-fill"></i></span>
-      </div>
-      <table className="table table-hover justify-content-center">
+return (
+  <div className="container-fluid mt-4">
+    {/* Encabezado */}
+    <div className={`d-flex justify-content-between align-items-end flex-wrap mb-3 ${styleCard['header']}`}>
+      <span className={`fs-4 fw-semibold ${styleCard['title']}`}>Clientes Archivados</span>
+      <span className="text-primary">
+        <i className="bi bi-people-fill"></i>
+      </span>
+    </div>
+
+    {/* Tabla */}
+    <div className="table-responsive">
+      <table className="table table-hover align-middle text-center shadow-sm border rounded-3 w-100">
         <thead className={styleCard['head-table']}>
           <tr>
             <th>Folio</th>
@@ -103,22 +109,37 @@ function ArchivedClients() {
             <th>Acción</th>
           </tr>
         </thead>
+
         <tbody className={`text-wrap ${styleCard['table-body']}`}>
           {clients.length === 0 ? (
             <tr>
-              <td colSpan="5" className="text-center text-muted">No hay clientes archivados.</td>
+              <td colSpan="5" className="text-center text-muted py-3">
+                No hay clientes archivados.
+              </td>
             </tr>
           ) : (
             clients.map(client => (
               <tr key={client._id} className={styleCard['selected-row']}>
                 <td>{client._id}</td>
                 <td>
-                  <strong>{`${client.Name.FirstName} ${client.Name.SecondName || ''} ${client.LastName.FatherLastName || ''} ${client.LastName.MotherLastName || ''}`.replace(/\s+/g, ' ').trim()}</strong>
+                  <strong>
+                    {`${client.Name.FirstName} ${client.Name.SecondName || ''} ${client.LastName.FatherLastName || ''} ${client.LastName.MotherLastName || ''}`
+                      .replace(/\s+/g, ' ')
+                      .trim()}
+                  </strong>
                 </td>
-                <td>{Array.isArray(client.PhoneNumber) ? client.PhoneNumber.join(', ') : client.PhoneNumber}</td>
-                <td>Sin paquete</td>
                 <td>
-                  <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(client._id)}>
+                  {Array.isArray(client.PhoneNumber)
+                    ? client.PhoneNumber.join(', ')
+                    : client.PhoneNumber || 'N/A'}
+                </td>
+                <td className="text-muted">Sin paquete</td>
+                <td>
+                  <button
+                    className="btn btn-outline-success btn-sm"
+                    onClick={() => handleUnarchive(client._id)}
+                  >
+                    <i className="bi bi-arrow-bar-up me-1"></i>
                     Desarchivar
                   </button>
                 </td>
@@ -128,7 +149,8 @@ function ArchivedClients() {
         </tbody>
       </table>
     </div>
-  );
+  </div>
+);
 }
 
 export default ArchivedClients;

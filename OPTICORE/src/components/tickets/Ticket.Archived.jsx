@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import ApiRequest from '../hooks/apiRequest';
-import { useParams } from 'react-router-dom';
-
+import styleCard from './css/ticketsCard.module.css';
 
 function ArchivedTickets() {
   const [tickets, setTickets] = useState([]);
+  const [search, setSearch] = useState('');
   const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
-  const { adminId } = useParams();
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -14,6 +13,7 @@ function ArchivedTickets() {
         const res = await makeRequest('/ticket/archived');
         setTickets(res || []);
       } catch (error) {
+        console.error(error);
         setTickets([]);
       }
     };
@@ -22,72 +22,109 @@ function ArchivedTickets() {
 
   const handleUnarchive = async (id) => {
     try {
-      const res = await makeRequest(`/ticket/edit/${id}`, 'POST', { Archived: false });
-      console.log('Respuesta desarchivar:', res);
+      await makeRequest(`/ticket/edit/${id}`, 'POST', { Archived: false });
       setTickets(prev => prev.filter(t => t._id !== id));
     } catch (error) {
-      console.error('Error unarchiving ticket:', error);
+      console.error('Error desarchivando ticket:', error);
     }
   };
 
-  return (
-    <div className="archived-tickets-list mt-4">
-      <h2 className="mb-4 text-center">
-        <i className="bi bi-archive-fill me-2 text-primary"></i>
-        Tickets Archivados
-      </h2>
-      {tickets.length === 0 ? (
-        <div className="alert alert-info text-center">No hay tickets archivados.</div>
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-bordered table-hover align-middle shadow-sm">
-            <thead style={{ background: '#343a40', color: '#fff' }}>
-              <tr>
-                <th><i className="bi bi-hash"></i> Folio</th>
-                <th><i className="bi bi-person"></i> Cliente</th>
-                <th><i className="bi bi-calendar"></i> Fecha</th>
-                <th><i className="bi bi-chat-left-text"></i> Asunto</th>
-                <th><i className="bi bi-archive"></i> Estado</th>
-                <th><i className="bi bi-arrow-repeat"></i> Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tickets.map(ticket => (
-                <tr key={ticket._id} style={{ background: '#f8f9fa' }}>
-                  <td><span className="badge bg-secondary">{ticket.Folio}</span></td>
+  const handleInputSearch = (e) => setSearch(e.target.value);
+
+  const filteredTickets = tickets.filter(ticket => {
+    const clientName =
+      ticket.ClientName ||
+      (ticket.Client?.Name
+        ? `${ticket.Client.Name.FirstName || ''} ${ticket.Client.Name.SecondName || ''} ${ticket.Client.LastName.FatherLastName || ''} ${ticket.Client.LastName.MotherLastName || ''}`
+            .replace(/\s+/g, ' ')
+            .trim()
+        : 'Sin cliente');
+    return (
+      (ticket.Folio && ticket.Folio.toString().includes(search)) ||
+      clientName.toLowerCase().includes(search.toLowerCase()) ||
+      (ticket.Issue && ticket.Issue.toLowerCase().includes(search.toLowerCase()))
+    );
+  });
+
+ return (
+  <div className="container-fluid mt-4">
+    {/* Encabezado y buscador */}
+    <div className={`d-flex justify-content-between align-items-end flex-wrap mb-3 ${styleCard['header']}`}>
+      <span className={`fs-4 fw-semibold ${styleCard['title']}`}>Tickets Archivados</span>
+      <div style={{ maxWidth: '250px' }}>
+        
+      </div>
+    </div>
+
+    {/* Tabla */}
+    <div className="table-responsive">
+      <table className="table table-hover align-middle text-center shadow-sm border rounded-3 w-100">
+        <thead className={styleCard['head-table']}>
+          <tr>
+            <th>Folio</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Asunto</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+
+        <tbody className={`text-wrap ${styleCard['table-body']}`}>
+          {filteredTickets.length === 0 ? (
+            <tr>
+              <td colSpan="6" className="text-center text-muted py-3">
+                No hay tickets archivados.
+              </td>
+            </tr>
+          ) : (
+            filteredTickets.map(ticket => {
+              const clientName =
+                ticket.ClientName ||
+                (ticket.Client?.Name
+                  ? `${ticket.Client.Name.FirstName || ''} ${ticket.Client.Name.SecondName || ''} ${ticket.Client.LastName.FatherLastName || ''} ${ticket.Client.LastName.MotherLastName || ''}`
+                      .replace(/\s+/g, ' ')
+                      .trim()
+                  : 'Sin cliente');
+
+              return (
+                <tr key={ticket._id} className={styleCard['selected-row']} style={{ cursor: 'pointer' }}>
                   <td>
-                    <span className="fw-bold text-dark">
-                      {ticket.ClientName
-                        ? ticket.ClientName
-                        : (ticket.Client && ticket.Client.Name)
-                          ? `${ticket.Client.Name.FirstName} ${ticket.Client.Name.SecondName || ''} ${ticket.Client.LastName.FatherLastName || ''} ${ticket.Client.LastName.MotherLastName || ''}`
-                          : 'Sin cliente'}
-                    </span>
+                    <span className="badge bg-secondary">{ticket.Folio || 'N/A'}</span>
                   </td>
+                  <td className="fw-semibold">{clientName}</td>
                   <td>
                     <span className="badge bg-info text-dark">
-                      {ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}
+                      {ticket.CreateDate
+                        ? new Date(ticket.CreateDate).toLocaleDateString('es-ES')
+                        : 'Sin fecha'}
                     </span>
                   </td>
                   <td>{ticket.Issue || <span className="text-muted">Sin asunto</span>}</td>
                   <td>
                     <span className="badge bg-warning text-dark">Archivado</span>
                   </td>
-                  <td>{ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</td>
-                  <td>{ticket.Issue || 'Sin asunto'}</td>
                   <td>
-                    <button className="btn btn-outline-success btn-sm" onClick={() => handleUnarchive(ticket._id)}>
-                      <i className="bi bi-arrow-bar-up me-1"></i> Desarchivar
+                    <button
+                      className="btn btn-outline-success btn-sm"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleUnarchive(ticket._id);
+                      }}
+                    >
+                      <i className="bi bi-arrow-bar-up me-1"></i>
+                      Desarchivar
                     </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              );
+            })
+          )}
+        </tbody>
+      </table>
     </div>
-  );
+  </div>
+);
 }
 
 export default ArchivedTickets;
