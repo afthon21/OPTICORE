@@ -16,12 +16,12 @@ function ClientLocation({ client }) {
         const googleMapsKey = import.meta.env.VITE_GOOGLE_MAP;
         
         if (!googleMapsKey) {
-            console.log('🗺️ Google Maps deshabilitado - no hay API key configurada');
+            console.log(error);
             setMapsAvailable(false);
             return;
         }
 
-        console.log('🗺️ Google Maps habilitado con API key:', googleMapsKey.substring(0, 10) + '...');
+        
         setMapsAvailable(true);
 
         // Si ya tiene coordenadas válidas, usarlas
@@ -53,8 +53,6 @@ function ClientLocation({ client }) {
                     return;
                 }
 
-                console.log('Geocodificando dirección:', fullAddress);
-
                 // Usar la API de geocodificación de Google
                 const geocoder = new window.google.maps.Geocoder();
 
@@ -66,7 +64,7 @@ function ClientLocation({ client }) {
                             lng: location.lng()
                         };
                         
-                        console.log('Coordenadas obtenidas:', newMarker);
+                        
                         setMarker(newMarker);
                     } else {
                         console.log('Error en geocodificación:', status);
@@ -84,8 +82,6 @@ function ClientLocation({ client }) {
             console.log('Google Maps no está disponible');
         }
     }, [client]);
-
-    // console.log('Marker actual:', marker); // Debug removido para reducir logs
 
     // Si Google Maps no está disponible, mostrar información alternativa
     if (!mapsAvailable) {

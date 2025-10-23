@@ -22,6 +22,5 @@ iniciarMonitoreoSalud();
 
 //Server
 app.listen(process.env.PORT, () => {
-    console.log('App running');
     console.log(`${process.env.HOST}:${process.env.PORT}/api`);
 });

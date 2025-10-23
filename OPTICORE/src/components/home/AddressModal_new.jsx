@@ -62,7 +62,6 @@ function AddressModal({ client, isOpen, onClose }) {
                 return;
             }
 
-            console.log('Geocoding address:', fullAddress);
 
             // Hacer geocodificación usando la API de Google Maps
             const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${API_KEY}`;
@@ -77,7 +76,6 @@ function AddressModal({ client, isOpen, onClose }) {
                     lng: location.lng
                 };
 
-                console.log('Geocoding successful:', coordinates);
 
                 setClientLocation({
                     coordinates,
@@ -160,7 +158,6 @@ function AddressModal({ client, isOpen, onClose }) {
 
     // Funciones de manejo
     const handleClose = () => {
-        console.log('Cerrando AddressModal...');
         setVisible(false);
         setTimeout(() => {
             onClose();
@@ -169,23 +166,18 @@ function AddressModal({ client, isOpen, onClose }) {
 
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
-            console.log('Cerrando modal por click en backdrop');
             handleClose();
         }
     };
 
     // Todos los useEffect
     useEffect(() => {
-        console.log('AddressModal useEffect - isOpen:', isOpen, 'client:', client?.Name?.FirstName);
         if (isOpen) {
-            console.log('Abriendo AddressModal...');
             setTimeout(() => setVisible(true), 10);
             if (client) {
-                console.log('Obteniendo ubicación del cliente:', client.Name?.FirstName);
                 getClientLocation();
             }
         } else {
-            console.log('Cerrando AddressModal...');
             setVisible(false);
         }
     }, [isOpen, client]);
@@ -218,11 +210,8 @@ function AddressModal({ client, isOpen, onClose }) {
 
     // Verificación de renderizado - DESPUÉS de todos los hooks
     if (!isOpen || !client) {
-        console.log('AddressModal no se renderiza - isOpen:', isOpen, 'client:', !!client);
         return null;
     }
-
-    console.log('Renderizando AddressModal para cliente:', client.Name?.FirstName);
 
     const addressData = getFullAddress();
     const clientName = [

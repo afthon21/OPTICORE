@@ -132,35 +132,28 @@ function HomeComponent() {
 
     // Funciones para manejar el modal de dirección
     const handleOpenAddressModal = (client) => {
-        console.log('handleOpenAddressModal llamado con cliente:', client?.Name?.FirstName);
-        console.log('Estado actual - addressModalOpen:', addressModalOpen, 'selectedClientForAddress:', selectedClientForAddress?.Name?.FirstName);
         setSelectedClientForAddress(client);
         setAddressModalOpen(true);
-        console.log('Estados actualizados - modal será abierto');
     };
 
     const handleCloseAddressModal = () => {
-        console.log('Cerrando modal de mapa');
         setAddressModalOpen(false);
         setSelectedClientForAddress(null);
     };
 
     // Funciones para manejar el modal de detalles de dirección
     const handleOpenAddressDetailModal = (client) => {
-        console.log('handleOpenAddressDetailModal llamado con cliente:', client?.Name?.FirstName);
         setSelectedClientForAddressDetail(client);
         setAddressDetailModalOpen(true);
     };
 
     const handleCloseAddressDetailModal = () => {
-        console.log('Cerrando modal de detalles de dirección');
         setAddressDetailModalOpen(false);
         setSelectedClientForAddressDetail(null);
     };
 
     // Función para abrir el modal de mapa desde el modal de detalles
     const handleOpenMapFromDetails = (client) => {
-        console.log('Abriendo modal de mapa para cliente:', client?.Name?.FirstName);
         // Cerrar el modal de detalles primero
         setAddressDetailModalOpen(false);
         setSelectedClientForAddressDetail(null);
@@ -173,35 +166,29 @@ function HomeComponent() {
 
     // Funciones para manejar el modal de detalles del cliente
     const handleShowClientDetails = (client) => {
-        console.log('Abriendo modal de detalles para cliente:', client?.Name?.FirstName);
         setSelectedClientForDetails(client);
         setClientDetailsModalOpen(true);
     };
 
     const handleCloseClientDetailsModal = () => {
-        console.log('Cerrando modal de detalles del cliente');
         setClientDetailsModalOpen(false);
         setSelectedClientForDetails(null);
     };
 
     // Debug de estados
     useEffect(() => {
-        console.log('Estado addressModalOpen cambió a:', addressModalOpen);
     }, [addressModalOpen]);
 
     useEffect(() => {
-        console.log('Estado selectedClientForAddress cambió a:', selectedClientForAddress?.Name?.FirstName);
     }, [selectedClientForAddress]);
 
     // Funciones globales para abrir modales (disponibles en window)
     useEffect(() => {
         window.openAddressDetailModal = (client) => {
-            console.log('window.openAddressDetailModal llamado con cliente:', client?.Name?.FirstName);
             handleOpenAddressDetailModal(client);
         };
         
         window.openAddressModal = (client) => {
-            console.log('window.openAddressModal llamado con cliente:', client?.Name?.FirstName);
             handleOpenAddressModal(client);
         };
         

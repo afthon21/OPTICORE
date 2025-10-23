@@ -122,16 +122,13 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
         
         setLoadingFoto(true);
         try {
-            console.log('Buscando foto de fachada para cliente:', client._id, client.Name?.FirstName);
             const documents = await makeRequest(`/document/all/${client._id}`);
-            console.log('Documentos obtenidos:', documents);
             
             // Buscar el documento con descripción "Foto de Fachada"
             const fotoFachadaDoc = documents.find(doc => 
                 doc.Description === 'Foto de Fachada'
             );
             
-            console.log('Foto de fachada encontrada:', fotoFachadaDoc);
             setFotoFachada(fotoFachadaDoc ? fotoFachadaDoc.Document : null);
         } catch (error) {
             console.error('Error obteniendo foto de fachada:', error);
@@ -169,12 +166,10 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
 
     // Funciones para manejar el modal de ubicación
     const handleOpenLocationModal = () => {
-        console.log('Abriendo modal de ubicación para cliente:', client?.Name?.FirstName);
         setLocationModalOpen(true);
     };
 
     const handleCloseLocationModal = () => {
-        console.log('Cerrando modal de ubicación');
         setLocationModalOpen(false);
     };
 
@@ -185,7 +180,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
         if (!client) return;
         
         try {
-            console.log('🗺️ Iniciando descarga del mapa...');
             
             const html2canvas = (await import('html2canvas')).default;
             
@@ -195,7 +189,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                 throw new Error('No se encontró el contenedor del mapa');
             }
 
-            console.log('📍 Preparando captura de Google Maps...');
 
             // Esperar a que el mapa esté completamente cargado
             await new Promise(resolve => {
@@ -207,7 +200,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                     const mapElements = mapContainer.querySelectorAll('.gm-style, canvas, img[src*="maps.googleapis.com"]');
                     
                     if (mapElements.length > 0 || attempts >= maxAttempts) {
-                        console.log(`✓ Mapa verificado después de ${attempts * 300}ms`);
                         resolve();
                     } else {
                         setTimeout(checkMapLoaded, 300);
@@ -218,9 +210,7 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
             });
 
             // **MÉTODO DIRECTO: Capturar WebGL canvas ANTES de html2canvas**
-            console.log('🎮 Buscando canvas WebGL en el mapa...');
             const webglCanvases = mapContainer.querySelectorAll('canvas');
-            console.log(`Detectados ${webglCanvases.length} canvas`);
             
             // Intentar capturar cada canvas WebGL individualmente
             const canvasCaptures = [];
@@ -233,7 +223,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                               canvas.getContext('experimental-webgl', { preserveDrawingBuffer: true });
                     
                     if (gl) {
-                        console.log(`Canvas ${i}: WebGL detectado - Intentando captura directa`);
                         
                         // Forzar finalización del renderizado WebGL
                         gl.finish();
@@ -257,7 +246,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                                     index: i
                                 });
                                 
-                                console.log(`✅ Canvas ${i} capturado exitosamente`);
                             } else {
                                 console.log(`⚠ Canvas ${i} resultó vacío o demasiado pequeño`);
                             }
@@ -294,14 +282,12 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                 }
             };
 
-            console.log('🖼️ Ejecutando html2canvas para elementos no-WebGL...');
             const baseCanvas = await html2canvas(mapContainer, options);
             
             let mapImage = null;
             
             // Si capturamos canvas WebGL, combinarlos con la captura base
             if (canvasCaptures.length > 0) {
-                console.log(`🔀 Combinando ${canvasCaptures.length} canvas WebGL con captura base`);
                 
                 const combinedCanvas = document.createElement('canvas');
                 combinedCanvas.width = baseCanvas.width;
@@ -329,7 +315,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                                     capture.height * scaleY
                                 );
                                 
-                                console.log(`✅ Canvas WebGL ${capture.index} superpuesto correctamente`);
                                 resolve();
                             };
                             img.onerror = reject;
@@ -342,13 +327,10 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                 
                 mapImage = combinedCanvas;
             } else {
-                console.log('📋 Usando captura base sin WebGL');
                 mapImage = baseCanvas;
             }
 
-            // **AGREGAR MARCADOR DE UBICACIÓN**
-            console.log('📍 Agregando marcador de ubicación del cliente...');
-            
+
             // Crear canvas con marcador superpuesto
             const markerCanvas = document.createElement('canvas');
             markerCanvas.width = mapImage.width;
@@ -487,7 +469,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
             
             // Actualizar mapImage con el marcador
             mapImage = markerCanvas;
-            console.log('✅ Marcador agregado exitosamente');
             
             // Crear canvas final con la información del cliente
             const finalCanvas = document.createElement('canvas');
@@ -563,7 +544,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
             link.click();
             document.body.removeChild(link);
             
-            console.log('✅ Mapa descargado exitosamente:', fileName);
             
         } catch (error) {
             console.error('Error al descargar el mapa:', error);
@@ -588,20 +568,16 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
         
         setLoadingPackage(true);
         try {
-            console.log('Buscando paquete para cliente:', client._id, client.Name?.FirstName);
             
             // Método 1: Buscar en todos los paquetes
             const packages = await makeRequest('/packages/all');
-            console.log('Paquetes obtenidos:', packages);
             
             // Buscar el paquete asignado al cliente
             const assignedPackage = packages.find(pkg => {
-                console.log('Verificando paquete:', pkg.name, 'Cliente ID en paquete:', pkg.Client?._id || pkg.Client);
                 const packageClientId = pkg.Client?._id || pkg.Client;
                 return packageClientId && packageClientId.toString() === client._id.toString();
             });
             
-            console.log('Paquete asignado encontrado:', assignedPackage);
             
             // Si no se encuentra, intentar método alternativo
             if (!assignedPackage) {
@@ -609,7 +585,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
                 try {
                     // Método 2: Buscar paquetes específicos del cliente
                     const clientPackages = await makeRequest(`/packages/client/${client._id}`);
-                    console.log('Paquetes del cliente (método alternativo):', clientPackages);
                     if (clientPackages && clientPackages.length > 0) {
                         setClientPackage(clientPackages[0]); // Tomar el primer paquete
                         return;
@@ -631,7 +606,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
     // Cargar paquete y foto cuando el modal se abre
     useEffect(() => {
         if (isOpen && client) {
-            console.log('Cliente completo:', client);
             fetchClientPackage();
             fetchFotoFachada();
         }

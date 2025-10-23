@@ -41,7 +41,7 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
         // Verificar si hay archivos en el objeto de transferencia
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             setFile(e.dataTransfer.files[0]); // Guardar el archivo en el estado
-            console.log('Archivo cargado:', e.dataTransfer.files[0]);
+            
             e.dataTransfer.clearData(); // Limpia los datos del drag & drop
         }
     };
