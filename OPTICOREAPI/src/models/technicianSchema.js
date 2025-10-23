@@ -5,7 +5,6 @@ const technicianSchema = new mongoose.Schema({
     telefono: { type: String },
     mercado: { type: String },
     ticketsAsignados: { type: Number, default: 0 },
-    // Campos opcionales para compatibilidad
     apellidoP: { type: String },
     apellidoA: { type: String },
     activo: { type: Boolean, default: true },

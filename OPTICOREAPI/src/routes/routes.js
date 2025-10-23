@@ -1,5 +1,5 @@
 import express from 'express';
-//Import Routes
+
 import clientRoutes from '../middlewares/client.routes.js';
 import authRoutes from '../middlewares/auth.routes.js';
 import ticketRoute from '../middlewares/ticket.routes.js';
@@ -10,9 +10,6 @@ import notesRoutes from '../middlewares/notes.routes.js';
 import packageRoutes from '../middlewares/packages.routes.js';
 import technicianRoutes from '../middlewares/technician.routes.js';
 import logRoutes from '../middlewares/log.routes.js';
-
-
-//RUTA NETWORK
 import networkRoutes from '../middlewares/network.routes.js';
 
 
@@ -27,8 +24,7 @@ const configureRoutes = (app) => {
     app.use(`${principal}/public/`, express.static('./storage/img'));
     app.use(`${principal}/profile`, profileRoute);
     app.use(`${principal}/note`, notesRoutes);
-    app.use(`${principal}/packages`, packageRoutes); // ✅ corregido
-    // ❌ borramos la línea de servicesRoutes
+    app.use(`${principal}/packages`, packageRoutes);
     app.use(`${principal}/logs`, logRoutes);
     app.use(`${principal}/network`, networkRoutes);
     app.use(`${principal}/tecnicos`, technicianRoutes);
