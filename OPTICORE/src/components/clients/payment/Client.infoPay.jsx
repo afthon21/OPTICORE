@@ -1,6 +1,27 @@
 import styleInfo from '../css/infoPay.module.css';
 
-function InfoPay({ payment }) {
+function InfoPay({ payment, onEdit, onArchive, onPrint }) {
+    const hideModal = () => {
+        const el = document.getElementById('PaymentClientModal');
+        if (!el) return;
+        const bsModal = window.bootstrap?.Modal.getInstance(el) || (window.bootstrap ? new window.bootstrap.Modal(el) : null);
+        bsModal?.hide();
+    };
+
+    const handleArchiveClick = async () => {
+        if (!payment?._id) return;
+        await onArchive?.(payment._id);
+        hideModal();
+    };
+
+    const handleEditClick = () => {
+        onEdit?.(payment);
+        hideModal(); // opcional según UX
+    };
+
+    const handlePrintClick = () => {
+        onPrint?.(payment);
+    };
     return (
         <div className="modal fade" id="PaymentClientModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
             <div className="modal-dialog">
@@ -63,33 +84,6 @@ function InfoPay({ payment }) {
                             disabled
                             value={payment.Abono || ''}/> 
                             
-                        </div>
-                        <br/>
-
-                        <p className="form-label"> <strong> Abono </strong> </p>
-                        <div className="input-group" >
-                            <input type="text"
-                            className={`form-control ${styleInfo['input']}`}
-                            disabled
-                            value={payment.Abono || ''}/> 
-                        </div>
-                        <br/>
-
-                        <p className="form-label"> <strong> Abono </strong> </p>
-                        <div className="input-group" >
-                            <input type="text"
-                            className={`form-control ${styleInfo['input']}`}
-                            disabled
-                            value={payment.Abono || ''}/> 
-                        </div>
-                        <br/>
-
-                        <p className="form-label"> <strong> Abono </strong> </p>
-                        <div className="input-group" >
-                            <input type="text"
-                            className={`form-control ${styleInfo['input']}`}
-                            disabled
-                            value={payment.Abono || ''}/> 
                         </div>
                         <br/>
 
