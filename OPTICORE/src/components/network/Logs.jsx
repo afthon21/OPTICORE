@@ -11,7 +11,15 @@ function Logs() {
         const fetchLogs = async () => {
             try {
                 const response = await makeRequest('/logs');
-                setLogs(response || []);
+                const allLogs = response || [];
+                // Ordenar logs de más reciente a más antiguo
+                const sortedLogs = allLogs.sort((a, b) => {
+                    // Usar timestamp o createdAt según esté disponible
+                    const dateA = new Date(a.timestamp || a.createdAt || a.date || 0);
+                    const dateB = new Date(b.timestamp || b.createdAt || b.date || 0);
+                    return dateB - dateA; // De más reciente a más antiguo
+                });
+                setLogs(sortedLogs);
             } catch (err) {
                 setError('Error al cargar los logs');
                 console.error(err);

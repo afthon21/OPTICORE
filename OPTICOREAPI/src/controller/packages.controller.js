@@ -4,37 +4,28 @@ import Client from '../models/clientSchema.js';
 
 // Crear paquete
 export const createPackage = async(req, res) => {
-    console.log('=== CREATING PACKAGE ===');
-    console.log('Request body:', req.body);
-    console.log('Admin ID:', req.adminId);
-    
     try {
         const { name, price, description, clientId } = req.body;
         const admin = req.adminId;
 
         // Validaciones
         if (!name) {
-            console.log('ERROR: Missing name');
             return res.status(400).json({ message: 'El nombre del paquete es requerido' });
         }
         
         if (!price) {
-            console.log('ERROR: Missing price');
             return res.status(400).json({ message: 'El precio del paquete es requerido' });
         }
         
         if (!clientId) {
-            console.log('ERROR: Missing clientId');
             return res.status(400).json({ message: 'Se requiere seleccionar un cliente' });
         }
 
         // Verificar que el cliente existe
         const clientExists = await Client.findById(clientId);
         if (!clientExists) {
-            console.log('ERROR: Client not found with ID:', clientId);
             return res.status(404).json({ message: 'El cliente seleccionado no existe' });
         }
-        console.log('✅ Client found:', clientExists.Name);
 
         // Generar folio único
         const folio = `PKG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -44,8 +35,6 @@ export const createPackage = async(req, res) => {
         const connectionType = req.body.type || 'No especificado';
         const fullName = name; // Usar el nombre completo que incluye timestamp y plataformas
         
-        console.log('Creating package with data:', { folio, fullName, packageSpeed, connectionType, price, description, clientId, admin });
-
         const newPackage = new Package({
             folio,
             name: fullName, // Usar el nombre completo para evitar duplicados
@@ -58,51 +47,31 @@ export const createPackage = async(req, res) => {
             Admin: admin || null
         });
 
-        console.log('Saving package...');
         const savedPackage = await newPackage.save();
-        console.log('Package saved successfully:', savedPackage._id);
-        
-        console.log('Populating client data...');
         await savedPackage.populate('Client', 'Name LastName Email Location');
-        console.log('Package populated:', savedPackage);
         
         return res.status(201).json({ 
             message: 'Paquete creado correctamente',
             package: savedPackage
         });
     } catch (error) {
-        console.error('ERROR creating package:', error);
-        console.error('Error details:', error.message);
         return res.status(500).json({ 
             message: 'Error al crear el paquete', 
-            error: error.message,
-            details: error.stack
+            error: error.message
         });
     }
 };
 
 // Obtener todos los paquetes
 export const getAllPackages = async(req, res) => {
-
-    
     try {
-        console.log('Searching for packages in database...');
         const packages = await Package.find()
             .populate('Client', 'Name LastName Email Location')
             .populate('Admin', 'UserName')
             .exec();
-
-        console.log('Found packages count:', packages.length);
-        console.log('Packages data:', packages.map(p => ({
-            id: p._id,
-            name: p.name,
-            client: p.Client ? `${p.Client.Name?.FirstName} ${p.Client.LastName?.FatherLastName}` : 'No client',
-            price: p.price
-        })));
         
         return res.status(200).json(packages);
     } catch (error) {
-        console.error('ERROR getting packages:', error);
         return res.status(500).json({ message: 'Error al obtener los paquetes' });
     }
 };
@@ -179,5 +148,27 @@ export const deletePackage = async(req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Error al eliminar el paquete' });
+    }
+};
+
+// Obtener paquetes por cliente
+export const getPackagesByClient = async(req, res) => {
+    try {
+        const { clientId } = req.params;
+        
+        // Verificar que el cliente existe
+        const clientExists = await Client.findById(clientId);
+        if (!clientExists) {
+            return res.status(404).json({ message: 'Cliente no encontrado' });
+        }
+
+        const packages = await Package.find({ Client: clientId })
+            .populate('Admin', 'UserName')
+            .exec();
+
+        return res.status(200).json(packages);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error al obtener los paquetes del cliente' });
     }
 };

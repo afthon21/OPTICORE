@@ -1,4 +1,4 @@
-import ApiRequest from '../hooks/apiRequest';
+import ApiRequest from '../hooks/apiRequest.jsx';
 import Swal from 'sweetalert2';
 import {useState, useEffect} from 'react';
 
@@ -27,12 +27,15 @@ function TicketInfo({ ticket: ticketProp, onStatusChange }) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error al cambiar!',
-                text: 'El ticket a sido cerrado no es posible cambiar su estado.',
+                text: 'El ticket ha sido cerrado, no es posible cambiar su estado.',
                 toast: true,
                 position: 'top',
                 timer: 1200,
                 timerProgressBar: true,
-                showConfirmButton: false
+                showConfirmButton: false,
+                customClass: {
+                    container: 'swal2-top-center'
+                }
             });
             return;
         }
@@ -40,80 +43,121 @@ function TicketInfo({ ticket: ticketProp, onStatusChange }) {
         // Error al colocar el mismo estado
         if (value === ticket.Status) {
             Swal.fire({
-                icon: 'error',
-                title: 'Error al cambiar!',
-                text: 'No sera posible cambiar el estado después de que el ticket haya sido cerrado.',
+                icon: 'warning',
+                title: 'Estado actual',
+                text: 'El ticket ya tiene este estado asignado.',
                 toast: true,
                 position: 'top',
-                iconColor: '#002b5b',
+                iconColor: '#ff9800',
                 timer: 1400,
                 timerProgressBar: true,
-                showConfirmButton: false
+                showConfirmButton: false,
+                customClass: {
+                    container: 'swal2-top-center'
+                }
             });
             return;
         }
 
         // Cambiar el estado
-        if (value !== ticket.Status) {
-            const confirm = await Swal.fire({
-                icon: 'warning',
-                iconColor: '#002b5b',
-                title: '¿Esta seguro de cambiar el estado a?',
-                text: data.Status,
-                toast: true,
-                position: 'top',
-                width: '30rem',
-                showCancelButton: true,
-                confirmButtonText: 'Aceptar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2a9d8f',
-                cancelButtonColor: '#404040'
-            });
+        const confirm = await Swal.fire({
+            icon: 'warning',
+            iconColor: '#002b5b',
+            title: '¿Está seguro de cambiar el estado?',
+            text: `Nuevo estado: ${data.Status}`,
+            toast: true,
+            position: 'top',
+            width: '400px',
+            showCancelButton: true,
+            confirmButtonText: 'Aceptar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#2a9d8f',
+            cancelButtonColor: '#404040',
+            background: '#ffffff',
+            backdrop: false,
+            timer: 0,
+            customClass: {
+                container: 'swal2-top-center',
+                popup: 'swal2-no-backdrop'
+            }
+        });
 
-            if (confirm.isConfirmed) {
-                try {
-                    const response = await makeRequest(`/ticket/edit/${ticket._id}`, 'PUT', data);
+        if (confirm.isConfirmed) {
+            try {
+                const response = await makeRequest(`/ticket/edit/${ticket._id}`, 'PUT', data);
 
-                    if (response) {
-                        if (onStatusChange) onStatusChange(response);
-                        setTicket({ ...ticket, ...data });
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Exito!',
-                            text: 'Estado actualizado',
-                            timer: 1200,
-                            timerProgressBar: true,
-                            showConfirmButton: false
-                        });
+                if (response && !error) {
+                    // Actualizar el ticket local con el estado nuevo
+                    const updatedTicket = { ...ticket, Status: value };
+                    setTicket(updatedTicket);
+                    
+                    // Notificar al componente padre del cambio
+                    if (onStatusChange) {
+                        onStatusChange(updatedTicket);
                     }
 
-                    if (error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: error,
-                            toast: true,
-                            position: 'top',
-                            width: '30rem'
-                        });
-                    }
-
-                } catch (error) {
-                    console.log(error);
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Estado actualizado correctamente',
+                        toast: true,
+                        position: 'top',
+                        timer: 1500,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        customClass: {
+                            container: 'swal2-top-center'
+                        }
+                    });
+                } else {
+                    // Mostrar error específico del servidor o error genérico
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al actualizar',
+                        text: error || 'No se pudo actualizar el estado del ticket',
+                        toast: true,
+                        position: 'top',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        customClass: {
+                            container: 'swal2-top-center'
+                        }
+                    });
                 }
+
+            } catch (err) {
+                console.error('Error al cambiar estado del ticket:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No se pudo conectar con el servidor',
+                    toast: true,
+                    position: 'top',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    customClass: {
+                        container: 'swal2-top-center'
+                    }
+                });
             }
         }
     }
     
     return (
         <div className="modal fade" id="TicketModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-            <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-dialog modal-lg" style={{
+                marginTop: '2rem',
+                marginBottom: 'auto'
+            }}>
                 <div className="modal-content" style={{
                     borderRadius: '15px',
                     border: 'none',
                     boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    maxHeight: '90vh',
+                    overflowY: 'auto'
                 }}>
                     {/* Header estilo cliente - Verde/Turquesa */}
                     <div className="modal-header" style={{
@@ -569,3 +613,34 @@ function TicketInfo({ ticket: ticketProp, onStatusChange }) {
 }
 
 export default TicketInfo;
+
+// Añadir estilos CSS para posicionar las alertas
+const style = document.createElement('style');
+style.textContent = `
+    .swal2-top-center {
+        top: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 10000 !important;
+    }
+    
+    .swal2-container.swal2-top {
+        align-items: flex-start !important;
+        padding-top: 20px !important;
+    }
+    
+    .swal2-no-backdrop {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 12px !important;
+    }
+    
+    .swal2-container.swal2-backdrop-show .swal2-no-backdrop {
+        backdrop-filter: none !important;
+    }
+`;
+
+if (!document.head.querySelector('style[data-ticket-info]')) {
+    style.setAttribute('data-ticket-info', 'true');
+    document.head.appendChild(style);
+}

@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest.jsx';
 
-function CreatePay({ client, onPaymentCreated }) {
+function CreatePay({ client, onPaymentCreated, onSuccess }) {
     const { makeRequest, loading } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
         Method: '',
-        Amount: '',
+        Abono: '',
         Note: ''
     });
 
@@ -37,7 +37,7 @@ function CreatePay({ client, onPaymentCreated }) {
     const handleClear = () => {
         setFormValues({
             Method: '',
-            Amount: '',
+            Abono: '',
             Note: ''
         });
         setFormErrors({});
@@ -48,8 +48,8 @@ function CreatePay({ client, onPaymentCreated }) {
         if (!formValues.Method || formValues.Method === 'Método de pago...') {
             errors.Method = 'La forma de pago es obligatoria.';
         }
-        if (!formValues.Amount || Number(formValues.Amount) <= 0) {
-            errors.Amount = 'El monto debe ser mayor a cero.';
+        if (!formValues.Abono || Number(formValues.Abono) <= 0) {
+            errors.Abono = 'El abono debe ser mayor a cero.';
         }
         if (!formValues.Note.trim()) {
             errors.Note = 'La nota es obligatoria.';
@@ -97,6 +97,7 @@ function CreatePay({ client, onPaymentCreated }) {
             }).then(() => {
                 handleClear();
                 if (onPaymentCreated) onPaymentCreated();
+                if (onSuccess) onSuccess();
             });
 
         } catch (error) {
@@ -127,7 +128,23 @@ function CreatePay({ client, onPaymentCreated }) {
                 <div className="modal-content">
                     <div className="modal-header">
                         <h1 className="modal-title fs-5" id="ModalLabel">Pago</h1>
-                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button
+                            type="button"
+                            style={{
+                                background: '#f3f3f3',
+                                color: '#555',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                padding: '3px 12px',
+                                fontSize: '0.95rem',
+                                fontWeight: 'normal',
+                                cursor: 'pointer',
+                                marginLeft: '16px',
+                                boxShadow: 'none'
+                            }}
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar"
+                        >Cerrar</button>
                     </div>
                     <div className={`${StyleFormPay['body']} modal-body`}>
                         <form onSubmit={handleSubmit} noValidate>
@@ -149,22 +166,7 @@ function CreatePay({ client, onPaymentCreated }) {
                             )}
                             <br />
 
-                            {/* Monto */}
-                            <label className="form-label">Monto</label>
-                            <div className="input-group">
-                                <span className="input-group-text">$</span>
-                                <input
-                                    type="number"
-                                    className={`form-control ${formErrors.Amount ? 'is-invalid' : ''}`}
-                                    name="Amount"
-                                    value={formValues.Amount}
-                                    onChange={handleChange}
-                                    placeholder="..." />
-                            </div>
-                            {formErrors.Amount && (
-                                <div className="text-danger mt-1" style={{ fontSize: '0.9em' }}>{formErrors.Amount}</div>
-                            )}
-                            <br />
+                            {/* Abono */}
                             <label className="form-label">Abono</label> 
                             <div className="input-group">
                                 <span className="input-group-text">$</span>
@@ -174,7 +176,9 @@ function CreatePay({ client, onPaymentCreated }) {
                                     name="Abono"
                                     value={formValues.Abono}
                                     onChange={handleChange}
-                                    placeholder="..."
+                                    placeholder="Ingrese el monto del abono"
+                                    min="0.01"
+                                    step="0.01"
                                 />
                             </div>
                             {formErrors.Abono && (

@@ -29,7 +29,7 @@ export const createDocument = async (req, res) => {
         return res.status(201).json({ message: 'Upload successfully' });
 
     } catch (error) {
-        console.log(error);
+        // Error registrado automáticamente por el sistema de logging
         return res.status(500).json({ message: 'Error creating document' });
     }
 }
@@ -52,7 +52,7 @@ export const viewDocuments = async (req, res) => {
         return res.status(200).json(documents);
 
     } catch (error) {
-        console.log(error);
+        // Error registrado automáticamente por el sistema de logging
         return res.status(500).json({ message: 'Server error!' });
 
     }

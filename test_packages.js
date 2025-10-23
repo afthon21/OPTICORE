@@ -50,11 +50,11 @@ const testGetPackages = async () => {
     }
 };
 
-// Ejecutar las pruebas
-console.log('Probando crear paquete...');
-testCreatePackage();
+// Ejecutar las pruebas (comentado para evitar logs automáticos)
+// console.log('Probando crear paquete...');
+// testCreatePackage();
 
-setTimeout(() => {
-    console.log('Probando obtener paquetes...');
-    testGetPackages();
-}, 2000);
+// setTimeout(() => {
+//     console.log('Probando obtener paquetes...');
+//     testGetPackages();
+// }, 2000);

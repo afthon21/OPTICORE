@@ -28,6 +28,7 @@ function HomeComponent() {
     const [showAllTicketsState, setShowAllTicketsState] = useState(false);
     const [userName, setUserName] = useState('');
     const [clients, setClients] = useState([]);
+    const [clientSearchTerm, setClientSearchTerm] = useState(''); // Estado para la búsqueda de clientes
     const [packages, setPackages] = useState([]);
     const [chartData, setChartData] = useState({
         fibra: { labels: [], data: [], total: 0 },
@@ -213,31 +214,12 @@ function HomeComponent() {
 
     // Función para mostrar detalles del ticket en un modal
     const handleShowTicketDetails = (ticket, source = 'tickets') => {
-        // Definir colores según la fuente
-        const getColors = (source) => {
-            switch(source) {
-                case 'tickets':
-                    return {
-                        primary: '#26a69a',
-                        secondary: '#4db6ac',
-                        name: 'Tickets'
-                    };
-                case 'pendientes':
-                    return {
-                        primary: '#ff9800',
-                        secondary: '#ffb74d',
-                        name: 'Tickets Pendientes'
-                    };
-                default:
-                    return {
-                        primary: '#26a69a',
-                        secondary: '#4db6ac',
-                        name: 'Tickets'
-                    };
-            }
+        // Usar siempre los mismos colores verdes para todas las ventanas
+        const colors = {
+            primary: '#26a69a',
+            secondary: '#4db6ac',
+            name: source === 'pendientes' ? 'Tickets Pendientes' : 'Tickets'
         };
-
-        const colors = getColors(source);
         
         Swal.fire({
             title: false,
@@ -503,6 +485,8 @@ function HomeComponent() {
             confirmButtonText: 'Cerrar',
             confirmButtonColor: colors.primary,
             width: 700,
+            position: 'center',
+            allowOutsideClick: true,
             customClass: {
                 popup: 'swal2-border-radius',
                 htmlContainer: 'swal2-html-custom'
@@ -510,11 +494,27 @@ function HomeComponent() {
             didOpen: () => {
                 // Estilos adicionales para el modal
                 const popup = Swal.getPopup();
+                const container = Swal.getContainer();
                 if (popup) {
                     popup.style.borderRadius = '15px';
                     popup.style.boxShadow = `0 15px 35px rgba(0,0,0,0.15)`;
                     popup.style.overflow = 'hidden';
                     popup.style.padding = '0';
+                    // Forzar centrado con !important
+                    popup.style.setProperty('position', 'fixed', 'important');
+                    popup.style.setProperty('top', '50%', 'important');
+                    popup.style.setProperty('left', '50%', 'important');
+                    popup.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+                    popup.style.setProperty('margin', '0', 'important');
+                    popup.style.setProperty('margin-left', '0', 'important');
+                    popup.style.setProperty('margin-right', '0', 'important');
+                }
+                if (container) {
+                    container.style.setProperty('display', 'flex', 'important');
+                    container.style.setProperty('align-items', 'center', 'important');
+                    container.style.setProperty('justify-content', 'center', 'important');
+                    container.style.setProperty('min-height', '100vh', 'important');
+                    container.style.setProperty('padding', '0', 'important');
                 }
             }
         });
@@ -598,9 +598,22 @@ function HomeComponent() {
         t => t.Status === 'En espera'
     );
 
-    // Ordenar todos los clientes de reciente a antiguo
+    // Ordenar y filtrar todos los clientes de reciente a antiguo
     const todosLosClientes = clients
         .filter(client => client.CreateDate) // Solo clientes con fecha válida
+        .filter(client => {
+            // Filtrar por término de búsqueda
+            if (!clientSearchTerm) return true;
+            
+            const fullName = [
+                client.Name.FirstName,
+                client.Name.SecondName,
+                client.LastName.FatherLastName,
+                client.LastName.MotherLastName
+            ].filter(Boolean).join(' ').toLowerCase();
+            
+            return fullName.includes(clientSearchTerm.toLowerCase());
+        })
         .sort((a, b) => new Date(b.CreateDate) - new Date(a.CreateDate));
 
     return (
@@ -618,10 +631,67 @@ function HomeComponent() {
                         borderRadius: '12px 12px 0 0'
                     }}>
                         <h5 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Clientes</h5>
+                        
+                        {/* Barra de búsqueda discreta */}
+                        <div className="input-group" style={{ width: '140px' }}>
+                            <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                placeholder="Buscar..."
+                                value={clientSearchTerm}
+                                onChange={(e) => setClientSearchTerm(e.target.value)}
+                                style={{
+                                    background: 'rgba(255,255,255,0.15)',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    borderRight: clientSearchTerm ? 'none' : '1px solid rgba(255,255,255,0.2)',
+                                    fontSize: '0.75rem',
+                                    color: 'white',
+                                    paddingLeft: '25px',
+                                    height: '28px'
+                                }}
+                            />
+                            <div style={{
+                                position: 'absolute',
+                                left: '8px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                zIndex: 10,
+                                pointerEvents: 'none'
+                            }}>
+                                <i className="bi bi-search" style={{ 
+                                    color: 'rgba(255,255,255,0.7)', 
+                                    fontSize: '0.75rem' 
+                                }}></i>
+                            </div>
+                            {clientSearchTerm && (
+                                <button
+                                    className="btn btn-sm"
+                                    type="button"
+                                    onClick={() => setClientSearchTerm('')}
+                                    style={{ 
+                                        background: 'rgba(255,255,255,0.15)',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        borderLeft: 'none',
+                                        color: 'rgba(255,255,255,0.8)',
+                                        padding: '2px 6px',
+                                        height: '28px',
+                                        width: '28px'
+                                    }}
+                                >
+                                    <i className="bi bi-x" style={{ fontSize: '0.7rem' }}></i>
+                                </button>
+                            )}
+                        </div>
                     </div>
+                    
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {todosLosClientes.length === 0 ? (
-                            <span className="text-muted">No hay clientes registrados</span>
+                            <span className="text-muted">
+                                {clientSearchTerm 
+                                    ? `No se encontraron clientes con "${clientSearchTerm}"` 
+                                    : "No hay clientes registrados"
+                                }
+                            </span>
                         ) : (
                             <ul className="list-group list-group-flush">
                                 {(showAllClients ? todosLosClientes : todosLosClientes.slice(0, 8)).map(client => (
@@ -738,7 +808,7 @@ function HomeComponent() {
                         margin: '-19px -16px 15px -16px',
                         borderRadius: '12px 12px 0 0'
                     }}>
-                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Registro de Errores</h6>
+                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Registro</h6>
                     </div>
                     <ErrorDisplay />
                 </div>

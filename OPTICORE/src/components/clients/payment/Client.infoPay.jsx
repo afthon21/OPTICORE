@@ -48,50 +48,15 @@ function InfoPay({ payment }) {
                         </div>
                         <br />
 
-                        <p className="form-label"><strong>Monto:</strong></p>
+                        <p className="form-label"><strong>Abono:</strong></p>
                         <div className="input-group">
+                            <span className="input-group-text">$</span>
                             <input
                                 className={`form-control ${styleInfo['input']}`}
                                 disabled
-                                value={payment.Amount || ''} />
+                                value={payment.Abono || '0'} />
                         </div>
                         <br />
-                        <p className="form-label"> <strong> Abono </strong> </p>
-                        <div className="input-group" >
-                            <input type="text"
-                            className={`form-control ${styleInfo['input']}`}
-                            disabled
-                            value={payment.Abono || ''}/> 
-                            
-                        </div>
-                        <br/>
-
-                        <p className="form-label"> <strong> Abono </strong> </p>
-                        <div className="input-group" >
-                            <input type="text"
-                            className={`form-control ${styleInfo['input']}`}
-                            disabled
-                            value={payment.Abono || ''}/> 
-                        </div>
-                        <br/>
-
-                        <p className="form-label"> <strong> Abono </strong> </p>
-                        <div className="input-group" >
-                            <input type="text"
-                            className={`form-control ${styleInfo['input']}`}
-                            disabled
-                            value={payment.Abono || ''}/> 
-                        </div>
-                        <br/>
-
-                        <p className="form-label"> <strong> Abono </strong> </p>
-                        <div className="input-group" >
-                            <input type="text"
-                            className={`form-control ${styleInfo['input']}`}
-                            disabled
-                            value={payment.Abono || ''}/> 
-                        </div>
-                        <br/>
 
                         <p className="form-label"><strong>Nota:</strong></p>
                         <div className="input-group">
