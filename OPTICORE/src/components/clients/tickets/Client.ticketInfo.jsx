@@ -2,7 +2,7 @@ import ApiRequest from '../../hooks/apiRequest';
 import Swal from 'sweetalert2';
 
 function TicketInfo({ ticket }) {
-    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const { makeRequest, error } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     const states = [
         { id: '0', name: 'Abierto' },
@@ -93,8 +93,8 @@ function TicketInfo({ ticket }) {
                         });
                     }
 
-                } catch (error) {
-                    console.log(error);
+                } catch (err) {
+                    console.log(err);
                 }
             }
         }

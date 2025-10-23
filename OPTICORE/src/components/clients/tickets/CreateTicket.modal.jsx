@@ -1,6 +1,6 @@
 import styleFormTIcket from '../css/createTicket.module.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import { cleanData } from '../../fragments/js/cleanData';
 import ApiRequest from '../../hooks/apiRequest';
@@ -11,7 +11,8 @@ function CreateTicket({ client, technicians = [], onTicketCreated }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [searchTech, setSearchTech] = useState('');
     const [isTechOpen, setIsTechOpen] = useState(false);
-    const [selectedTech, setSelectedTech] = useState('');
+    // selectedTech isn't read in render but we keep setter to record selection
+    const [, setSelectedTech] = useState('');
     const [formValues, setFormValues] = useState({
         Issue: '',
         Description: '',
@@ -42,18 +43,20 @@ function CreateTicket({ client, technicians = [], onTicketCreated }) {
         }));
     }
 
-    const handleClear = () => {
+    const DEFAULT_PRIORITY_NAME = 'Seleccione la prioridad...';
+
+    const handleClear = useCallback(() => {
         setFormValues({
             Issue: '',
             Description: '',
-            Priority: priority.find((item) => item.id === '0').name,
+            Priority: DEFAULT_PRIORITY_NAME,
             tecnico: ''
         });
         setSearchTech('');
         setSelectedTech('');
         setIsTechOpen(false);
         setFormErrors({});
-    }
+    }, []);
 
     useEffect(() => {
         /**
@@ -70,7 +73,7 @@ function CreateTicket({ client, technicians = [], onTicketCreated }) {
                 modal.removeEventListener("hidden.bs.modal", handleClear)
             }
         }
-    });
+    }, [handleClear]);
 
     const validators = () => {
         const errors = {};
@@ -117,13 +120,13 @@ function CreateTicket({ client, technicians = [], onTicketCreated }) {
         try {
             await makeRequest(`/ticket/new/${client}`, 'POST', cleanedData);
 
-            if (loading) {
+                if (loading) {
                 await Swal.fire({
                     icon: 'info',
                     title: 'Espere!',
                     text: 'creando...',
                     toast: true,
-                    position: top,
+                        position: 'top',
                     timer: 1200,
                     timerProgressBar: true
                 });

@@ -1,13 +1,12 @@
 import MapGoogle from "../../fragments/maps/Map.fragment";
 
-import ApiRequest from "../../hooks/apiRequest";
 import { useState, useEffect } from "react";
 
 
 function ClientLocation({ client }) {
     const [marker, setMarker] = useState({
-        lat: client.Location.Latitude || 19.4326, // Ciudad de México por defecto
-        lng: client.Location.Length || -99.1332
+        lat: client?.Location?.Latitude ?? 19.4326, // Ciudad de México por defecto
+        lng: client?.Location?.Length ?? -99.1332
     });
 
     const [mapsAvailable, setMapsAvailable] = useState(false);
@@ -26,7 +25,7 @@ function ClientLocation({ client }) {
         setMapsAvailable(true);
 
         // Si ya tiene coordenadas válidas, usarlas
-        if (client.Location.Latitude && client.Location.Length && 
+        if (client?.Location?.Latitude && client?.Location?.Length && 
             client.Location.Latitude !== 0 && client.Location.Length !== 0) {
             setMarker({
                 lat: client.Location.Latitude,
@@ -57,8 +56,8 @@ function ClientLocation({ client }) {
                 console.log('Geocodificando dirección:', fullAddress);
 
                 // Usar la API de geocodificación de Google
-                const geocoder = new google.maps.Geocoder();
-                
+                const geocoder = new window.google.maps.Geocoder();
+
                 geocoder.geocode({ address: fullAddress }, (results, status) => {
                     if (status === 'OK' && results[0]) {
                         const location = results[0].geometry.location;
