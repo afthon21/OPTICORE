@@ -31,7 +31,6 @@ export const viewAllTechnicians = async(req, res) => {
         const allTechnicians = await technician.find();
         return res.status(200).json(allTechnicians);
     } catch (error) {
-        // Error registrado automáticamente por el sistema de logging
         return res.status(500).json({ message: 'Error finding technicians' });
     }
 }

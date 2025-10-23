@@ -1,11 +1,11 @@
 import styleFormModal from '../css/uploadModal.module.css'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest';
 
 export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
-    const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
+    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [file, setFile] = useState(null);
     const [value, setValue] = useState('');
     const [formErrors, setFormErrors] = useState({});
@@ -21,6 +21,8 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
         { id: '7', name: 'Contraseña de modem' },
         { id: '8', name: 'Potencia' }
     ];
+
+    const DEFAULT_DOCUMENT_NAME = documentName[0].name;
 
     const handleChangue = (e) => {
         setValue(e.target.value);
@@ -39,7 +41,7 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
         // Verificar si hay archivos en el objeto de transferencia
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             setFile(e.dataTransfer.files[0]); // Guardar el archivo en el estado
-            console.log('Archivo cargado:', e.dataTransfer.files[0]);
+            
             e.dataTransfer.clearData(); // Limpia los datos del drag & drop
         }
     };
@@ -52,10 +54,10 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
     /**
      * Limpiar formulario
      */
-    const handleClear = () => {
-        setValue(documentName.find((item) => item.id === '0').name);
+    const handleClear = useCallback(() => {
+        setValue(DEFAULT_DOCUMENT_NAME);
         setFile(null);
-    }
+    }, [DEFAULT_DOCUMENT_NAME]);
 
     useEffect(() => {
         /**
@@ -71,7 +73,7 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
                 modal.removeEventListener("hidden.bs.modal", handleClear)
             }
         }
-    }, []);
+    }, [handleClear]);
 
     const validators = () => {
         const errors = {};
@@ -129,8 +131,8 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
             if (onUploadSuccess) onUploadSuccess();
             handleClear();
             
-        } catch (error) {
-            console.log(error);
+        } catch (err) {
+            console.log(err);
         }
     };
 
@@ -173,14 +175,13 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
                                     className={`form-select ${styleFormModal['select']}`}
                                     name="Method"
                                     onChange={handleChangue}
-                                    value={value}>
+                                    defaultValue={documentName[0].name}>
 
                                     {documentName.map((name) => (
                                         <option
                                             className={styleFormModal['option']}
                                             key={name.id}
                                             hidden={name.hide}
-                                            selected={name.selected}
                                             value={name.name}>
 
                                             {name.name}
@@ -222,10 +223,10 @@ export function UploadDoc({ client, onUploadSuccess }) { //se agrego lo segundo
                                         />
                                     )}
                                     {/*Enlace para descargar PDF*/}
-                                    {file.type === 'application/pdf' &&(
+                                    {file.type === 'application/pdf' && (
                                         <a
                                             href={URL.createObjectURL(file)}
-                                            terget="_blank"
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className={styleFormModal['pdf-link']}
                                         >

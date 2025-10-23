@@ -4,6 +4,7 @@ import Client from '../models/clientSchema.js';
 
 // Crear paquete
 export const createPackage = async(req, res) => {
+
     try {
         const { name, price, description, clientId } = req.body;
         const admin = req.adminId;
@@ -35,6 +36,7 @@ export const createPackage = async(req, res) => {
         const connectionType = req.body.type || 'No especificado';
         const fullName = name; // Usar el nombre completo que incluye timestamp y plataformas
         
+
         const newPackage = new Package({
             folio,
             name: fullName, // Usar el nombre completo para evitar duplicados
@@ -48,6 +50,7 @@ export const createPackage = async(req, res) => {
         });
 
         const savedPackage = await newPackage.save();
+        
         await savedPackage.populate('Client', 'Name LastName Email Location');
         
         return res.status(201).json({ 
@@ -69,6 +72,8 @@ export const getAllPackages = async(req, res) => {
             .populate('Client', 'Name LastName Email Location')
             .populate('Admin', 'UserName')
             .exec();
+
+        
         
         return res.status(200).json(packages);
     } catch (error) {

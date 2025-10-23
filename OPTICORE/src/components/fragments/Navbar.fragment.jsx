@@ -13,25 +13,9 @@ export function NavbarFragmentAll() {
     const adminId = sessionStorage.getItem('adminId');
     const { region, setRegion, isAdmin, canChangeRegion, userRole } = useRegion();
 
-    // Debug para el navbar
-    console.log('🎭 Navbar - Rol de usuario:', userRole);
-    console.log('🎭 Navbar - ¿Es admin?:', isAdmin);
-    console.log('🎭 Navbar - ¿Puede cambiar región?:', canChangeRegion);
-    console.log('🎭 Navbar - Región actual:', region);
-
-    // Función de debug para verificar sessionStorage
-    const debugSessionStorage = () => {
-        console.log('🔍 DEBUG SESSION STORAGE:');
-        console.log('adminRole:', sessionStorage.getItem('adminRole'));
-        console.log('adminRegion:', sessionStorage.getItem('adminRegion'));
-        console.log('adminId:', sessionStorage.getItem('adminId'));
-        console.log('userName:', sessionStorage.getItem('userName'));
-    };
-
     // Función para forzar actualización del nombre
     const refreshUserName = () => {
         const currentName = sessionStorage.getItem('userName');
-        console.log('🔄 Forzando actualización de nombre:', currentName);
         setName(currentName);
         setRefreshTrigger(prev => prev + 1);
     };
@@ -39,7 +23,6 @@ export function NavbarFragmentAll() {
     // Efecto principal para cargar el nombre inicial y cuando cambia el rol
     useEffect(() => {
         const name = sessionStorage.getItem('userName');
-        console.log('👤 Cargando nombre de usuario inicial:', name);
         setName(name);
     }, [userRole, refreshTrigger]); // Se actualiza cuando cambia el rol o el trigger
 
@@ -50,7 +33,6 @@ export function NavbarFragmentAll() {
         const checkForChanges = () => {
             const currentName = sessionStorage.getItem('userName');
             if (currentName !== lastKnownName) {
-                console.log('👤 Cambio detectado - Anterior:', lastKnownName, '| Nuevo:', currentName);
                 setName(currentName);
                 lastKnownName = currentName;
             }
@@ -89,7 +71,6 @@ export function NavbarFragmentAll() {
                                     <a
                                         className={`nav-link ${region === 'Estado de México' ? 'active' : ''}`}
                                         onClick={() => {
-                                            console.log('🎯 Cambiando región a Estado de México');
                                             setRegion('Estado de México');
                                         }}
                                         role="button"
@@ -105,7 +86,6 @@ export function NavbarFragmentAll() {
                                     <a
                                         className={`nav-link ${region === 'Puebla' ? 'active' : ''}`}
                                         onClick={() => {
-                                            console.log('🎯 Cambiando región a Puebla');
                                             setRegion('Puebla');
                                         }}
                                         role="button"

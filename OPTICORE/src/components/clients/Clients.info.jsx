@@ -12,7 +12,7 @@ import ClientTickets from './tickets/Client.tickets';
 import ClientNotes from './notes/client.notes';
 import ClientLocation from './location/location.map';
 
-function ClientsInfo({ client, initialActiveTab = 'personal' }) {
+function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGlobalUpdate }) {
     const [show, setShow] = useState({
         personal: initialActiveTab === 'personal',
         payments: initialActiveTab === 'payments',

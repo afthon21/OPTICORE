@@ -12,10 +12,6 @@ import { DropdownTechnicians } from '../fragments/Dropdown.technician.jsx';
 
 
 export function CardCreateTicket({ clients = [], technician = [] }) {
-    console.log('📋 CardCreateTicket renderizado:');
-    console.log('  - Clientes:', clients.length);
-    console.log('  - Técnicos:', technician.length);
-    console.log('  - Lista de técnicos:', technician);
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');

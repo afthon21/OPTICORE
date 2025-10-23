@@ -1,5 +1,5 @@
 import StyleFormPay from '../css/CreatePay.module.css';
-import { cleanData } from '../../fragments/js/cleanData';
+import { cleanData } from '../../../lib/utils.js';
 import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest.jsx';

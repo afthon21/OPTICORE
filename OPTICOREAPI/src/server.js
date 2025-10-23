@@ -25,5 +25,5 @@ iniciarMonitoreoSalud();
 
 //Server
 app.listen(process.env.PORT, () => {
-    console.log(`OptiCore API - Server running on port ${process.env.PORT}`);
+    console.log(`${process.env.HOST}:${process.env.PORT}/api`);
 });

@@ -9,11 +9,6 @@ function PackagesCard({ packages = [], onSelected }) {
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
 
-  console.log("=== PACKAGES CARD RENDER ===");
-  console.log("Packages prop:", packages);
-  console.log("Packages length:", packages.length);
-  console.log("Region:", region);
-
   const handleInputSearch = (e) => {
     setSearch(e.target.value);
   };
