@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import ApiRequest from "../../hooks/apiRequest";
+import ApiRequest from "../../hooks/apiRequest.jsx";
 
-import { cleanData } from "../../fragments/js/cleanData";
+import { cleanData } from '../../../lib/utils.js';
 import Swal from "sweetalert2";
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 

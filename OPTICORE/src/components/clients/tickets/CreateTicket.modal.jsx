@@ -2,8 +2,8 @@ import styleFormTIcket from '../css/createTicket.module.css';
 
 import { useEffect, useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
-import { cleanData } from '../../fragments/js/cleanData';
-import ApiRequest from '../../hooks/apiRequest';
+import { cleanData } from '../../../lib/utils.js';
+import ApiRequest from '../../hooks/apiRequest.jsx';
 import { DropdownTechnicians } from '../../fragments/Dropdown.technician.jsx';
 
 

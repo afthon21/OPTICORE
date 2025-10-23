@@ -16,7 +16,7 @@ function ClientLocation({ client }) {
         const googleMapsKey = import.meta.env.VITE_GOOGLE_MAP;
         
         if (!googleMapsKey) {
-            console.log(error);
+            console.warn('VITE_GOOGLE_MAP no configurada');
             setMapsAvailable(false);
             return;
         }
@@ -95,11 +95,11 @@ function ClientLocation({ client }) {
                 textAlign: "center"
             }}>
                 <h5>📍 Ubicación del Cliente</h5>
-                <p><strong>Dirección:</strong> {client.Location.Address}</p>
-                <p><strong>Colonia:</strong> {client.Location.Cologne}</p>
-                <p><strong>Municipio:</strong> {client.Location.Municipality}</p>
-                <p><strong>Estado:</strong> {client.Location.State}</p>
-                <p><strong>CP:</strong> {client.Location.ZIP}</p>
+                <p><strong>Dirección:</strong> {client?.Location?.Address || 'N/A'}</p>
+                <p><strong>Colonia:</strong> {client?.Location?.Cologne || 'N/A'}</p>
+                <p><strong>Municipio:</strong> {client?.Location?.Municipality || 'N/A'}</p>
+                <p><strong>Estado:</strong> {client?.Location?.State || 'N/A'}</p>
+                <p><strong>CP:</strong> {client?.Location?.ZIP || 'N/A'}</p>
                 <small className="text-muted">Google Maps no disponible</small>
             </div>
         );
