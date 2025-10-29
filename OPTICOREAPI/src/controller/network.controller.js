@@ -25,7 +25,6 @@ const safeCloseSession = (session, sessionClosedFlag = null) => {
     session.close();
     if (sessionClosedFlag) sessionClosedFlag.closed = true;
   } catch (error) {
-    console.log('🔧 Error al cerrar sesión SNMP:', error.message);
     if (sessionClosedFlag) sessionClosedFlag.closed = true;
   }
 };
@@ -57,7 +56,6 @@ export async function detectarPuertos() {
       safeCloseSession(session, sessionFlag);
       
       if (error) {
-        console.log('🔧 Error SNMP - usando datos simulados:', error.message);
         return resolve({
           ethernet: [
             { index: 1, description: 'eth0', status: 1 },
@@ -114,7 +112,7 @@ export async function getOLTPorts(req, res) {
     // Timeout para evitar que se cuelgue
     const timeout = setTimeout(() => {
       if (!responseFlag.sent) {
-        console.log('🔧 SNMP timeout en getOLTPorts - enviando datos simulados');
+        
         responseFlag.sent = true;
         safeCloseSession(session, sessionFlag);
         res.json([
@@ -141,7 +139,6 @@ export async function getOLTPorts(req, res) {
         const now = Date.now();
         
         if (error) {
-          console.log('🔧 Error SNMP en getOLTPorts - enviando datos simulados:', error.message);
           responseFlag.sent = true;
           return res.json([
             {
@@ -240,7 +237,6 @@ export function getDeviceInfo(req, res) {
   // Timeout para evitar que se cuelgue
   const timeout = setTimeout(() => {
     if (!responseFlag.sent) {
-      console.log('🔧 SNMP timeout en getDeviceInfo - enviando datos simulados');
       responseFlag.sent = true;
       safeCloseSession(session, sessionFlag);
       res.json({ 
@@ -258,7 +254,6 @@ export function getDeviceInfo(req, res) {
     
     if (!responseFlag.sent) {
       if (error) {
-        console.log('🔧 Error SNMP en getDeviceInfo - enviando datos simulados:', error.message);
         responseFlag.sent = true;
         return res.json({ 
           model: 'Simulado - Dispositivo SNMP', 
@@ -293,7 +288,6 @@ export function iniciarMonitoreoSalud() {
       // Timeout para el monitoreo
       const timeout = setTimeout(() => {
         safeCloseSession(session, sessionFlag);
-        console.log('🔧 Timeout en monitoreo de salud - usando datos por defecto');
         
         networkHealthHistory.push({
           timestamp: new Date().toISOString(),

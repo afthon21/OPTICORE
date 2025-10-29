@@ -10,7 +10,7 @@ ticketRoute.get('/view/:id', protectRoute, getProfile, viewOneTicket); // Buscar
 ticketRoute.get('/archived', protectRoute, getProfile, viewArchivedTickets); // Ver solo tickets archivados
 ticketRoute.post('/new/:id', protectRoute, getProfile, createTicketById); // Crear ticket por id de cliente
 ticketRoute.get('/all/:id', protectRoute, getProfile, viewClientTicketS); // Ver todos los tickets de un solo cliente buscado por id
-ticketRoute.post('/edit/:id', protectRoute, getProfile, editTicket); // Editar  ticket
+ticketRoute.put('/edit/:id', protectRoute, getProfile, editTicket); // Editar  ticket
 ticketRoute.delete('/delete/:id', protectRoute, getProfile, deleteTicket);
 ticketRoute.post('/archive/:id', protectRoute, getProfile, archiveTicket); //Archivar ticket 
 export default ticketRoute;

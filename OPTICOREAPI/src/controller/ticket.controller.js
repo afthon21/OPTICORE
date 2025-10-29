@@ -1,15 +1,15 @@
+import ticket from '../models/ticketsSchema.js';
+import client from "../models/clientSchema.js";
+
 // Obtener solo tickets archivados
 export const viewArchivedTickets = async (req, res) => {
     try {
         const archivedTickets = await ticket.find({ Archived: true });
         return res.status(200).json(archivedTickets);
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Error finding archived tickets' });
     }
 }
-import ticket from '../models/ticketsSchema.js';
-import client from "../models/clientSchema.js";
 
 //Create a new Ticket
 export const createTicket = async (req, res) => {
@@ -53,7 +53,6 @@ export const createTicket = async (req, res) => {
 
         return res.status(201).json({ message: 'New ticket created' });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Error creating ticket' });
     }
 }
@@ -69,7 +68,6 @@ export const viewAllTickets = async (req, res) => {
 
         return res.status(200).json(allTickets);
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Error finding tickets' });
     }
 }
@@ -90,7 +88,6 @@ export const viewOneTicket = async (req, res) => {
 
         return res.status(200).json(oneTicket);
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Ticket not already exist' });
     }
 }
@@ -135,7 +132,6 @@ export const createTicketById = async (req, res) => {
         await newTicket.save();
         return res.status(201).json({ message: 'New ticket created' });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Error creating ticket' });
     }
 }
@@ -145,6 +141,11 @@ export const viewClientTicketS = async (req, res) => {
     const id = req.params.id;
 
     try {
+        // Validar que el ID tenga formato válido de MongoDB ObjectId
+        if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ message: 'Invalid client ID format' });
+        }
+
         const exist = await client.findById(id);
 
         if (!exist) {
@@ -152,15 +153,16 @@ export const viewClientTicketS = async (req, res) => {
         }
 
         const tickets = await ticket.find({ Client: exist._id })
-            .populate('Client', 'Name LastName')
+            .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
+            .populate('tecnico')
             .exec();
 
-        return res.status(200).json(tickets);
+        // Retornar array vacío si no hay tickets en lugar de null
+        return res.status(200).json(tickets || []);
 
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Server Error!' })
+        return res.status(500).json({ message: 'Server Error' })
     }
 }
 
@@ -170,30 +172,41 @@ export const editTicket = async (req, res) => {
 
     try {
         const idTicket = await ticket.findById(id);
-        const UpdateQuery = {};
 
         if (!idTicket) {
             return res.status(404).json({ message: 'Ticket not found' });
         }
 
-        const fields = {
-            CreateDate: (value) => { UpdateQuery['CreateDate'] = value },
-            Issue: (value) => { UpdateQuery['Issue'] = value },
-            Description: (value) => { UpdateQuery['Description'] = value },
-            Status: (value) => { UpdateQuery['Status'] = value },
-            Priority: (value) => { UpdateQuery['Priority'] = value }
-        };
+        const UpdateQuery = {};
 
-        for (const [key, updateFunction] of Object.entries(fields)) {
-            if (req.body[key]) {
-                await updateFunction(req.body[key]);
+        // Campos permitidos para actualizar
+        const allowedFields = ['CreateDate', 'Issue', 'Description', 'Status', 'Priority', 'tecnico'];
+        
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                UpdateQuery[field] = req.body[field];
             }
         }
 
-        await ticket.findByIdAndUpdate(idTicket, { $set: UpdateQuery }, { $new: true });
-        return res.status(200).json({ message: 'Ticket update' });
+        if (Object.keys(UpdateQuery).length === 0) {
+            return res.status(400).json({ message: 'No fields provided to update' });
+        }
+
+        const updatedTicket = await ticket.findByIdAndUpdate(
+            id, 
+            { $set: UpdateQuery }, 
+            { new: true }
+        ).populate('Client', 'Name LastName Location')
+         .populate('Admin', 'UserName')
+         .populate('tecnico');
+
+        if (!updatedTicket) {
+            return res.status(400).json({ message: 'Failed to update ticket' });
+        }
+
+        return res.status(200).json(updatedTicket);
+
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Server error!' });
     }
 }
@@ -212,7 +225,6 @@ export const deleteTicket = async (req, res) => {
         await ticket.findByIdAndDelete(idTicket);
         return res.status(200).json({ message: 'Ticked deleted' });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Server Error!' });
     }
 }
@@ -228,7 +240,6 @@ export const archiveTicket = async (req, res) => {
         await idTicket.save();
         return res.status(200).json({ message: 'Ticket archived', ticket: idTicket });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: 'Server error!' });
 
     }

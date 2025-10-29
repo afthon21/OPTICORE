@@ -111,7 +111,6 @@ function LoginComponent() {
             }
 
             // Guarda el token o datos importantes en el almacenamiento si es necesario
-            console.log('🔐 Datos del login recibidos:', res);
             
             sessionStorage.setItem('adminId', res.adminId);
             sessionStorage.setItem('token', res.token);
@@ -120,7 +119,7 @@ function LoginComponent() {
             sessionStorage.setItem('adminRole', res.role);
             sessionStorage.setItem('loginSuccess', true);
 
-            console.log('🔐 Rol guardado en sessionStorage:', res.role);
+            
 
             // Reinicializar el contexto después del login
             if (initializeAfterLogin) {
@@ -140,7 +139,7 @@ function LoginComponent() {
             handleHome(navigate, res.adminId);
 
         } catch (error) {
-            console.log('Error en la solicitud ', error);
+            
         }
     }
 

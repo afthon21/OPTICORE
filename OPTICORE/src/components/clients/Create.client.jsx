@@ -1,6 +1,6 @@
 import styleCreateCard from './css/createClient.module.css';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { cleanData } from '../fragments/js/cleanData.js';
 import { getDate } from '../fragments/js/getDate.js';
@@ -108,7 +108,7 @@ function CreateClient() {
             SecondName: '',
             FatherLastName: '',
             MotherLastName: '',
-            PhoneNumber: '',
+        PhoneNumber: [],
             Email: '',
             State: '',
             Municipality: '',

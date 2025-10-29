@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import ApiRequest from '../hooks/apiRequest';
-import { useParams } from 'react-router-dom';
 
 function ArchivedClients() {
   const [clients, setClients] = useState([]);
   const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
-  const { adminId } = useParams();
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
         const res = await makeRequest('/client/all');
         setClients((res || []).filter(c => c.Archived === true));
-      } catch (error) {
+      } catch (err) {
+        console.error('Error fetching archived clients:', err);
         setClients([]);
       }
     };

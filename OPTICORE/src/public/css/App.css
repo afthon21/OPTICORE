@@ -59,3 +59,197 @@ body {
     font-size: 0.98em;
   }
 }
+
+/* === ESTILOS PARA MODAL DE TICKET === */
+#TicketClientModal {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  z-index: 1050 !important;
+}
+
+#TicketClientModal .modal-dialog {
+  margin: 0 auto !important;
+  max-width: 800px !important;
+  width: 90% !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: 100vh !important;
+  justify-content: center !important;
+}
+
+#TicketClientModal .modal-dialog-centered {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+}
+
+#TicketClientModal .modal-content {
+  border-radius: 20px !important;
+  border: none !important;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.25) !important;
+  overflow: hidden !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  background: white !important;
+  position: relative !important;
+  animation: modalFadeIn 0.3s ease-out !important;
+  transform-origin: center center !important;
+}
+
+#TicketClientModal .modal-header {
+  border-top-left-radius: 15px !important;
+  border-top-right-radius: 15px !important;
+  padding: 2rem !important;
+  border-bottom: none !important;
+}
+
+/* Eliminar cualquier círculo negro o pseudo-elemento no deseado */
+#TicketClientModal .modal-header *::before,
+#TicketClientModal .modal-header *::after {
+  display: none !important;
+}
+
+#TicketClientModal .modal-header {
+  position: relative !important;
+}
+
+#TicketClientModal .modal-header::before,
+#TicketClientModal .modal-header::after {
+  display: none !important;
+}
+
+#TicketClientModal .modal-body {
+  padding: 1.5rem 2rem !important;
+}
+
+#TicketClientModal .modal-footer {
+  border-bottom-left-radius: 15px !important;
+  border-bottom-right-radius: 15px !important;
+  justify-content: center !important;
+  padding: 1rem 2rem 1.5rem !important;
+  background-color: #f8f9fa !important;
+  border-top: 1px solid #dee2e6 !important;
+}
+
+/* Estilos para el contenido del modal */
+#TicketClientModal .row {
+  margin: 0 !important;
+  padding: 0.5rem 0 !important;
+}
+
+#TicketClientModal .col-md-6 {
+  padding: 0.5rem !important;
+}
+
+#TicketClientModal .form-label {
+  font-weight: 600 !important;
+  color: #495057 !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 0.9rem !important;
+}
+
+#TicketClientModal .form-control, #TicketClientModal .form-select {
+  border-radius: 8px !important;
+  border: 1px solid #dee2e6 !important;
+  padding: 0.75rem !important;
+  font-size: 0.95rem !important;
+  transition: all 0.2s ease !important;
+}
+
+#TicketClientModal .form-control:focus, #TicketClientModal .form-select:focus {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25) !important;
+}
+
+#TicketClientModal .badge {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.85rem !important;
+  border-radius: 20px !important;
+}
+
+#TicketClientModal h5 {
+  color: #343a40 !important;
+  font-weight: 700 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+#TicketClientModal .btn-secondary {
+  border-radius: 25px !important;
+  padding: 0.75rem 2rem !important;
+  border: none !important;
+  background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+  color: white !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+#TicketClientModal .btn-secondary:hover {
+  background: linear-gradient(135deg, #5a6268, #495057) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 15px rgba(108,117,125,0.3) !important;
+}
+
+/* Animación para el modal */
+@keyframes modalFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Backdrop del modal */
+#TicketClientModal .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Responsive para modal de ticket */
+@media (max-width: 768px) {
+  #TicketClientModal .modal-dialog {
+    width: 95% !important;
+    max-width: 95% !important;
+    min-height: 100vh !important;
+  }
+  
+  #TicketClientModal .modal-content {
+    max-height: 90vh !important;
+    border-radius: 15px !important;
+  }
+  
+  #TicketClientModal .modal-header {
+    padding: 1.5rem !important;
+  }
+  
+  #TicketClientModal .modal-body {
+    padding: 1rem 1.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  #TicketClientModal .modal-dialog {
+    width: 98% !important;
+    max-width: 98% !important;
+    min-height: 100vh !important;
+  }
+  
+  #TicketClientModal .modal-content {
+    max-height: 95vh !important;
+    border-radius: 10px !important;
+  }
+  
+  #TicketClientModal .modal-header {
+    padding: 1rem !important;
+  }
+  
+  #TicketClientModal .modal-body {
+    padding: 0.75rem 1rem !important;
+  }
+}

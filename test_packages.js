@@ -19,7 +19,7 @@ const testCreatePackage = async () => {
 
         if (response.ok) {
             const result = await response.json();
-            console.log('Paquete creado exitosamente:', result);
+            
         } else {
             const error = await response.json();
             console.error('Error al crear paquete:', error);
@@ -40,7 +40,7 @@ const testGetPackages = async () => {
 
         if (response.ok) {
             const packages = await response.json();
-            console.log('Paquetes obtenidos:', packages);
+            
         } else {
             const error = await response.json();
             console.error('Error al obtener paquetes:', error);
@@ -51,10 +51,10 @@ const testGetPackages = async () => {
 };
 
 // Ejecutar las pruebas
-console.log('Probando crear paquete...');
+
 testCreatePackage();
 
 setTimeout(() => {
-    console.log('Probando obtener paquetes...');
+    
     testGetPackages();
 }, 2000);

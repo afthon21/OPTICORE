@@ -275,7 +275,6 @@ export default function Card() {
             }}
           >
             {platforms.map((p) => {
-              console.log("Renderizando:", p.name);
               const selected = selectedPlatforms.includes(p.name);
               return (
                 <button
