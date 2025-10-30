@@ -1,13 +1,48 @@
 import React, { useState } from 'react';
+import EditPackageModal from './EditPackage.modal.jsx';
 import styleCard from '../payments/css/paymentCard.module.css';
 import styleTable from '../payments/css/paymentTable.module.css';
 import { useRegion } from '../../hooks/RegionContext';
+import ApiRequest from '../hooks/apiRequest.jsx';
 
-function PackagesCard({ packages = [], onSelected }) {
+function PackagesCard({ packages = [], setPackages, onSelected }) {
+  // Usar el hook correctamente
+  const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
+  // Actualizar paquete en la API y en el estado local
+  const handleSavePackage = async (updatedPkg) => {
+    if (!updatedPkg || !updatedPkg._id) return false;
+    // Solo enviar los campos relevantes
+    const body = {
+      type: updatedPkg.type,
+      connectionType: updatedPkg.connectionType,
+      platforms: updatedPkg.platforms,
+      price: updatedPkg.price,
+      description: updatedPkg.description
+    };
+    const res = await makeRequest(`/packages/edit/${updatedPkg._id}`, 'PUT', body);
+    if (res && res.updatedPackage && setPackages) {
+      setPackages(prev => prev.map(p => p._id === updatedPkg._id ? res.updatedPackage : p));
+      handleCloseModal();
+      return true;
+    }
+    return false;
+  };
   const { region } = useRegion();
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const handleEditClick = (pkg) => {
+    setSelectedPackage(pkg);
+    setShowEditModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowEditModal(false);
+    setSelectedPackage(null);
+  };
 
   const handleInputSearch = (e) => {
     setSearch(e.target.value);
@@ -122,6 +157,7 @@ function PackagesCard({ packages = [], onSelected }) {
             <th onClick={() => handleHeaderClick('Plataformas')} style={{ cursor: 'pointer' }}>
               Plataformas Adicionales {sortField === 'Plataformas' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
             </th>
+              <th>Acciones</th>
           </tr>
         </thead>
         <tbody className={`text-wrap ${styleCard['table-body']}`}>
@@ -145,15 +181,39 @@ function PackagesCard({ packages = [], onSelected }) {
                     : 'Ninguna'
                   }
                 </td>
+                  <td>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={() => handleEditClick(pkg)}>Editar</button>
+                  </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="6">No hay paquetes registrados</td>
+                <td colSpan="7">No hay paquetes registrados</td>
             </tr>
           )}
         </tbody>
       </table>
+      {/* Modal de edición de paquete */}
+      {showEditModal && (
+        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.3)', zIndex: 9999 }}
+          onClick={handleCloseModal}
+        >
+          <div
+            style={{ position: 'relative', maxWidth: 600, margin: '5% auto', background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', padding: 24 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              style={{ position: 'absolute', top: 12, right: 12, background: 'transparent', border: 'none', fontSize: 22, cursor: 'pointer' }}
+              onClick={handleCloseModal}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+            {/* Renderizar el modal de edición, pasando el paquete seleccionado y la función de guardado */}
+            <EditPackageModal pkg={selectedPackage} onClose={handleCloseModal} onSave={handleSavePackage} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

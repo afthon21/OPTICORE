@@ -121,10 +121,12 @@ export const getPackageByName = async(req, res) => {
 export const updatePackage = async(req, res) => {
     try {
         const { id } = req.params;
-        const { name, price, description } = req.body;
+        const { type, connectionType, platforms, price, description } = req.body;
 
         const updatedPackage = await Package.findByIdAndUpdate(
-            id, { $set: { name, price, description } }, { new: true } // <- aquí lo corregí (antes estaba mal puesto como $new)
+            id,
+            { $set: { type, connectionType, platforms, price, description } },
+            { new: true }
         );
 
         if (!updatedPackage) {
