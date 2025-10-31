@@ -14,7 +14,7 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "express": "^4.19.2",
     "express-myconnection": "^1.0.4",
     "express-validator": "^7.2.0",
@@ -29,6 +29,7 @@
     "pdfkit": "^0.15.0",
     "pdfkit-table": "^0.1.99",
     "react-select": "^5.10.2",
-    "routeros": "^1.6.12"
+    "routeros": "^1.6.12",
+    "vite": "^7.1.5"
   }
 }

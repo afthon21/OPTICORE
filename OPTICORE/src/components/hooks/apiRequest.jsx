@@ -30,7 +30,7 @@ function ApiRequest(baseUrl) {
             if (!res.ok) {
                 const errorDetails = await res.json();
                 setError(errorDetails.message);
-                return;
+                return null;
             }
 
             return await res.json();

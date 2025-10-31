@@ -15,7 +15,11 @@ export function DropdownTechnicians({ filteredOptions, onOptionClick }) {
     return (
         <ul className={`list-group ${styleDrop['drop-list']}`}>
             {filteredOptions.map((option, index) => {
-                const fullName = `${option.nombre} ${option.apellidoP || ''}`.replace(/\s+/g, ' ').trim();
+                // Manejar ambas estructuras de datos
+                const fullName = option.apellidoP 
+                    ? `${option.nombre} ${option.apellidoP} ${option.apellidoA || ''}`.replace(/\s+/g, ' ').trim()
+                    : option.nombre; // Si no hay apellidoP, usar solo el nombre
+                    
                 return (
                     <li
                         className="list-group-item"
@@ -24,6 +28,7 @@ export function DropdownTechnicians({ filteredOptions, onOptionClick }) {
                         onMouseDown={() => onOptionClick(option)}
                     >
                         {fullName}
+                        {option.mercado && <small className="text-muted d-block">{option.mercado}</small>}
                     </li>
                 );
             })}

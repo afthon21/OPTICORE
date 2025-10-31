@@ -1,12 +1,12 @@
 import technician from '../models/technicianSchema.js';
 
 // Crear un nuevo técnico
-export const newTechnician = async (req, res) => {
+export const newTechnician = async(req, res) => {
     const {
         nombre,
         apellidoP,
         apellidoA,
-        // agrega aquí otros campos si tienes
+        activo // <-- Nuevo campo
     } = req.body;
 
     try {
@@ -14,7 +14,7 @@ export const newTechnician = async (req, res) => {
             nombre,
             apellidoP,
             apellidoA,
-            // otros campos
+            activo // <-- Nuevo campo
         });
 
         await newTech.save();
@@ -26,18 +26,21 @@ export const newTechnician = async (req, res) => {
 }
 
 
-export const viewAllTechnicians = async (req, res) => {
+export const viewAllTechnicians = async(req, res) => {
     try {
+        console.log('🔍 [TECHNICIAN] Buscando todos los técnicos...');
         const allTechnicians = await technician.find();
+        console.log(`✅ [TECHNICIAN] Encontrados ${allTechnicians.length} técnicos`);
+        console.log('📋 [TECHNICIAN] Lista:', allTechnicians.map(t => `${t.nombre} ${t.apellidoP} (ID: ${t._id})`));
         return res.status(200).json(allTechnicians);
     } catch (error) {
-        console.log('Error finding technicians:', error);
+        console.log('❌ [TECHNICIAN] Error finding technicians:', error);
         return res.status(500).json({ message: 'Error finding technicians' });
     }
 }
 
 // Ver técnico por ID
-export const viewTechnicianById = async (req, res) => {
+export const viewTechnicianById = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -53,7 +56,7 @@ export const viewTechnicianById = async (req, res) => {
 }
 
 // Editar técnico
-export const editTechnician = async (req, res) => {
+export const editTechnician = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -76,7 +79,7 @@ export const editTechnician = async (req, res) => {
 }
 
 // Eliminar técnico
-export const deleteTechnician = async (req, res) => {
+export const deleteTechnician = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -90,5 +93,25 @@ export const deleteTechnician = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server error!' });
+    }
+}
+
+export const viewActiveTechnicians = async(req, res) => {
+    try {
+        const activeTechnicians = await technician.find({ activo: true });
+        return res.status(200).json(activeTechnicians);
+    } catch (error) {
+        console.log('Error finding technicians:', error);
+        return res.status(500).json({ message: 'Error finding technicians' });
+    }
+}
+
+export const viewInactiveTechnicians = async(req, res) => {
+    try {
+        const inactiveTechnicians = await technician.find({ activo: false });
+        return res.status(200).json(inactiveTechnicians);
+    } catch (error) {
+        console.log('Error finding technicians:', error);
+        return res.status(500).json({ message: 'Error finding technicians' });
     }
 }

@@ -2,6 +2,8 @@ export const handleLogout = (navigate) => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userName');
     sessionStorage.removeItem('adminId');
+    sessionStorage.removeItem('adminRegion');
+    sessionStorage.removeItem('adminRole');
     navigate('/')
 }
 
@@ -64,3 +66,17 @@ export const handleResetPassword = (navigate) => {
     const resetPassUrl = '/reset-password-new';
     navigate(resetPassUrl);
 }
+export const handleArchiveClients = (navigate, adminId) => {
+    navigate(`/clients/archived/${adminId}`);
+};
+export const handleArchiveTickets = (navigate, adminId) => {
+    navigate(`/tickets/archived/${adminId}`);
+
+}
+export const handleTechnicians = (navigate, adminId) => {
+    navigate(`/tecnicos/${adminId}`); 
+};
+
+export const handleCreateTechnician = (navigate, adminId) => {
+    navigate(`/tecnicos/create/${adminId}`);
+};

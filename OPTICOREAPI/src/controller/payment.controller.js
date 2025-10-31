@@ -54,7 +54,7 @@ export const createPayment = async (req, res) => {
 export const viewAllPayments = async (req, res) => {
     try {
         const allPayments = await payment.find()
-            .populate('Client', 'Name LastName')
+            .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
             .exec();
         return res.status(200).json(allPayments);
@@ -76,7 +76,7 @@ export const viewOnePayment = async (req, res) => {
         }
 
         const viewPayment = await payment.findById(id)
-            .populate('Client', 'Name LastName')
+            .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
             .exec();
 
@@ -146,7 +146,7 @@ export const vieWClientPayments = async (req, res) => {
         }
 
         const payments = await payment.find({ Client: idClient })
-            .populate('Client', 'Name LastName')
+            .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
             .exec();
 
@@ -208,5 +208,24 @@ export const deletePayment = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server Error!' });
+    }
+}
+
+//Archivar pagos
+export const archivePayments = async (req, res) => {
+    const id=req.params.id;
+    try {
+        const idPayment=await payment.findById(id);
+           if (!idPayment) {
+            return res.status(404).json({ message: 'Payment does not exist' });
+        }
+
+        idPayment.Archived = true;
+        await idPayment.save();
+
+        return res.status(200).json({ message: 'Payment archived successfully' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error archiving payment' });
     }
 }

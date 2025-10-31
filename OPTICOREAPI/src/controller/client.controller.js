@@ -5,7 +5,7 @@ import payment from '../models/paymentsSchema.js';
 import ticket from '../models/ticketsSchema.js';
 
 //Create a new client
-export const newClient = async (req, res) => {
+export const newClient = async(req, res) => {
     const {
         Name: {
             FirstName,
@@ -54,7 +54,9 @@ export const newClient = async (req, res) => {
                 InNumber,
                 Latitude,
                 Length
-            }
+            },
+            // Status por defecto (el schema ya lo coloca, pero lo dejamos explícito si llega en body)
+            Status: req.body.Status ? req.body.Status : undefined
         });
 
 
@@ -67,7 +69,7 @@ export const newClient = async (req, res) => {
 }
 
 //View all clients
-export const viewAllClient = async (req, res) => {
+export const viewAllClient = async(req, res) => {
     try {
         const allClients = await client.find();
         return res.status(200).json(allClients);
@@ -78,7 +80,7 @@ export const viewAllClient = async (req, res) => {
 }
 
 //View id Client
-export const viewIdClient = async (req, res) => {
+export const viewIdClient = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -95,7 +97,7 @@ export const viewIdClient = async (req, res) => {
 }
 
 //Editar el cliente
-export const editClient = async (req, res) => {
+export const editClient = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -123,7 +125,8 @@ export const editClient = async (req, res) => {
             InNumber: (value) => { UpdateQuery['Location.InNumber'] = value },
             Latitude: (value) => { UpdateQuery['Location.Latitude'] = value },
             Length: (value) => { UpdateQuery['Location.Length'] = value },
-            PhoneNumber: (value) => { UpdateQuery['PhoneNumber'] = value }
+            PhoneNumber: (value) => { UpdateQuery['PhoneNumber'] = value },
+            Status: (value) => { UpdateQuery['Status'] = value }
         }
 
         for (const [key, updateFunction] of Object.entries(fields)) {
@@ -142,7 +145,7 @@ export const editClient = async (req, res) => {
 }
 
 //Eliminar cliente
-export const deleteClient = async (req, res) => {
+export const deleteClient = async(req, res) => {
     const id = req.params.id;
 
     try {
@@ -164,5 +167,21 @@ export const deleteClient = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server Erro!' });
+    }
+}
+//Archivar cliente
+export const archiveClient = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const idClient = await client.findById(id);
+        if (!idClient) {
+            return res.status(404).json({ message: 'Client does not exist yet' });
+        }
+        idClient.Archived = true;
+        await idClient.save();
+        return res.status(200).json({ message: 'Client archived', client: idClient });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
     }
 }

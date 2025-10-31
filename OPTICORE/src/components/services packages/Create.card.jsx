@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import ApiRequest from "../hooks/apiRequest";
-import Swal from 'sweetalert2'; // Asegúrate de tener esta importación
-import Select from 'react-select';
-import { useRegion, RegionProvider } from '../../hooks/RegionContext.jsx';
+import Swal from 'sweetalert2';
+import { useRegion } from '../../hooks/RegionContext.jsx';
 
 
 
@@ -61,10 +60,9 @@ export default function Card({ onPackageCreated }) {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [confirmed, setConfirmed] = useState(false);
-  const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+  const { makeRequest, error } = ApiRequest(import.meta.env.VITE_API_BASE);
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [packages, setPackages] = useState([]);
+  const [selectedClient, setSelectedClient] = useState('');
 
   const getFilteredPackages = (packageType) => {
     const packages = packageType === "fiber" ? fiberPackages : radioPackages;
@@ -80,23 +78,13 @@ export default function Card({ onPackageCreated }) {
         const res = await makeRequest('/client/all');
         setClients(res || []);
       } catch (error) {
-        console.log(error);
+        console.log('Error fetching clients:', error);
       }
     };
     fetchClients();
   }, [makeRequest]);
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        const res = await makeRequest("/services/all");
-        setPackages(res || []);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchPackages();
-  }, [makeRequest]);
+
 
   const handlePlatformToggle = (name) => {
     setSelectedPlatforms((prev) =>
@@ -119,52 +107,111 @@ export default function Card({ onPackageCreated }) {
   };
 
   const handleConfirm = async () => {
-    const newPackage = {
-      Folio: `PKG${Date.now()}`,
-      Client: selectedClient,
-      Name: selectedPackage,
-      Type: type === "fiber" ? "Fibra Óptica" : "Radio Frecuencia",
-      Price: getTotal(),
-      Platforms: selectedPlatforms.map(name => ({ name }))
-    };
+    if (!selectedClient) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Cliente requerido',
+        text: 'Por favor selecciona un cliente para asignar el paquete.',
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top',
+        timerProgressBar: true,
+      });
+      return;
+    }
 
-    await makeRequest('/services/create', {
-      method: 'POST',
-      body: JSON.stringify(newPackage),
-      headers: { 'Content-Type': 'application/json' }
-    });
+    try {
+      // Crear el paquete con la estructura que espera el backend
+      const timestamp = new Date().toLocaleString('es-ES');
+      const selectedPlatformData = selectedPlatforms.map(platformName => {
+        const platformInfo = platforms.find(p => p.name === platformName);
+        return {
+          name: platformName,
+          price: platformInfo?.price || 0
+        };
+      });
 
+      const packageData = {
+        name: `${selectedPackage} - ${type === "fiber" ? "Fibra Óptica" : "Radio Frecuencia"}${selectedPlatforms.length > 0 ? ` + ${selectedPlatforms.join(', ')}` : ''} (${timestamp})`,
+        packageSpeed: selectedPackage, // Velocidad del paquete (100 Megas, etc.)
+        type: type === "fiber" ? "Fibra Óptica" : "Radio Frecuencia",
+        price: getTotal(),
+        description: `Paquete de ${selectedPackage} con ${type === "fiber" ? "Fibra Óptica" : "Radio Frecuencia"}${selectedPlatforms.length > 0 ? `. Plataformas incluidas: ${selectedPlatforms.join(', ')}` : ''}. Creado el ${timestamp}`,
+        platforms: selectedPlatformData,
+        clientId: selectedClient
+      };
+
+      // Crear el paquete usando el endpoint de packages
+      const response = await makeRequest('/packages/new', 'POST', packageData);
+      
+      console.log("Response from server:", response);
+      console.log("Error from hook:", error);
+
+      // Verificar si hay error en el hook
+      if (error) {
+        throw new Error(error);
+      }
+
+      // Verificar si la respuesta es null o undefined (indica error en makeRequest)
+      if (!response) {
+        throw new Error('No se recibió respuesta del servidor');
+      }
+
+      if (response && response.message) {
+        // Mostrar mensaje de éxito
         await Swal.fire({
-      icon: 'success',
-      title: '¡Paquete confirmado!',
-      text: 'El paquete fue asignado correctamente al cliente.',
-      timer: 1500,
-      showConfirmButton: false,
-      toast: true,
-      position: 'top',
-      timerProgressBar: true,
-    });
+          icon: 'success',
+          title: '¡Paquete confirmado!',
+          text: `Paquete "${packageData.name}" ha sido creado con un precio de $${packageData.price}.`,
+          timer: 2500,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top',
+          timerProgressBar: true,
+        });
 
-    setSelectedClient('');
-    setConfirmed(true);
+        setConfirmed(true);
+        
+        // Notifica al padre para recargar la tabla primero
+        if (onPackageCreated) onPackageCreated();
 
-    // Notifica al padre para recargar la tabla
-    if (onPackageCreated) onPackageCreated();
+        // Opcional: reiniciar todo después de un momento
+        setTimeout(() => {
+          resetAll();
+        }, 3000);
+      } else {
+        throw new Error('No se recibió respuesta válida del servidor');
+      }
+
+    } catch (error) {
+      console.error('Error detallado al crear paquete:', error);
+      
+      // Mostrar mensaje de error con más detalles
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al crear paquete',
+        text: error.message || 'Hubo un error al crear el paquete. Por favor, intenta de nuevo.',
+        timer: 4000,
+        showConfirmButton: true,
+        toast: false,
+        position: 'center',
+        timerProgressBar: true,
+      });
+    }
   };
 
   const resetAll = () => {
     setType(null);
     setSelectedPackage(null);
     setSelectedPlatforms([]);
+    setSelectedClient('');
     setConfirmed(false);
   };
 
   const blueColor = "#0074e8";
 
-  const clientOptions = clients.map(client => ({
-    value: client._id,
-    label: `${client.Name.FirstName} ${client.Name.SecondName || ''} ${client.LastName.FatherLastName} ${client.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim()
-  }));
+
 
     return (
     <div
@@ -404,7 +451,7 @@ export default function Card({ onPackageCreated }) {
               flexDirection: "column",
               alignItems: "center",
               gap: 16,
-              marginBottom: 80, // Aumenta este valor
+              marginBottom: 40,
               width: "100%",
             }}
           >
@@ -423,27 +470,26 @@ export default function Card({ onPackageCreated }) {
               value={selectedClient}
               onChange={e => {
                 setSelectedClient(e.target.value);
-                setConfirmed(false); // Reinicia el estado del botón
+                setConfirmed(false);
               }}
               style={{
-                width: 350,
-                padding: 10,
+                width: "100%",
+                maxWidth: 400,
+                padding: 12,
                 borderRadius: 8,
-                border: "1px solid #ccc",
-                boxShadow: "none",
+                border: "2px solid #ddd",
                 fontSize: 16,
                 fontWeight: 600,
                 cursor: "pointer",
-                userSelect: "none",
                 backgroundColor: "#fff",
                 color: "#222",
                 transition: "border-color 0.3s ease",
               }}
             >
-              <option value="">Selecciona un cliente </option>
+              <option value="">Selecciona un cliente</option>
               {clients.map(client => (
                 <option key={client._id} value={client._id}>
-                  {`${client.Name.FirstName} ${client.Name.SecondName || ''} ${client.LastName.FatherLastName} ${client.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim()}
+                  {`${client.Name?.FirstName || ''} ${client.Name?.SecondName || ''} ${client.LastName?.FatherLastName || ''} ${client.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim()}
                 </option>
               ))}
             </select>
@@ -456,20 +502,20 @@ export default function Card({ onPackageCreated }) {
             onClick={handleConfirm}
             disabled={confirmed || !selectedClient}
             style={{
-              backgroundColor: confirmed ? "#ccc" : blueColor,
+              backgroundColor: confirmed || !selectedClient ? "#ccc" : blueColor,
               color: "#fff",
               fontWeight: "700",
               fontSize: 22,
               padding: "14px 40px",
               borderRadius: 12,
               border: "none",
-              cursor: confirmed ? "default" : "pointer",
+              cursor: confirmed || !selectedClient ? "default" : "pointer",
               userSelect: "none",
-              boxShadow: !confirmed ? `0 8px 24px ${blueColor}bb` : "none",
+              boxShadow: !confirmed && selectedClient ? `0 8px 24px ${blueColor}bb` : "none",
               transition: "all 0.3s ease",
             }}
           >
-            {confirmed ? "Paquete confirmado" : "Confirmar paquete"}
+            {confirmed ? "Paquete confirmado" : "Crear paquete"}
           </button>
         </div>
       )}

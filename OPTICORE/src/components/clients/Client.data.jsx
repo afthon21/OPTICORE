@@ -1,15 +1,64 @@
 import { useState, useEffect } from 'react';
+import ApiRequest from '../hooks/apiRequest.jsx';
+import Swal from 'sweetalert2';
+import PropTypes from 'prop-types';
 import styleData from './css/ClientData.module.css';
 import EditClientModal from './EditClientModal';
 
 function ClientData({ client, onUpdateClient }) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentClient, setCurrentClient] = useState(client);
+    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     // Si el prop client cambia (por ejemplo, seleccionas otro cliente), actualiza el estado local
     useEffect(() => {
         setCurrentClient(client);
     }, [client]);
+
+    const toggleStatus = async () => {
+        if (!currentClient?._id) return;
+        const newStatus = currentClient.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+        const actionText = newStatus === 'ACTIVE' ? 'activar' : 'desactivar';
+        const clientName = `${currentClient.Name.FirstName} ${currentClient.Name.SecondName || ''} ${currentClient.LastName.FatherLastName} ${currentClient.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim();
+        
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `¿Quieres ${actionText} al cliente ${clientName}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: newStatus === 'ACTIVE' ? '#28a745' : '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Sí, ${actionText}`,
+            cancelButtonText: 'Cancelar'
+        });
+        
+        if (result.isConfirmed) {
+            const updated = await makeRequest(`/client/edit/${currentClient._id}`,'POST',{ Status: newStatus });
+            if (updated) {
+                setCurrentClient(updated);
+                if (onUpdateClient) onUpdateClient(updated);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Estado actualizado',
+                    text: `El cliente ahora está ${newStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}`,
+                    timer: 1200,
+                    position: 'top',
+                    showConfirmButton: false,
+                    toast: true
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    position: 'top',
+                    toast: true
+                });
+            }
+        }
+    }
 
     const Indicators = () => (
         <div className={styleData['indicator-container']}>
@@ -24,8 +73,9 @@ function ClientData({ client, onUpdateClient }) {
                 title="Editar cliente"
             ></div>
             <div className={`${styleData['circle']} ${styleData['green']}`}
+                onClick={toggleStatus}
                 style={{ cursor: 'pointer' }}
-                title="Activar/Desactivar cliente"
+                title={currentClient?.Status === 'ACTIVE' ? 'Desactivar cliente' : 'Activar cliente'}
             ></div>
         </div>
     );
@@ -121,3 +171,12 @@ function ClientData({ client, onUpdateClient }) {
 }
 
 export default ClientData;
+
+ClientData.propTypes = {
+    client: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.string
+    ]),
+    onUpdateClient: PropTypes.func,
+    onStatusToggled: PropTypes.func
+};

@@ -17,7 +17,7 @@ import ClientsComponent from './components/clients/Clients.component.jsx';
 import CreateClient from './components/clients/Create.client.jsx';
 import PaymentComponent from './components/payments/Payment.component.jsx';
 import CreatePayment from './components/payments/Create.payment.jsx';
-import ServicePackagesComponent from './components/services packages/services.component.jsx';
+import PackagesContainer from './components/services packages/PackagesContainer.jsx';
 import CreatePackage from './components/services packages/Create.Packages.jsx';
 import RecoveryPwdComponent from './components/auth/recoveryPwd/recovery.component.jsx';
 import ResetPwdComponent from './components/auth/recoveryPwd/resetPwd.components.jsx';
@@ -31,11 +31,23 @@ import Logs from './components/network/Logs.jsx';
 import OltPorts from './components/network/OltPorts';
 import NetworkHealth from './components/network/NetworkHealth';
 import Onus from './components/network/Onus.jsx';
+import ArchivedClients from './components/clients/ArchivedClients.jsx';
+import ArchivedTickets from './components/tickets/Ticket.Archived.jsx';
+import { CreateTechnician } from './components/technician/create.technician.jsx';
+import { ViewTechnicians } from './components/technician/technician.component.jsx';
+
+
+
 
 function App() {
   return (
     <RegionProvider>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <NavbarFragmentAll />
         <div className="container d-flex content">
           <Routes>
@@ -45,17 +57,30 @@ function App() {
             {/* tickets rutas */}
             <Route path='/ticket/:adminId' element={<ProtectedRoute> <TicketComponent /> </ProtectedRoute>}></Route>
             <Route path='/ticket/create/:adminId' element={<ProtectedRoute> <CreateTicket /> </ProtectedRoute>}></Route>
+            <Route path='/ticket/archived/:adminId' element={<ProtectedRoute><ArchivedTickets /> </ProtectedRoute>}></Route>
             {/* clientes rutas */}
             <Route path='/clients/:adminId' element={<ProtectedRoute> <ClientsComponent /> </ProtectedRoute>}></Route>
             <Route path='/clients/register/:adminId' element={<ProtectedRoute> <CreateClient /> </ProtectedRoute>}></Route>
+            <Route path='/clients/archived/:adminId' element={<ProtectedRoute><ArchivedClients /> </ProtectedRoute>}></Route>
+
+            <Route path="/tecnicos/create/:adminId" element={<ProtectedRoute> <CreateTechnician /> </ProtectedRoute>} />
+            <Route path="/tecnicos/:adminId" element={<ProtectedRoute> <ViewTechnicians /> </ProtectedRoute>} />
+            
+
             {/* pagos rutas */}
             <Route path='/payment/:adminId' element={<ProtectedRoute> <PaymentComponent /> </ProtectedRoute>}></Route>
             <Route path='/payment/create/:adminId' element={<ProtectedRoute> <CreatePayment /> </ProtectedRoute>}></Route>
             {/* Paquetes rutas */}
-            <Route path='/packageServices/:id' element={<ProtectedRoute> <ServicePackagesComponent /> </ProtectedRoute>}></Route>
+            <Route path='/packageServices/:id' element={<ProtectedRoute> <PackagesContainer /> </ProtectedRoute>}></Route>
             <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
             {/* Monitoreo de red */}
             <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
+            <Route path='/network/radiofrecuencia/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/mapa/:adminId' element={<ProtectedRoute><Mapa /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/topologia/:adminId' element={<ProtectedRoute><Topologia /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/logs/:adminId' element={<ProtectedRoute><Logs /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/onus/:adminId' element={<ProtectedRoute><Onus /></ProtectedRoute>}></Route>
             <Route path='/network/fibra-optica/:adminId' element={<FibraOptica />}></Route>
             <Route path='/network/fibra-optica/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
             <Route path='/network/fibra-optica/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>

@@ -1,6 +1,7 @@
 import styleDocuments from '../css/clientsDocuments.module.css';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import PropTypes from 'prop-types';
 import Swal from "sweetalert2";
 import { UploadDoc } from './Upload.modal.jsx';
 import { LoadFragment } from '../../fragments/Load.fragment.jsx';
@@ -10,18 +11,28 @@ function ClientDocuments({ client }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
+        if (!client) return; // No hacer fetch si no hay cliente
         try {
-            const res = await makeRequest(`/document/all/${client}`)
-            setData(res)
+            const res = await makeRequest(`/document/all/${client}`);
+            setData(res);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
+    }, [client, makeRequest]);
 
     useEffect(() => {
-        fetchData()
-    }, [makeRequest]);
+        fetchData();
+    }, [fetchData]);
+
+    // Mostrar mensaje si no hay cliente seleccionado
+    if (!client) {
+        return <p>Seleccione un cliente para ver sus documentos.</p>;
+    }
+    
+    if (loading) return <LoadFragment />
+
+    if (error) return <p>Error cargando documentos!</p>
 
     function getFileExtension(filename) {
         const url = new URL(filename);
@@ -48,6 +59,7 @@ function ClientDocuments({ client }) {
             });
         } else {
             Swal.fire({
+                title: title,
                 imageAlt: title,
                 imageUrl: document,
                 showCloseButton: true,
@@ -190,5 +202,9 @@ function ClientDocuments({ client }) {
 
     );
 }
+
+ClientDocuments.propTypes = {
+    client: PropTypes.string
+};
 
 export default ClientDocuments;

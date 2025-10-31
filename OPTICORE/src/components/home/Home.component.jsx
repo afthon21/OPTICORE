@@ -1,56 +1,13 @@
-    // Función para mostrar detalles del cliente en un modal
-        const handleShowClientDetails = (client) => {
-            // Mostrar la dirección exactamente como la ingresó el usuario
-            let direccion = 'Sin dirección';
-            // Buscar dirección en Address o en Location
-            if (client.Address) {
-                if (typeof client.Address === 'string') {
-                    direccion = client.Address;
-                } else if (typeof client.Address === 'object') {
-                    const municipio = client.Address.City || client.Address.Municipio || '';
-                    const calle = client.Address.Street || '';
-                    const cp = client.Address.PostalCode || client.Address.CP || '';
-                    direccion = [municipio, calle, cp].filter(Boolean).join(', ');
-                }
-            } else if (client.Location) {
-                // Algunos clientes pueden tener la dirección en Location
-                const municipio = client.Location.Municipality || '';
-                const calle = client.Location.Address || '';
-                const cp = client.Location.ZIP || '';
-                direccion = [municipio, calle, cp].filter(Boolean).join(', ');
-            }
-            if (!direccion || direccion === ', , ') direccion = 'Sin dirección';
-            Swal.fire({
-                title: `<div style='display:flex;justify-content:center;align-items:center;'><i class="bi bi-person-plus-fill text-success" style="font-size:2.5rem;"></i></div>` +
-                    '<div style="margin-top:10px;font-size:1.5rem;font-weight:600;">' +
-                    [
-                        client.Name.FirstName,
-                        client.Name.SecondName,
-                        client.LastName.FatherLastName,
-                        client.LastName.MotherLastName
-                    ].filter(Boolean).join(' ').toUpperCase() +
-                    '</div>',
-                html: `
-                    <b>Email:</b> ${client.Email || 'Sin email'}<br/>
-                    <b>Tel:</b> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}<br/>
-                    <b>Región:</b> ${getClientRegion(client)}<br/>
-                    <b>Registrado:</b> ${client.CreateDate ? new Date(client.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}<br/>
-                    <b>Dirección:</b> ${direccion}<br/>
-                `,
-                icon: undefined,
-                showClass: {
-                    popup: 'swal2-show'
-                },
-                hideClass: {
-                    popup: 'swal2-hide'
-                },
-                confirmButtonText: 'Cerrar',
-                width: 350,
-                customClass: {
-                    popup: 'swal2-border-radius swal2-small-popup'
-                }
-            });
-        };
+import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
+import ApiRequest from '../hooks/apiRequest'; //importacion de la API
+import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
+import ErrorDisplay from './ErrorDisplay.jsx';
+import FibraChart from './FibraChart.jsx';
+import RadioChart from './RadioChart.jsx';
+import AddressModal from './AddressModal.jsx';
+import ClientAddressDetailModal from './ClientAddressDetailModal.jsx';
+
 // SweetAlert2 popup size custom CSS
 const swalSmallStyle = document.createElement('style');
 swalSmallStyle.innerHTML = `
@@ -63,23 +20,28 @@ if (!document.getElementById('swal2-small-popup-style')) {
     swalSmallStyle.id = 'swal2-small-popup-style';
     document.head.appendChild(swalSmallStyle);
 }
-import React, { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import ApiRequest from '../hooks/apiRequest'; //importacion de la API
-import EstadoRedResumen from '../network/EstadoRedResumen.jsx';
-import ErrorDisplay from './ErrorDisplay.jsx';
-import { useRegion, RegionProvider} from '../../hooks/RegionContext.jsx';
 
 function HomeComponent() {
     const [tickets, setTickets] = useState([]);
-    const [showAllTickets, setShowAllTickets] = useState(false);
+    const [showAllClients, setShowAllClients] = useState(false);
+    const [showAllTicketsState, setShowAllTicketsState] = useState(false);
     const [userName, setUserName] = useState('');
     const [clients, setClients] = useState([]);
-    const {region} = useRegion();
-
+    const [clientDocuments, setClientDocuments] = useState({});
+    const [packages, setPackages] = useState([]);
+    const [chartData, setChartData] = useState({
+        fibra: { labels: [], data: [], total: 0 },
+        radio: { labels: [], data: [], total: 0 }
+    });
+    // Estado para el modal de detalles de dirección
+    const [addressDetailModalOpen, setAddressDetailModalOpen] = useState(false);
+    const [selectedClientForAddressDetail, setSelectedClientForAddressDetail] = useState(null);
+    // Estado para el modal de mapa
+    const [addressModalOpen, setAddressModalOpen] = useState(false);
+    const [selectedClientForAddress, setSelectedClientForAddress] = useState(null);
     // Estado para los colores de cada recuadro
     const [boxColors, setBoxColors] = useState({
-        clientesNuevos: '#ecebebff',
+        clientes: '#ecebebff',
         admins: '#ecebebff',
         red: '#ecebebff',
         errores: '#ecebebff',
@@ -90,32 +52,344 @@ function HomeComponent() {
     });
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
+    // Función para obtener paquetes
+    const fetchPackages = async () => {
+        try {
+            const res = await makeRequest('/packages/all');
+            if (res) {
+                setPackages(res);
+                processChartData(res, clients);
+            }
+        } catch (error) {
+            console.error('Error fetching packages:', error);
+        }
+    };
+
+    // Función para procesar datos de las gráficas
+    const processChartData = (packagesData, clientsData) => {
+        // Inicializar contadores
+        const fibraStats = {
+            '50 Megas': 0,
+            '100 Megas': 0, 
+            '200 Megas': 0,
+            '300 Megas': 0
+        };
+        
+        const radioStats = {
+            '10 Megas': 0,
+            '15 Megas': 0,
+            '20 Megas': 0
+        };
+        
+        let fibraTotal = 0;
+        let radioTotal = 0;
+        
+        // Contar paquetes por tipo y velocidad
+        packagesData.forEach(pkg => {
+            const speed = pkg.type || 'No especificado';
+            const connectionType = pkg.connectionType || '';
+            
+            if (connectionType.includes('Fibra')) {
+                if (fibraStats.hasOwnProperty(speed)) {
+                    fibraStats[speed]++;
+                    fibraTotal++;
+                }
+            } else if (connectionType.includes('Radio')) {
+                if (radioStats.hasOwnProperty(speed)) {
+                    radioStats[speed]++;
+                    radioTotal++;
+                }
+            }
+        });
+        
+        // Convertir a porcentajes basado en cada tipo específico
+        const fibraLabels = Object.keys(fibraStats).filter(key => fibraStats[key] > 0);
+        const fibraData = fibraLabels.map(key => 
+            fibraTotal > 0 ? Math.round((fibraStats[key] / fibraTotal) * 100) : 0
+        );
+        
+        const radioLabels = Object.keys(radioStats).filter(key => radioStats[key] > 0);
+        const radioData = radioLabels.map(key => 
+            radioTotal > 0 ? Math.round((radioStats[key] / radioTotal) * 100) : 0
+        );
+        
+        setChartData({
+            fibra: {
+                labels: fibraLabels.length > 0 ? fibraLabels : ['Sin datos'],
+                data: fibraData.length > 0 ? fibraData : [0],
+                total: fibraTotal
+            },
+            radio: {
+                labels: radioLabels.length > 0 ? radioLabels : ['Sin datos'],
+                data: radioData.length > 0 ? radioData : [0],
+                total: radioTotal
+            }
+        });
+    };
+
+    // Función para mostrar detalles del cliente en un modal
+    const handleShowClientDetails = (client) => {
+        // Mostrar la dirección exactamente como la ingresó el usuario
+        let direccion = 'Sin dirección';
+        // Buscar dirección en Address o en Location
+        if (client.Address) {
+            if (typeof client.Address === 'string') {
+                direccion = client.Address;
+            } else if (typeof client.Address === 'object') {
+                const municipio = client.Address.City || client.Address.Municipio || '';
+                const calle = client.Address.Street || '';
+                const cp = client.Address.PostalCode || client.Address.CP || '';
+                direccion = [municipio, calle, cp].filter(Boolean).join(', ');
+            }
+        } else if (client.Location) {
+            // Algunos clientes pueden tener la dirección en Location
+            const municipio = client.Location.Municipality || '';
+            const calle = client.Location.Address || '';
+            const cp = client.Location.ZIP || '';
+            direccion = [municipio, calle, cp].filter(Boolean).join(', ');
+        }
+        if (!direccion || direccion === ', , ') direccion = 'Sin dirección';
+
+        // Obtener la foto de fachada del cliente (ya cargada previamente)
+        const fotoFachada = clientDocuments[client._id];
+
+        // Crear el HTML para la foto de fachada
+        const fotoFachadaHTML = fotoFachada 
+            ? `<div style="margin-bottom: 8px; display: flex; justify-content: center;">
+                 <img src="${fotoFachada}" alt="Foto de Fachada" 
+                      style="width: 300px; height: 260px; object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6;" />
+               </div>`
+            : `<div style="margin-bottom: 8px; display: flex; justify-content: center;">
+                 <div style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; 
+                             background-color: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px; color: #6c757d; font-size: 10px;">
+                   Sin foto
+                 </div>
+               </div>`;
+
+        // Crear contenido HTML para el modal
+        const clientInfoHTML = `
+            <div style="text-align: center;">
+                <div style="margin-bottom: 10px;">
+                    <i class="bi bi-house-check-fill text-success" style="font-size: 2rem;"></i>
+                </div>
+                ${fotoFachadaHTML}
+                <h4 style="font-weight: 600; margin-bottom: 15px; color: #333;">
+                    ${[
+                        client.Name.FirstName,
+                        client.Name.SecondName,
+                        client.LastName.FatherLastName,
+                        client.LastName.MotherLastName
+                    ].filter(Boolean).join(' ').toUpperCase()}
+                </h4>
+                <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                    <p><strong>Tel:</strong> ${(client.PhoneNumber && client.PhoneNumber.length > 0) ? client.PhoneNumber.join(', ') : 'Sin teléfono'}</p>
+                    <p><strong>Dirección:</strong> <button id="address-link" style="background: none; border: none; color: #2a9d8f; text-decoration: underline; cursor: pointer; padding: 2px 4px; font-size: inherit; font-family: inherit; border-radius: 4px; transition: all 0.2s ease;" title="Ver dirección completa" onmouseover="this.style.backgroundColor='rgba(42, 157, 143, 0.1)'; this.style.textDecoration='underline';" onmouseout="this.style.backgroundColor='transparent'; this.style.textDecoration='underline';">${direccion} <i class="bi bi-arrow-up-right-square" style="font-size: 12px; margin-left: 4px;"></i></button></p>
+                    ${fotoFachada ? `<div style="text-align: center; margin-top: 15px;">
+                        <button id="download-foto-btn" style="background-color: #28a745; color: white; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 14px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0 auto;" title="Descargar Foto de Fachada">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+
+        const clientName = [
+            client.Name.FirstName,
+            client.Name.SecondName,
+            client.LastName.FatherLastName,
+            client.LastName.MotherLastName
+        ].filter(Boolean).join(' ');
+
+        Swal.fire({
+            html: clientInfoHTML,
+            showCloseButton: true,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cerrar',
+            cancelButtonColor: '#404040',
+            background: '#ededed',
+            width: 400,
+            padding: '2em',
+            didOpen: () => {
+                // Agregar evento de clic al botón de descarga
+                const downloadBtn = document.getElementById('download-foto-btn');
+                if (downloadBtn && fotoFachada) {
+                    downloadBtn.addEventListener('click', () => {
+                        handleDownloadFotoFachada(fotoFachada, clientName);
+                    });
+                }
+                
+                // Agregar evento de clic al botón de dirección
+                const addressButton = document.getElementById('address-link');
+                if (addressButton) {
+                    addressButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Click en botón de dirección para cliente:', client.Name.FirstName);
+                        
+                        // Cerrar SweetAlert primero
+                        Swal.close();
+                        
+                        // Abrir el modal de detalles de dirección
+                        setTimeout(() => {
+                            if (window.openAddressDetailModal) {
+                                window.openAddressDetailModal(client);
+                            } else {
+                                console.error('window.openAddressDetailModal no está disponible');
+                            }
+                        }, 300);
+                    });
+                }
+            }
+        });
+    };
+
+    // Funciones para manejar el modal de dirección
+    const handleOpenAddressModal = (client) => {
+        console.log('handleOpenAddressModal llamado con cliente:', client?.Name?.FirstName);
+        console.log('Estado actual - addressModalOpen:', addressModalOpen, 'selectedClientForAddress:', selectedClientForAddress?.Name?.FirstName);
+        setSelectedClientForAddress(client);
+        setAddressModalOpen(true);
+        console.log('Estados actualizados - modal será abierto');
+    };
+
+    const handleCloseAddressModal = () => {
+        console.log('Cerrando modal de mapa');
+        setAddressModalOpen(false);
+        setSelectedClientForAddress(null);
+    };
+
+    // Funciones para manejar el modal de detalles de dirección
+    const handleOpenAddressDetailModal = (client) => {
+        console.log('handleOpenAddressDetailModal llamado con cliente:', client?.Name?.FirstName);
+        setSelectedClientForAddressDetail(client);
+        setAddressDetailModalOpen(true);
+    };
+
+    const handleCloseAddressDetailModal = () => {
+        console.log('Cerrando modal de detalles de dirección');
+        setAddressDetailModalOpen(false);
+        setSelectedClientForAddressDetail(null);
+    };
+
+    // Función para abrir el modal de mapa desde el modal de detalles
+    const handleOpenMapFromDetails = (client) => {
+        console.log('Abriendo modal de mapa para cliente:', client?.Name?.FirstName);
+        // Cerrar el modal de detalles primero
+        setAddressDetailModalOpen(false);
+        setSelectedClientForAddressDetail(null);
+        // Abrir el modal de mapa
+        setTimeout(() => {
+            setSelectedClientForAddress(client);
+            setAddressModalOpen(true);
+        }, 300);
+    };
+
+    // Debug de estados
+    useEffect(() => {
+        console.log('Estado addressModalOpen cambió a:', addressModalOpen);
+    }, [addressModalOpen]);
+
+    useEffect(() => {
+        console.log('Estado selectedClientForAddress cambió a:', selectedClientForAddress?.Name?.FirstName);
+    }, [selectedClientForAddress]);
+
+    // Funciones globales para abrir modales (disponibles en window)
+    useEffect(() => {
+        window.openAddressDetailModal = (client) => {
+            console.log('window.openAddressDetailModal llamado con cliente:', client?.Name?.FirstName);
+            handleOpenAddressDetailModal(client);
+        };
+        
+        window.openAddressModal = (client) => {
+            console.log('window.openAddressModal llamado con cliente:', client?.Name?.FirstName);
+            handleOpenAddressModal(client);
+        };
+        
+        return () => {
+            delete window.openAddressDetailModal;
+            delete window.openAddressModal;
+        };
+    }, []);
+
+    // Función para mostrar detalles del ticket en un modal
+    const handleShowTicketDetails = (ticket) => {
+        Swal.fire({
+            title: `<div style='display:flex;justify-content:center;align-items:center;'><i class="bi bi-ticket-perforated-fill text-primary" style="font-size:2.5rem;"></i></div>` +
+                `<div style="margin-top:10px;font-size:1.2rem;font-weight:600;">Folio: ${ticket.Folio || 'Sin folio'}</div>`,
+            html: `
+                <b>Asunto:</b> ${ticket.Issue || 'Sin asunto'}<br/>
+                <b>Descripción:</b> ${ticket.Description || 'Sin descripción'}<br/>
+                <b>Estado:</b> ${ticket.Status || 'Sin estado'}<br/>
+                <b>Fecha de creación:</b> ${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}<br/>
+     
+                <b>Cliente:</b> ${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}<br/>
+                <b>Técnico:</b> ${ticket.tecnico || 'Sin técnico'}<br/>
+                <b>Prioridad: </b> ${ticket.Priority || 'Sin prioridad'}<br/>
+
+            `,
+            icon: undefined,
+            showClass: {
+                popup: 'swal2-show'
+            },
+            hideClass: {
+                popup: 'swal2-hide'
+            },
+            confirmButtonText: 'Cerrar',
+            width: 350,
+            customClass: {
+                popup: 'swal2-border-radius swal2-small-popup'
+            }
+        });
+    };
+
     // Función para cambiar color
     const handleColorChange = (box, color) => {
         setBoxColors(prev => ({ ...prev, [box]: color }));
     };
 
-    const getClientRegion = (client) => {
-        if (!client) return 'Estado de México';
-        const regionFound = client.region ||
-                           client.Location?.region ||
-                           client.Address?.region ||
-                           'Estado de México';
-        return regionFound;
-    };
-
-    const getAdminRegion = (admin) => {
-        return admin.Region || admin.AssignedRegion || 'Estado de México';
-    };
-
-     const filterByRegion = (items, getRegionFunction) => {
-        if (!region || region === 'Estado de México' || !items) {
-            return items || [];
+    // Función para descargar la foto de fachada
+    const handleDownloadFotoFachada = async (url, clientName) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            // Usar el nombre del cliente como nombre del archivo
+            const fileName = `Foto_Fachada_${clientName.replace(/\s+/g, '_')}.${url.split('.').pop()}`;
+            link.download = fileName;
+            
+            link.click();
+            
+            // Limpia la URL para evitar problemas de memoria
+            URL.revokeObjectURL(link.href);
+        } catch (error) {
+            console.error('Error al descargar la foto:', error);
         }
-        return items.filter(item => {
-            const itemRegion = getRegionFunction(item);
-            return itemRegion === region;
-        });
+    };
+
+    // Función para obtener la foto de fachada de un cliente
+    const getFotoFachada = async (clientId) => {
+        try {
+            const documents = await makeRequest(`/document/all/${clientId}`);
+            const fotoFachada = documents.find(doc => doc.Description === 'Foto de Fachada');
+            return fotoFachada ? fotoFachada.Document : null;
+        } catch (error) {
+            console.log('Error obteniendo foto de fachada:', error);
+            return null;
+        }
+    };
+
+    // Función para cargar todas las fotos de fachada
+    const loadFotosFachada = async (clientsList) => {
+        const documentsMap = {};
+        for (const client of clientsList) {
+            const fotoFachada = await getFotoFachada(client._id);
+            documentsMap[client._id] = fotoFachada;
+        }
+        setClientDocuments(documentsMap);
     };
 
     useEffect(() => {
@@ -155,57 +429,67 @@ function HomeComponent() {
             try {
                 const res = await makeRequest('/client/all');
                 setClients(res || []);
+                // Cargar fotos de fachada después de obtener los clientes
+                if (res && res.length > 0) {
+                    await loadFotosFachada(res);
+                }
+                return res || [];
             } catch (error) {
                 console.log(error);
+                return [];
             }
         };
 
-        fetchTickets();
-        fetchClients();
+        const loadInitialData = async () => {
+            fetchTickets();
+            const clientsData = await fetchClients();
+            // Cargar paquetes después de obtener clientes para calcular porcentajes
+            try {
+                const packagesRes = await makeRequest('/packages/all');
+                if (packagesRes) {
+                    setPackages(packagesRes);
+                    processChartData(packagesRes, clientsData);
+                }
+            } catch (error) {
+                console.error('Error fetching packages:', error);
+            }
+        };
+
+        loadInitialData();
     }, []);
 
-     const pendientes = tickets.filter(t => t.Status === 'En espera');
+    // Recargar datos cuando cambien los clientes
+    useEffect(() => {
+        if (packages.length > 0 && clients.length > 0) {
+            processChartData(packages, clients);
+        }
+    }, [clients, packages]);
 
-    // Filtrar clientes nuevos (últimos 30 días) y ordenar de reciente a antiguo
-    const clientesNuevos = clients
-        .filter(client => {
-            if (!client.CreateDate) return false;
-            const fechaRegistro = new Date(client.CreateDate);
-            const fechaActual = new Date();
-            const diasDiferencia = (fechaActual - fechaRegistro) / (1000 * 60 * 60 * 24);
-            return diasDiferencia <= 30;
-        })
+    const pendientes = tickets.filter(
+        t => t.Status === 'En espera'
+    );
+
+    // Ordenar todos los clientes de reciente a antiguo
+    const todosLosClientes = clients
+        .filter(client => client.CreateDate) // Solo clientes con fecha válida
         .sort((a, b) => new Date(b.CreateDate) - new Date(a.CreateDate));
-
-    const clientesNuevosFiltrados = filterByRegion(clientesNuevos, getClientRegion);
-    const ticketsFiltrados = filterByRegion(tickets, (ticket) => {
-        const client = clients.find(c => c._id === ticket.Client);
-        return getClientRegion(client);
-    });
-
-    const pendientesFiltrados = filterByRegion(pendientes, (ticket) => {
-        const client = clients.find(c => c._id === ticket.Client);
-        return getClientRegion(client);
-    });
 
     return (
         <div className="content mt-3" style={{ marginLeft: '70px' }}>
-            <div className="mb-3 p-2 bg-light rounded">
-                <small className="text-muted">Región activa: </small>
-                <strong className="text-primary">{region}</strong>
-            </div>
+
+            
             {/* Primera fila */}
             <div className="dashboard-row" style={{ minHeight: '250px' }}>
-                <div className="dashboard-card" style={{ background: boxColors.clientesNuevos }}>
+                <div className="dashboard-card" style={{ background: boxColors.clientes }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Clientes Nuevos ({region})</h5>
+                        <h5 className="border-bottom">Clientes</h5>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
-                        {clientesNuevosFiltrados.length === 0 ? (
-                            <span className="text-muted">No hay clientes nuevos ({region})</span>
+                        {todosLosClientes.length === 0 ? (
+                            <span className="text-muted">No hay clientes registrados</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {(showAllTickets ? clientesNuevosFiltrados : clientesNuevosFiltrados.slice(0, 8)).map(client => (
+                                {(showAllClients ? todosLosClientes : todosLosClientes.slice(0, 8)).map(client => (
                                     <li
                                         key={client._id}
                                         className="list-group-item py-1 px-2"
@@ -216,7 +500,7 @@ function HomeComponent() {
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
-                                                    <i className="bi bi-person-plus-fill text-success me-1"></i>
+                                                    <i className="bi bi-person-fill text-info me-1"></i>
                                                     {[
                                                         client.Name.FirstName,
                                                         client.Name.SecondName,
@@ -227,18 +511,30 @@ function HomeComponent() {
                                                 <br />
                                                 <small className="text-muted">{client.CreateDate ? new Date(client.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</small>
                                             </div>
-                                            <span className="badge bg-primary">Nuevo</span>
+                                            {(() => {
+                                                // Calcular si es cliente nuevo (últimos 30 días)
+                                                if (!client.CreateDate) return <span className="badge bg-secondary">Sin fecha</span>;
+                                                const fechaRegistro = new Date(client.CreateDate);
+                                                const fechaActual = new Date();
+                                                const diasDiferencia = (fechaActual - fechaRegistro) / (1000 * 60 * 60 * 24);
+                                                
+                                                if (diasDiferencia <= 30) {
+                                                    return <span className="badge bg-success">Nuevo</span>;
+                                                } else {
+                                                    return <span className="badge bg-info">Cliente</span>;
+                                                }
+                                            })()}
                                         </div>
                                     </li>
                                 ))}
-                                {clientesNuevosFiltrados.length > 8 && (
+                                {todosLosClientes.length > 8 && (
                                     <li className="list-group-item py-1 px-2 text-center">
                                         <button
                                             className="btn btn-link btn-sm p-0 text-decoration-none"
-                                            onClick={() => setShowAllTickets(!showAllTickets)}
+                                            onClick={() => setShowAllClients(!showAllClients)}
                                             style={{ fontSize: '0.8rem' }}
                                         >
-                                            {showAllTickets ? (
+                                            {showAllClients ? (
                                                 <>
                                                     <i className="bi bi-chevron-up me-1"></i>
                                                     Mostrar menos
@@ -246,7 +542,7 @@ function HomeComponent() {
                                             ) : (
                                                 <>
                                                     <i className="bi bi-chevron-down me-1"></i>
-                                                    +{clientesNuevosFiltrados.length - 8} clientes más...
+                                                    +{todosLosClientes.length - 8} clientes más...
                                                 </>
                                             )}
                                         </button>
@@ -258,7 +554,7 @@ function HomeComponent() {
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.admins }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="border-bottom">Administradores Activos ({region})</h5>
+                        <h5 className="border-bottom">Administradores Activos</h5>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
                         {userName ? (
@@ -283,7 +579,7 @@ function HomeComponent() {
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Estado de Red</h6>
                     </div>
-                    <div className="flex-grow-1">
+                    <div className="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
                         <EstadoRedResumen />
                     </div>
                 </div>
@@ -301,36 +597,42 @@ function HomeComponent() {
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Radio Frecuencia - Paquetes</h6>
                     </div>
-                    <p>Total de Clientes: </p>
+                    <p>Total de Clientes: <strong>{chartData.radio.total}</strong></p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                        {/* Aquí va tu gráfica circular */}
+                        <RadioChart data={chartData.radio} />
                     </div>
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.fibra }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 className="border-bottom">Fibra Optica - Paquetes</h6>
                     </div>
-                    <p>Total de Clientes: </p>
+                    <p>Total de Clientes: <strong>{chartData.fibra.total}</strong></p>
                     <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                        {/* Aquí va tu gráfica circular */}
+                        <FibraChart data={chartData.fibra} />
                     </div>
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.tickets }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Todos los Tickets ({region})</h6>
+                        <h6 className="border-bottom">Tickets</h6>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
-                        {ticketsFiltrados.length === 0 ? (
-                            <span className="text-muted">No hay tickets registrados en {region}</span>
+                        {tickets.length === 0 ? (
+                            <span className="text-muted">No hay tickets registrados</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {(showAllTickets ? ticketsFiltrados : ticketsFiltrados.slice(0, 8)).map(ticket => (
+                                {(showAllTicketsState ? tickets : tickets.slice(0, 8)).map(ticket => (
                                     <li
                                         key={ticket._id}
                                         className="list-group-item py-1 px-2"
-                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
-                                        title="Ver detalles del ticket"
-                                    >
+                                        style={{ 
+                                            background: '#fff', 
+                                            border: '1px solid #e0e0e0', 
+                                            borderRadius: '6px', 
+                                            marginBottom: '4px', 
+                                            boxShadow: '0 1px 2px rgba(0,0,0,0.04)', 
+                                            cursor: 'pointer' }}
+                                        onClick={() => handleShowTicketDetails(ticket)}
+                                        title="Ver detalles del ticket">
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
@@ -340,24 +642,28 @@ function HomeComponent() {
                                                 <br />
                                                 <small className="text-muted">{ticket.Issue}</small>
                                             </div>
-                                            <span className={`badge ${ticket.Status === 'Resuelto' ? 'bg-success' :
-                                                    ticket.Status === 'En espera' ? 'bg-warning text-dark' :
-                                                        ticket.Status === 'En proceso' ? 'bg-info text-dark' :
-                                                            'bg-secondary'
+                                            <span className={`badge ${
+                                            ticket.Status === 'Resuelto' 
+                                            ? 'bg-success' 
+                                            :ticket.Status === 'En espera' 
+                                            ? 'bg-warning text-dark' 
+                                            :ticket.Status === 'En proceso' 
+                                            ? 'bg-info text-dark' 
+                                            :'bg-secondary'
                                                 }`}>
                                                 {ticket.Status}
                                             </span>
                                         </div>
                                     </li>
                                 ))}
-                                {ticketsFiltrados.length > 8 && (
+                                {tickets.length > 8 && (
                                     <li className="list-group-item py-1 px-2 text-center">
                                         <button
                                             className="btn btn-link btn-sm p-0 text-decoration-none"
-                                            onClick={() => setShowAllTickets(!showAllTickets)}
+                                            onClick={() => setShowAllTicketsState(!showAllTicketsState)}
                                             style={{ fontSize: '0.8rem' }}
                                         >
-                                            {showAllTickets ? (
+                                            {showAllTicketsState ? (
                                                 <>
                                                     <i className="bi bi-chevron-up me-1"></i>
                                                     Mostrar menos
@@ -365,10 +671,11 @@ function HomeComponent() {
                                             ) : (
                                                 <>
                                                     <i className="bi bi-chevron-down me-1"></i>
-                                                    +{ticketsFiltrados.length - 8} tickets más...
+                                                    +{tickets.length - 8} tickets más...
                                                 </>
                                             )}
                                         </button>
+
                                     </li>
                                 )}
                             </ul>
@@ -377,20 +684,27 @@ function HomeComponent() {
                 </div>
                 <div className="dashboard-card dashboard-table" style={{ background: boxColors.pendientes }}>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="border-bottom">Tickets Pendientes ({region})</h6>
+                        <h6 className="border-bottom">Tickets Pendientes</h6>
                     </div>
                     <div className="flex-grow-1" style={{ overflowY: 'auto', maxHeight: 200 }}>
-                        {pendientesFiltrados.length === 0 ? (
-                            <span className="text-muted">Sin tickets pendientes en {region}</span>
+                        {pendientes.length === 0 ? (
+                            <span className="text-muted">Sin tickets pendientes</span>
                         ) : (
                             <ul className="list-group list-group-flush">
-                                {pendientesFiltrados.slice(0, 8).map(ticket => (
-                                    <li
-                                        key={ticket._id}
-                                        className="list-group-item py-1 px-2"
-                                        style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', marginBottom: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', cursor: 'pointer' }}
-                                        title="Ver detalles del ticket pendiente"
-                                    >
+                                {pendientes.slice(0, 8).map(ticket => (
+
+                                    <li key={ticket._id} 
+                                    className="list-group-item py-1 px-2" 
+                                    style={{
+                                        background: '#fff', 
+                                        border: '1px solid #e0e0e0', 
+                                        borderRadius: '6px', 
+                                        marginBottom: '4px', 
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)', 
+                                        cursor: 'pointer' }}
+                                    onClick={() => handleShowTicketDetails(ticket)} 
+                                    title="Ver detalles del ticket pendiente">
+
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>
@@ -409,6 +723,20 @@ function HomeComponent() {
                     </div>
                 </div>
             </div>
+            
+            {/* Modal de detalles de dirección */}
+            <ClientAddressDetailModal 
+                client={selectedClientForAddressDetail}
+                isOpen={addressDetailModalOpen}
+                onClose={handleCloseAddressDetailModal}
+            />
+            
+            {/* Modal de mapa */}
+            <AddressModal 
+                client={selectedClientForAddress}
+                isOpen={addressModalOpen}
+                onClose={handleCloseAddressModal}
+            />
         </div>
     );
 }

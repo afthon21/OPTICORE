@@ -60,5 +60,9 @@ Antes de ejecutar el servidor, abre una terminal separada para cada proyecto:
  ```
  Iniciamos el siguiente servicio
  ````sh
-   npm run dev 
-
+   npm run dev
+`````
+hay una instalacionq ue debemos poner en el frontend (OPTICORE) para que funcione correctamente:
+  `````sh
+npm install html2canvas
+npm install chartjs-plugin-datalabels
