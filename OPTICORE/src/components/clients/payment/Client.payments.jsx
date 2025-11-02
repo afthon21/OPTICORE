@@ -1,3 +1,11 @@
+    // Permite refrescar datos globalmente cuando se edite un paquete
+    const handlePackageEdited = () => {
+        if (onGlobalUpdate && client) {
+            onGlobalUpdate(client);
+            fetchData();
+            fetchClientPackage();
+        }
+    };
 import stylePayment from '../css/clientPayments.module.css'
 
 import { useEffect, useState, useCallback } from "react";
@@ -284,5 +292,6 @@ function ClientPayments({ client }) {
 export default ClientPayments;
 
 ClientPayments.propTypes = {
-    client: PropTypes.string
+    client: PropTypes.string,
+    onGlobalUpdate: PropTypes.func
 };

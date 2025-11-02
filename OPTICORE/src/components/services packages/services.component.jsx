@@ -24,6 +24,8 @@ function PackagesCard({ packages = [], setPackages, onSelected }) {
     if (res && res.updatedPackage && setPackages) {
       setPackages(prev => prev.map(p => p._id === updatedPkg._id ? res.updatedPackage : p));
       handleCloseModal();
+      // Llamar a la función global para refrescar cliente y paquetes
+      if (onGlobalUpdate) onGlobalUpdate(updatedPkg.Client);
       return true;
     }
     return false;
