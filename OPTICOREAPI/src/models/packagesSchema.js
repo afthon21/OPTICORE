@@ -16,7 +16,11 @@ const packageSchema = new mongoose.Schema({
     platforms: [{ name: String, price: Number }], // Plataformas adicionales
     Client: { type: mongoose.Schema.Types.ObjectId, ref: 'client', required: true },
     createdAt: { type: Date, default: Date.now },
-    Admin: { type: mongoose.Schema.Types.ObjectId, ref: 'admin' }
+    Admin: { type: mongoose.Schema.Types.ObjectId, ref: 'admin' },
+    Archived: {
+        type: Boolean,
+        default: false
+    }
 });
 
 // Índice compuesto para optimizar consultas (sin restricción única)

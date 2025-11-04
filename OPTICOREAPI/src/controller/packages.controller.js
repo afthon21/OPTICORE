@@ -83,11 +83,11 @@ export const createPackage = async(req, res) => {
 
 // Obtener todos los paquetes
 export const getAllPackages = async(req, res) => {
-
-    
     try {
         console.log('Searching for packages in database...');
-        const packages = await Package.find()
+        const query = req.query.archived === 'true' ? { Archived: true } : { Archived: { $ne: true } };
+        
+        const packages = await Package.find(query)
             .populate('Client', 'Name LastName Email Location')
             .populate('Admin', 'UserName')
             .exec();
@@ -179,5 +179,45 @@ export const deletePackage = async(req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Error al eliminar el paquete' });
+    }
+};
+// Archivar paquete
+export const archivePackage = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const packageToArchive = await Package.findById(id);
+        if (!packageToArchive) {
+            return res.status(404).json({ message: 'Paquete no encontrado' });
+        }
+        packageToArchive.Archived = true;
+        await packageToArchive.save();
+        return res.status(200).json({ 
+            message: 'Paquete archivado correctamente',
+            package: packageToArchive
+        });
+    } catch (error) {
+        console.error('ERROR archiving package:', error);
+        return res.status(500).json({ message: 'Error al archivar el paquete' });
+    }
+};
+
+// Desarchivar paquete
+export const unarchivePackage = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const packageToUnarchive = await Package.findById(id);
+
+        if (!packageToUnarchive) {
+            return res.status(404).json({ message: 'Paquete no encontrado' });
+        }
+        packageToUnarchive.Archived = false;
+        await packageToUnarchive.save();
+        return res.status(200).json({ 
+            message: 'Paquete desarchivado correctamente',
+            package: packageToUnarchive
+        });
+    } catch (error) {
+        console.error('ERROR unarchiving package:', error);
+        return res.status(500).json({ message: 'Error al desarchivar el paquete' });
     }
 };

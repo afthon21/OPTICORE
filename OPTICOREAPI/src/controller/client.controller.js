@@ -3,6 +3,7 @@ import document from '../models/documentSchema.js';
 import notes from '../models/notesSchema.js';
 import payment from '../models/paymentsSchema.js';
 import ticket from '../models/ticketsSchema.js';
+import packages from '../models/packagesSchema.js';
 
 //Create a new client
 export const newClient = async(req, res) => {
@@ -71,7 +72,17 @@ export const newClient = async(req, res) => {
 //View all clients
 export const viewAllClient = async(req, res) => {
     try {
-        const allClients = await client.find();
+        const allClients = await client.aggregate([
+            {
+                $lookup: {
+                    from: 'packages', 
+                    foreignField: 'Client',
+                    as: 'Packages'
+                }
+            },
+            { $sort: { CreateDate: -1 } }
+        ]);
+
         return res.status(200).json(allClients);
     } catch (error) {
         console.log(error);
@@ -159,14 +170,15 @@ export const deleteClient = async(req, res) => {
             notes.deleteMany({ Client: id }),
             document.deleteMany({ Client: id }),
             payment.deleteMany({ Client: id }),
-            ticket.deleteMany({ Client: id })
+            ticket.deleteMany({ Client: id }),
+            packages.deleteMany({ Client: id })
         ]);
 
         await client.findByIdAndDelete(id);
         return res.status(200).json({ message: 'Client deleted' });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: 'Server Erro!' });
+        return res.status(500).json({ message: 'Server Error!' });
     }
 }
 //Archivar cliente
@@ -177,19 +189,18 @@ export const archiveClient = async (req, res) => {
         if (!idClient) {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
-        // Archivar cliente
         idClient.Archived = true;
         await idClient.save();
-
-        // Archivar en cascada: tickets, pagos, notas y documentos
+        // Archivar en cascada: tickets, pagos, notas, documentos y paquetes
         await Promise.all([
             ticket.updateMany({ Client: id }, { $set: { Archived: true } }),
             payment.updateMany({ Client: id }, { $set: { Archived: true } }),
             notes.updateMany({ Client: id }, { $set: { Archived: true } }),
-            document.updateMany({ Client: id }, { $set: { Archived: true } })
+            document.updateMany({ Client: id }, { $set: { Archived: true } }),
+            packages.updateMany({ Client: id }, { $set: { Archived: true } })
         ]);
 
-        return res.status(200).json({ message: 'Client archived (cascade)', client: idClient });
+        return res.status(200).json({ message: 'Client archived', client: idClient });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server error!' });
@@ -204,19 +215,18 @@ export const unarchiveClient = async (req, res) => {
         if (!idClient) {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
-        // Desarchivar cliente
         idClient.Archived = false;
         await idClient.save();
-
-        // Desarchivar en cascada: tickets, pagos, notas y documentos
+        // Desarchivar en cascada: tickets, pagos, notas, documentos y paquetes
         await Promise.all([
             ticket.updateMany({ Client: id }, { $set: { Archived: false } }),
             payment.updateMany({ Client: id }, { $set: { Archived: false } }),
             notes.updateMany({ Client: id }, { $set: { Archived: false } }),
-            document.updateMany({ Client: id }, { $set: { Archived: false } })
+            document.updateMany({ Client: id }, { $set: { Archived: false } }),
+            packages.updateMany({ Client: id }, { $set: { Archived: false } })
         ]);
 
-        return res.status(200).json({ message: 'Client unarchived (cascade)', client: idClient });
+        return res.status(200).json({ message: 'Client unarchived', client: idClient });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server error!' });

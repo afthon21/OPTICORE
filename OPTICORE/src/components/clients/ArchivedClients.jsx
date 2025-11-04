@@ -13,19 +13,19 @@ function ArchivedClients() {
     const fetchClients = async () => {
       try {
         const res = await makeRequest('/client/all');
-        console.log('Todos los clientes:', res); // Debug
+        console.log('Todos los clientes:', res); 
         const archivedClients = (res || []).filter(c => c.Archived === true);
-        console.log('Clientes archivados encontrados:', archivedClients); // Debug
+        console.log('Clientes archivados encontrados:', archivedClients); 
         setClients(archivedClients);
       } catch (error) {
-        console.error('Error al obtener clientes:', error); // Debug mejorado
+        console.error('Error al obtener clientes:', error); 
         setClients([]);
       }
     };
     fetchClients();
   }, [makeRequest]);
 
-  // Refrescar cuando se navega a esta página (útil cuando se llega desde archivado)
+  
   useEffect(() => {
     const refetchClients = async () => {
       try {
@@ -70,7 +70,7 @@ function ArchivedClients() {
             showConfirmButton: false,
             toast: true
           });
-          // Mantenerse en esta página (Archivados) después de desarchivar
+         
         }
       } catch (error) {
           console.error('Error unarchiving client:', error);
@@ -133,7 +133,11 @@ return (
                     ? client.PhoneNumber.join(', ')
                     : client.PhoneNumber || 'N/A'}
                 </td>
-                <td className="text-muted">Sin paquete</td>
+                <td className="text-muted">
+                  {Array.isArray(client.Packages) && client.Packages.length > 0
+                    ? client.Packages.map(p => `${p.name || p.folio || 'Paquete'}${p.folio ? ` (${p.folio})` : ''}`).join(', ')
+                    : 'Sin paquete'}
+                </td>
                 <td>
                   <button
                     className="btn btn-outline-success btn-sm"
