@@ -121,7 +121,19 @@ function CardCreatePayment({ clients = [] }) {
         }
 
         try {
-            await makeRequest('/pay/new', 'POST', cleanedData);
+            const res = await makeRequest('/pay/new', 'POST', cleanedData);
+
+            // If the API returned the created payment, dispatch a global event so other components can update
+            if (res && res._id) {
+                try {
+                    window.dispatchEvent(new CustomEvent('payment:created', { detail: res }));
+                } catch (e) {
+                    // older browsers fallback
+                    const evt = document.createEvent('CustomEvent');
+                    evt.initCustomEvent('payment:created', true, true, res);
+                    window.dispatchEvent(evt);
+                }
+            }
 
             if (error) {
                 Swal.fire({

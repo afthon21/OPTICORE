@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 
-function ErrorDisplay() {
+function ErrorDisplay({ showAll = false, onToggleShowAll = null, onLastUpdateChange = null }) {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showAllErrors, setShowAllErrors] = useState(false);
+    const [showAllErrors, setShowAllErrors] = useState(showAll);
     const [lastUpdate, setLastUpdate] = useState(null);
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
+    // Mantener sincronizado el estado local con la prop recibida desde el padre
+    useEffect(() => {
+        setShowAllErrors(Boolean(showAll));
+    }, [showAll]);
 
     useEffect(() => {
         const fetchErrorLogs = async () => {
@@ -24,7 +29,9 @@ function ErrorDisplay() {
                         return dateB - dateA; // De más reciente a más antiguo
                     });
                     setLogs(sortedLogs);
-                    setLastUpdate(new Date());
+                    const now = new Date();
+                    setLastUpdate(now);
+                    if (typeof onLastUpdateChange === 'function') onLastUpdateChange(now);
                 } else {
                     setError('Respuesta inválida del servidor');
                 }
@@ -41,10 +48,10 @@ function ErrorDisplay() {
 
         fetchErrorLogs();
         
-        // Set up interval to refresh every 15 seconds for more responsive updates
-        const interval = setInterval(fetchErrorLogs, 15000);
-        
-        return () => clearInterval(interval);
+            // Set up interval to refresh every 15 seconds for more responsive updates
+            const interval = setInterval(fetchErrorLogs, 15000);
+
+            return () => clearInterval(interval);
     }, []);
 
     const formatDateTime = (timestamp) => {
@@ -56,9 +63,7 @@ function ErrorDisplay() {
         });
     };
 
-    const getRemainingLogsCount = () => {
-        return Math.max(0, logs.length - 5);
-    };
+    const getRemainingLogsCount = () => Math.max(0, logs.length - 5);
 
 
 
@@ -186,51 +191,7 @@ function ErrorDisplay() {
                 )}
             </div>
             
-            {/* Sección fija en la parte inferior - sin fondo separado */}
-            <div 
-                style={{ 
-                    position: 'absolute',
-                    bottom: '35px',
-                    left: '12px',
-                    right: '12px'
-                }}
-            >
-                {/* Indicador de última actualización */}
-                {lastUpdate && (
-                    <div className="text-center">
-                        <small className="text-muted" style={{ fontSize: '0.7rem', opacity: '0.8' }}>
-                            <i className="bi bi-clock me-1"></i>
-                            Última actualización: {formatDateTime(lastUpdate)}
-                        </small>
-                    </div>
-                )}
-                
-                {/* Botón para mostrar más/menos registros */}
-                {logs && logs.length > 5 && (
-                    <div className="text-center mt-1">
-                        <button
-                            className="btn btn-link btn-sm p-0 text-decoration-none"
-                            onClick={() => setShowAllErrors(!showAllErrors)}
-                            style={{ 
-                                fontSize: '0.8rem',
-                                color: '#6c757d'
-                            }}
-                        >
-                            {showAllErrors ? (
-                                <>
-                                    <i className="bi bi-chevron-up me-1"></i>
-                                    Mostrar menos
-                                </>
-                            ) : (
-                                <>
-                                    <i className="bi bi-chevron-down me-1"></i>
-                                    +{getRemainingLogsCount()} registros más...
-                                </>
-                            )}
-                        </button>
-                    </div>
-                )}
-            </div>
+            {/* Controles de fecha / mostrar más ahora se renderizan en el header por el componente padre */}
         </div>
     );
 }
