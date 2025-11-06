@@ -23,6 +23,7 @@ import RecoveryPwdComponent from './components/auth/recoveryPwd/recovery.compone
 import ResetPwdComponent from './components/auth/recoveryPwd/resetPwd.components.jsx';
 import { NavbarFragmentAll } from './components/fragments/Navbar.fragment.jsx';
 import { RegionProvider } from './hooks/RegionContext';
+
 import Radiofrecuencia from './components/network/Radiofrecuencia.jsx';
 import FibraOptica from './components/network/FibraOptica.jsx';
 import Mapa from './components/network/Mapa.jsx';
@@ -70,6 +71,7 @@ function App() {
             {/* Paquetes rutas */}
             <Route path='/packageServices/:id' element={<ProtectedRoute> <PackagesContainer /> </ProtectedRoute>}></Route>
             <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
+           
             {/* Monitoreo de red */}
             <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
             <Route path='/network/radiofrecuencia/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>

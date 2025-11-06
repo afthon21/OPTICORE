@@ -72,16 +72,7 @@ export const newClient = async(req, res) => {
 //View all clients
 export const viewAllClient = async(req, res) => {
     try {
-        const allClients = await client.aggregate([
-            {
-                $lookup: {
-                    from: 'packages', 
-                    foreignField: 'Client',
-                    as: 'Packages'
-                }
-            },
-            { $sort: { CreateDate: -1 } }
-        ]);
+        const allClients = await client.find();
 
         return res.status(200).json(allClients);
     } catch (error) {
@@ -217,7 +208,6 @@ export const unarchiveClient = async (req, res) => {
         }
         idClient.Archived = false;
         await idClient.save();
-        // Desarchivar en cascada: tickets, pagos, notas, documentos y paquetes
         await Promise.all([
             ticket.updateMany({ Client: id }, { $set: { Archived: false } }),
             payment.updateMany({ Client: id }, { $set: { Archived: false } }),
