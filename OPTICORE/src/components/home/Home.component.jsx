@@ -54,6 +54,9 @@ function HomeComponent() {
         tickets: '#ecebebff',
         pendientes: '#ecebebff',
     });
+    // Estado para controlar la vista completa de los logs y la última actualización (para el header)
+    const [showAllLogs, setShowAllLogs] = useState(false);
+    const [lastLogsUpdate, setLastLogsUpdate] = useState(null);
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
     // Función para obtener paquetes
@@ -789,15 +792,50 @@ function HomeComponent() {
                 </div>
                 <div className="dashboard-card" style={{ background: boxColors.errores, flex: '1 1 200px' }}>
                     <div className="d-flex justify-content-between align-items-center" style={{
-                        background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
-                        color: 'white',
-                        padding: '12px 15px',
-                        margin: '-19px -16px 15px -16px',
-                        borderRadius: '12px 12px 0 0'
-                    }}>
-                        <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Registro</h6>
-                    </div>
-                    <ErrorDisplay />
+                            background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)',
+                            color: 'white',
+                            padding: '12px 15px',
+                            margin: '-19px -16px 15px -16px',
+                            borderRadius: '12px 12px 0 0'
+                        }}>
+                            <h6 className="mb-0" style={{ color: 'white', fontWeight: '600' }}>Registro</h6>
+
+                            {/* Controles movidos al header: última actualización y mostrar más/menos */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {lastLogsUpdate ? (
+                                    <small style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem' }}>
+                                        Última actualización: {new Date(lastLogsUpdate).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
+                                    </small>
+                                ) : (
+                                    <small style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>Cargando...</small>
+                                )}
+
+                                <button
+                                    className="btn btn-sm"
+                                    onClick={() => setShowAllLogs(prev => !prev)}
+                                    style={{
+                                        fontSize: '0.78rem',
+                                        background: 'rgba(255,255,255,0.12)',
+                                        color: 'rgba(255,255,255,0.95)',
+                                        border: '1px solid rgba(255,255,255,0.12)',
+                                        padding: '4px 8px'
+                                    }}
+                                    title={showAllLogs ? 'Mostrar menos registros' : 'Mostrar más registros'}
+                                >
+                                    {showAllLogs ? (
+                                        <><i className="bi bi-chevron-up me-1"></i> Mostrar menos</>
+                                    ) : (
+                                        <><i className="bi bi-chevron-down me-1"></i> Mostrar más</>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        <ErrorDisplay
+                            showAll={showAllLogs}
+                            onToggleShowAll={() => setShowAllLogs(prev => !prev)}
+                            onLastUpdateChange={(date) => setLastLogsUpdate(date)}
+                        />
                 </div>
             </div>
 

@@ -33,7 +33,7 @@ export default function PackagesContainer() {
 
   return (
     <div>
-      <PackagesCard packages={packages} />
+      <PackagesCard packages={packages} setPackages={setPackages} />
     </div>
   );
 }

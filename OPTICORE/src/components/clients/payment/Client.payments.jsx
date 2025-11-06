@@ -1,3 +1,11 @@
+    // Permite refrescar datos globalmente cuando se edite un paquete
+    const handlePackageEdited = () => {
+        if (onGlobalUpdate && client) {
+            onGlobalUpdate(client);
+            fetchData();
+            fetchClientPackage();
+        }
+    };
 import stylePayment from '../css/clientPayments.module.css'
 
 import { useEffect, useState, useCallback } from "react";
@@ -8,7 +16,7 @@ import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import CreatePay from './CreatePay.modal.jsx';
 import InfoPay from './Client.infoPay.jsx';
 
-function ClientPayments({ client }) {
+function ClientPayments({ client, refreshKey = 0 }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
@@ -40,7 +48,14 @@ function ClientPayments({ client }) {
         if (!client) return; // No hacer fetch si no hay cliente
         try {
             const res = await makeRequest(`/pay/all/${client}`);
-            setData(res);
+            // Asegurarnos de que res sea un array; si no, normalizar a array vacío
+            if (Array.isArray(res)) {
+                setData(res);
+            } else if (res) {
+                setData([res]);
+            } else {
+                setData([]);
+            }
         } catch (error) {
             console.log(error);
         }
@@ -52,7 +67,13 @@ function ClientPayments({ client }) {
         try {
             const res = await makeRequest(`/packages/client/${client}`);
             // Si el cliente tiene múltiples paquetes, tomamos el primero activo
-            setClientPackage(Array.isArray(res) ? res[0] : res);
+            if (Array.isArray(res)) {
+                setClientPackage(res.length > 0 ? res[0] : null);
+            } else if (res) {
+                setClientPackage(res);
+            } else {
+                setClientPackage(null);
+            }
         } catch (error) {
             console.log('Error fetching client package:', error);
             setClientPackage(null);
@@ -62,7 +83,29 @@ function ClientPayments({ client }) {
     useEffect(() => {
         fetchData();
         fetchClientPackage();
-    }, [fetchData, fetchClientPackage]);
+    }, [fetchData, fetchClientPackage, refreshKey]);
+
+    // Escuchar eventos globales de pago creado (por ejemplo desde la vista global de pagos)
+    useEffect(() => {
+        const handler = (e) => {
+            const created = e && e.detail ? e.detail : null;
+            if (!created) return;
+
+            // Obtener id del cliente actual (puede ser string o un objeto)
+            const currentClientId = typeof client === 'string' ? client : (client && client._id ? client._id : null);
+            const paymentClientId = created.Client && (created.Client._id || created.Client);
+
+            if (currentClientId && paymentClientId && String(currentClientId) === String(paymentClientId)) {
+                // Re-fetch the payments to keep ordering and computed totals consistent with server
+                fetchData();
+                // Refresh package info as it may affect pending amount
+                fetchClientPackage();
+            }
+        };
+
+        window.addEventListener('payment:created', handler);
+        return () => window.removeEventListener('payment:created', handler);
+    }, [client, fetchClientPackage]);
     
     // Mostrar mensaje si no hay cliente seleccionado
     if (!client) {
@@ -74,17 +117,15 @@ function ClientPayments({ client }) {
         );
     }
 
-    // Mostrar mensaje si el cliente no tiene paquete asignado
-    if (!loading && !clientPackage) {
-        return (
-            <div className="alert alert-warning" role="alert">
-                <i className="bi bi-exclamation-triangle me-2"></i>
-                Este cliente no tiene un paquete asignado. 
-                <br />
-                <small className="text-muted">Asigne un paquete al cliente para poder calcular el monto pendiente.</small>
-            </div>
-        );
-    }
+    // Mostrar aviso si el cliente no tiene paquete asignado, pero no impedir mostrar pagos
+    const noPackageAlert = (!loading && !clientPackage) ? (
+        <div className="alert alert-warning" role="alert">
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            Este cliente no tiene un paquete asignado. 
+            <br />
+            <small className="text-muted">Asigne un paquete al cliente para poder calcular el monto pendiente.</small>
+        </div>
+    ) : null;
     
     const handleSort = (column) => {
         if (sortColumn === column) {
@@ -130,6 +171,26 @@ function ClientPayments({ client }) {
 
     const sortedData = getSortedData();
 
+    // Totales y contadores usados en el modal de abonos
+    const totalAmount = data.reduce((total, payment) => total + (Number(payment.Amount) || 0), 0);
+    // Sólo considerar como "abonado" los pagos con estado 'Exitoso' (case-insensitive).
+    // Si el campo Abono es 0 pero el pago fue exitoso, usar Amount como valor pagado.
+    const successfulAbonos = data.reduce((total, payment) => {
+        const status = payment?.Status || '';
+        const isSuccess = /exitoso/i.test(status);
+        if (!isSuccess) return total;
+        const abono = Number(payment.Abono || 0);
+        const amount = Number(payment.Amount || 0);
+        return total + (abono > 0 ? abono : amount);
+    }, 0);
+    const totalPaymentsCount = data.length;
+    const abonosCount = data.filter(payment => {
+        const isSuccess = /exitoso/i.test(payment?.Status || '');
+        const abono = Number(payment.Abono || 0);
+        const amount = Number(payment.Amount || 0);
+        return isSuccess && (abono > 0 || amount > 0);
+    }).length;
+
     if (loading) return <LoadFragment />
     if (error) return <p>Error!</p>
 
@@ -155,6 +216,9 @@ function ClientPayments({ client }) {
                 }} />
             </div>
 
+            {/* Mostrar alerta si no hay paquete, pero continuar mostrando resúmenes y pagos */}
+            {noPackageAlert}
+
             {/* Resumen de abonos acumulados */}
             <div className="row mb-3">
                 <div className="col-md-4">
@@ -167,7 +231,7 @@ function ClientPayments({ client }) {
                             ${clientPackage?.price ? Number(clientPackage.price).toLocaleString() : '0'}
                         </div>
                         {clientPackage && (
-                            <div style={{color: '#888', fontSize: '0.95rem', marginTop: '8px'}}>{clientPackage.name}</div>
+                            <div style={{color: '#888', fontSize: '0.95rem', marginTop: '8px'}}>{clientPackage.description || clientPackage.name || 'Sin descripción'}</div>
                         )}
                     </div>
                 </div>
@@ -178,7 +242,7 @@ function ClientPayments({ client }) {
                             <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1.1rem'}}>Total Abonos</span>
                         </div>
                         <div style={{color: '#28a745', fontSize: '2rem', fontWeight: 'bold'}}>
-                            ${data.reduce((total, payment) => total + (Number(payment.Abono) || 0), 0).toLocaleString()}
+                            ${successfulAbonos.toLocaleString()}
                         </div>
                     </div>
                 </div>
@@ -191,15 +255,13 @@ function ClientPayments({ client }) {
                         <div style={{color: '#ffc107', fontSize: '2rem', fontWeight: 'bold'}}>
                             ${(() => {
                                 const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                                const totalAbonos = data.reduce((total, payment) => total + (Number(payment.Abono) || 0), 0);
-                                const pendiente = totalPackage - totalAbonos;
+                                const pendiente = totalPackage - successfulAbonos;
                                 return pendiente >= 0 ? pendiente.toLocaleString() : '0';
                             })()}
                         </div>
                         {(() => {
                             const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                            const totalAbonos = data.reduce((total, payment) => total + (Number(payment.Abono) || 0), 0);
-                            const pendiente = totalPackage - totalAbonos;
+                            const pendiente = totalPackage - successfulAbonos;
                             return pendiente <= 0 && totalPackage > 0 ? (
                                 <div style={{color: '#28a745', fontSize: '1rem', marginTop: '8px'}}>
                                     <i className="bi bi-check-circle me-1"></i>
@@ -253,17 +315,19 @@ function ClientPayments({ client }) {
                                         <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Fecha</th>
                                         <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Folio</th>
                                         <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Método</th>
+                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Monto</th>
                                         <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Abono</th>
                                         <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {sortedData.filter(payment => Number(payment.Abono || 0) > 0).map((payment, index) => (
+                                    {sortedData.map((payment, index) => (
                                         <tr key={payment._id || index}>
                                             <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.CreateDate ? new Date(payment.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</td>
                                             <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Folio}</td>
                                             <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Method}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>${Number(payment.Abono || 0).toLocaleString()}</td>
+                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>${Number(payment.Amount || 0).toLocaleString()}</td>
+                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>${(Number(payment.Abono || 0) > 0 ? Number(payment.Abono) : Number(payment.Amount || 0)).toLocaleString()}</td>
                                             <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Status || 'N/A'}</td>
                                         </tr>
                                     ))}
@@ -271,8 +335,10 @@ function ClientPayments({ client }) {
                             </table>
                         </div>
                         <div style={{ marginTop: '12px', fontSize: '1.05rem' }}>
-                            <div><b>Total Abonado:</b> ${data.reduce((total, payment) => total + (Number(payment.Abono) || 0), 0).toLocaleString()}</div>
-                            <div><b>Abonos registrados:</b> {data.filter(payment => Number(payment.Abono || 0) > 0).length}</div>
+                            <div><b>Total Monto (suma Amount):</b> ${totalAmount.toLocaleString()}</div>
+                            <div><b>Total Abonado:</b> ${successfulAbonos.toLocaleString()}</div>
+                            <div><b>Pagos registrados:</b> {totalPaymentsCount}</div>
+                            <div><b>Abonos registrados:</b> {abonosCount}</div>
                         </div>
                     </div>
                 </div>
@@ -284,5 +350,6 @@ function ClientPayments({ client }) {
 export default ClientPayments;
 
 ClientPayments.propTypes = {
-    client: PropTypes.string
+    client: PropTypes.string,
+    onGlobalUpdate: PropTypes.func
 };

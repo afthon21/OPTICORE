@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 import ApiRequest from '../../hooks/apiRequest.jsx';
 
-function CreatePay({ client, onPaymentCreated, onSuccess }) {
+function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
     const { makeRequest, loading } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
         Method: '',
@@ -82,23 +82,43 @@ function CreatePay({ client, onPaymentCreated, onSuccess }) {
         const cleanedData = cleanData(formValues);
 
         try {
-            const res = await makeRequest(`/pay/new/${client}`, 'POST', cleanedData);
+                // Asegurar que se envíe Amount (requerido en el backend). Usamos el Abono como Amount si no se proporciona.
+                const payload = {
+                    ...cleanedData,
+                    Amount: cleanedData.Amount ? Number(cleanedData.Amount) : Number(formValues.Abono) || 0,
+                    Abono: Number(formValues.Abono) || 0,
+                    CreateDate: cleanedData.CreateDate || new Date().toISOString()
+                };
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Creado exitosamente!',
-                text: res.message,
-                timer: 1200,
-                showConfirmButton: false,
-                timerProgressBar: true,
-                toast: true,
-                position: 'top',
-                background: '#e5e8e8'
-            }).then(() => {
-                handleClear();
-                if (onPaymentCreated) onPaymentCreated();
-                if (onSuccess) onSuccess();
-            });
+                const res = await makeRequest(`/pay/new/${client}`, 'POST', payload);
+
+                if (!res) {
+                    throw new Error('No se obtuvo respuesta del servidor al crear el pago');
+                }
+
+                // Si el backend devuelve el pago creado, úsalo para actualizar la UI sin un re-fetch completo
+                const createdPayment = (res && res._id) ? res : null;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Creado exitosamente!',
+                    text: (res && res.message) ? res.message : 'Pago registrado',
+                    timer: 1200,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top',
+                    background: '#e5e8e8'
+                }).then(() => {
+                    handleClear();
+                    if (createdPayment && typeof onPaymentAdded === 'function') {
+                        onPaymentAdded(createdPayment);
+                    } else if (typeof onPaymentCreated === 'function') {
+                        // Fallback: trigger parent to refetch
+                        onPaymentCreated();
+                    }
+                    if (onSuccess) onSuccess();
+                });
 
         } catch (error) {
             console.log(error);
