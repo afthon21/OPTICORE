@@ -4,8 +4,8 @@ import dotenv from 'dotenv';
 import configureRoutes from './routes/routes.js';
 import cors from 'cors';
 import corsOptions from './libs/cors.js';
-import { iniciarMonitoreoSalud } from './controller/network.controller.js'; // 👈 Agrega esta línea
-import packageRoutes from "./middlewares/packages.routes.js"; // <-- Corrige el nombre aquí
+import { iniciarMonitoreoSalud } from './controller/network.controller.js';
+import packageRoutes from "./middlewares/packages.routes.js";
 // Logger imports removed for privacy
 
 //Config

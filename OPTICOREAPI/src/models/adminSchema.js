@@ -51,7 +51,6 @@ const adminSchema = new mongoose.Schema({
     }
 });
 
-//Función para crear el nombre de usuario
 adminSchema.methods.setUser = function setUser(FirstName,FatherLastName,MotherLastName) {
     const name = FirstName;
     const characterOne = FatherLastName;
