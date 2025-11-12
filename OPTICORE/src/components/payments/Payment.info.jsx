@@ -150,6 +150,12 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
                 if (onStatusChange) {
                     onStatusChange(updated);
                 }
+                   // Emitir evento global para que vistas que escuchan ('payment:created') refresquen datos
+                    try {
+                        window.dispatchEvent(new CustomEvent('payment:created', { detail: updated }));
+                    } catch (e) {
+                        // silenciar en caso de entornos donde CustomEvent no esté disponible
+                    }
                 Swal.fire({
                     toast: true,
                     position: 'top',
@@ -173,6 +179,12 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
                 });
                 return;
 
+                }
+                // Emitir evento global para que componentes interesados (ej. vista de cliente) refresquen datos
+                try {
+                    window.dispatchEvent(new CustomEvent('payment:created', { detail: updated }));
+                } catch (e) {
+                    // Silenciar si el navegador no soporta CustomEvent de esta manera
                 }
             } catch (error) {
                 console.log(error);

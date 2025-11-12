@@ -12,7 +12,11 @@ import ClientTickets from './tickets/Client.tickets';
 import ClientNotes from './notes/client.notes';
 import ClientLocation from './location/location.map';
 
+<<<<<<< HEAD
 function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) {
+=======
+function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGlobalUpdate }) {
+>>>>>>> origin/Yanez
     const [show, setShow] = useState({
         personal: initialActiveTab === 'personal',
         payments: initialActiveTab === 'payments',
@@ -24,17 +28,36 @@ function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) 
 
     // Estado local para el cliente seleccionado
     const [currentClient, setCurrentClient] = useState(client);
+<<<<<<< HEAD
     
     // Estado para la lista completa de clientes (necesario para el apartado "Activos")
     const [clients, setClients] = useState([]);
     
     // Estado para controlar cuando refrescar la lista de activos
     const [shouldRefreshActives, setShouldRefreshActives] = useState(false);
+=======
+    const [paymentsRefreshKey, setPaymentsRefreshKey] = useState(0);
+>>>>>>> origin/Yanez
 
     // Si el prop client cambia (por ejemplo, seleccionas otro cliente), actualiza el estado local
     useEffect(() => {
         setCurrentClient(client);
     }, [client]);
+
+    // Escuchar eventos globales de pago creado para refrescar la vista de cliente si aplica
+    useEffect(() => {
+        const handler = (e) => {
+            const created = e && e.detail ? e.detail : null;
+            if (!created) return;
+            const paymentClientId = created.Client && (created.Client._id || created.Client);
+            if (currentClient && currentClient._id && paymentClientId && String(currentClient._id) === String(paymentClientId)) {
+                setPaymentsRefreshKey(k => k + 1);
+            }
+        };
+
+        window.addEventListener('payment:created', handler);
+        return () => window.removeEventListener('payment:created', handler);
+    }, [currentClient]);
 
     // Actualizar la pestaña activa cuando cambie initialActiveTab
     useEffect(() => {
@@ -248,7 +271,7 @@ function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) 
 
                     {/* Ver pagos */}
                     {show.payments && (
-                        <ClientPayments client={currentClient?._id} />
+                        <ClientPayments client={currentClient?._id} refreshKey={paymentsRefreshKey} />
                     )}
 
                     {/* Ver tickets */}

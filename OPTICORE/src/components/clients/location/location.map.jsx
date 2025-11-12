@@ -1,13 +1,12 @@
 import MapGoogle from "../../fragments/maps/Map.fragment";
 
-import ApiRequest from "../../hooks/apiRequest";
 import { useState, useEffect } from "react";
 
 
 function ClientLocation({ client }) {
     const [marker, setMarker] = useState({
-        lat: client.Location.Latitude || 19.4326, // Ciudad de México por defecto
-        lng: client.Location.Length || -99.1332
+        lat: client?.Location?.Latitude ?? 19.4326, // Ciudad de México por defecto
+        lng: client?.Location?.Length ?? -99.1332
     });
 
     const [mapsAvailable, setMapsAvailable] = useState(false);
@@ -17,16 +16,16 @@ function ClientLocation({ client }) {
         const googleMapsKey = import.meta.env.VITE_GOOGLE_MAP;
         
         if (!googleMapsKey) {
-            console.log('🗺️ Google Maps deshabilitado - no hay API key configurada');
+            console.warn('VITE_GOOGLE_MAP no configurada');
             setMapsAvailable(false);
             return;
         }
 
-        console.log('🗺️ Google Maps habilitado con API key:', googleMapsKey.substring(0, 10) + '...');
+        
         setMapsAvailable(true);
 
         // Si ya tiene coordenadas válidas, usarlas
-        if (client.Location.Latitude && client.Location.Length && 
+        if (client?.Location?.Latitude && client?.Location?.Length && 
             client.Location.Latitude !== 0 && client.Location.Length !== 0) {
             setMarker({
                 lat: client.Location.Latitude,
@@ -54,11 +53,9 @@ function ClientLocation({ client }) {
                     return;
                 }
 
-                console.log('Geocodificando dirección:', fullAddress);
-
                 // Usar la API de geocodificación de Google
-                const geocoder = new google.maps.Geocoder();
-                
+                const geocoder = new window.google.maps.Geocoder();
+
                 geocoder.geocode({ address: fullAddress }, (results, status) => {
                     if (status === 'OK' && results[0]) {
                         const location = results[0].geometry.location;
@@ -67,7 +64,7 @@ function ClientLocation({ client }) {
                             lng: location.lng()
                         };
                         
-                        console.log('Coordenadas obtenidas:', newMarker);
+                        
                         setMarker(newMarker);
                     } else {
                         console.log('Error en geocodificación:', status);
@@ -86,8 +83,6 @@ function ClientLocation({ client }) {
         }
     }, [client]);
 
-    // console.log('Marker actual:', marker); // Debug removido para reducir logs
-
     // Si Google Maps no está disponible, mostrar información alternativa
     if (!mapsAvailable) {
         return (
@@ -100,11 +95,11 @@ function ClientLocation({ client }) {
                 textAlign: "center"
             }}>
                 <h5>📍 Ubicación del Cliente</h5>
-                <p><strong>Dirección:</strong> {client.Location.Address}</p>
-                <p><strong>Colonia:</strong> {client.Location.Cologne}</p>
-                <p><strong>Municipio:</strong> {client.Location.Municipality}</p>
-                <p><strong>Estado:</strong> {client.Location.State}</p>
-                <p><strong>CP:</strong> {client.Location.ZIP}</p>
+                <p><strong>Dirección:</strong> {client?.Location?.Address || 'N/A'}</p>
+                <p><strong>Colonia:</strong> {client?.Location?.Cologne || 'N/A'}</p>
+                <p><strong>Municipio:</strong> {client?.Location?.Municipality || 'N/A'}</p>
+                <p><strong>Estado:</strong> {client?.Location?.State || 'N/A'}</p>
+                <p><strong>CP:</strong> {client?.Location?.ZIP || 'N/A'}</p>
                 <small className="text-muted">Google Maps no disponible</small>
             </div>
         );

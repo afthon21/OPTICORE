@@ -19,7 +19,12 @@ function ApiRequest(baseUrl) {
             const headers = {};
 
             if (!isFormData) headers['Content-Type'] = 'application/json';
-            if (requiresAuth && token) headers['Authorization'] = `Bearer ${token}`;
+            if (requiresAuth && token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            } else if (requiresAuth && !token) {
+                setError('No authorization token found. Please login again.');
+                return null;
+            }
 
             const res = await fetch(`${baseUrl}${endpoint}`, {
                 method,
@@ -28,8 +33,19 @@ function ApiRequest(baseUrl) {
             });
 
             if (!res.ok) {
-                const errorDetails = await res.json();
-                setError(errorDetails.message);
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorDetails = await res.json();
+                    setError(errorDetails.message);
+                } else {
+                    setError(`Server error: ${res.status} ${res.statusText}`);
+                }
+                return null;
+            }
+
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                setError('Server returned non-JSON response');
                 return null;
             }
 

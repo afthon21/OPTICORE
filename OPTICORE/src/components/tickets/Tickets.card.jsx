@@ -35,12 +35,10 @@ function TicketsCard({ tickets = [], onSelected }) {
         // Filtrar por el estado de la ubicación del cliente
         const matches = ticket.Client.Location.State === region;
         if (matches) {
-            console.log(`Ticket ${ticket.Folio} del cliente en ${ticket.Client.Location.State} coincide con región ${region}`);
         }
         return matches;
     });
 
-    console.log(`Filtrado tickets por región: ${ticketsByRegion.length}/${tickets.length} tickets para región: ${region}`);
 
     // Filtro por estado, folio, fecha y cliente
     const filteredName = ticketsByRegion.filter(ticket => {

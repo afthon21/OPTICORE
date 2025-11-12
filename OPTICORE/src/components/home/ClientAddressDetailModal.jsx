@@ -174,16 +174,11 @@ function ClientAddressDetailModal({ client, isOpen, onClose }) {
 
     // Función para descargar captura de pantalla del modal con el mapa
     const handleDownloadAddress = async () => {
-        console.log('🔥 Botón de descarga presionado');
-        
         if (!client) {
-            console.log('❌ No hay cliente seleccionado');
             return;
         }
 
         const clientName = getClientName();
-        console.log('👤 Cliente:', clientName);
-        
         try {
             // Asegurar que la ubicación esté cargada
             if (!clientLocation) {

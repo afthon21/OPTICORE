@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import ApiRequest from "../../hooks/apiRequest";
+import ApiRequest from "../../hooks/apiRequest.jsx";
 
-import { cleanData } from "../../fragments/js/cleanData";
+import { cleanData } from '../../../lib/utils.js';
 import Swal from "sweetalert2";
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
@@ -22,7 +22,7 @@ function CreateNote({ client, onNoteCreated }) {
         const modal = modalRef.current;
         if (!modal) return;
 
-        const instance = bootstrap.Modal.getOrCreateInstance(modal);
+    bootstrap.Modal.getOrCreateInstance(modal);
         modal.addEventListener("hidden.bs.modal", handleClear);
 
         return () => {
@@ -62,8 +62,8 @@ function CreateNote({ client, onNoteCreated }) {
                 onNoteCreated();
             }
 
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
             Swal.fire({
                 icon: 'error',
                 title: 'Error al crear la nota',

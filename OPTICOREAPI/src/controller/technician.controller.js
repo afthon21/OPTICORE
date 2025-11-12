@@ -28,13 +28,9 @@ export const newTechnician = async(req, res) => {
 
 export const viewAllTechnicians = async(req, res) => {
     try {
-        console.log('🔍 [TECHNICIAN] Buscando todos los técnicos...');
         const allTechnicians = await technician.find();
-        console.log(`✅ [TECHNICIAN] Encontrados ${allTechnicians.length} técnicos`);
-        console.log('📋 [TECHNICIAN] Lista:', allTechnicians.map(t => `${t.nombre} ${t.apellidoP} (ID: ${t._id})`));
         return res.status(200).json(allTechnicians);
     } catch (error) {
-        console.log('❌ [TECHNICIAN] Error finding technicians:', error);
         return res.status(500).json({ message: 'Error finding technicians' });
     }
 }

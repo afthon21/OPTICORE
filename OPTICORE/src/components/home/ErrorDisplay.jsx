@@ -1,24 +1,46 @@
 import { useState, useEffect } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 
-function ErrorDisplay() {
+function ErrorDisplay({ showAll = false, onToggleShowAll = null, onLastUpdateChange = null }) {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showAllErrors, setShowAllErrors] = useState(false);
+    const [showAllErrors, setShowAllErrors] = useState(showAll);
+    const [lastUpdate, setLastUpdate] = useState(null);
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
+    // Mantener sincronizado el estado local con la prop recibida desde el padre
+    useEffect(() => {
+        setShowAllErrors(Boolean(showAll));
+    }, [showAll]);
 
     useEffect(() => {
         const fetchErrorLogs = async () => {
             try {
                 const response = await makeRequest('/logs');
-                // Filter only error level logs and get all error logs
-                const errorLogs = (response || [])
-                    .filter(log => log.level === 'error');
-                setLogs(errorLogs);
+                // Verificar si la respuesta es válida
+                if (response && typeof response === 'object') {
+                    const allLogs = Array.isArray(response) ? response : [];
+                    // Ordenar logs de más reciente a más antiguo
+                    const sortedLogs = allLogs.sort((a, b) => {
+                        // Usar timestamp o createdAt según esté disponible
+                        const dateA = new Date(a.timestamp || a.createdAt || a.date || 0);
+                        const dateB = new Date(b.timestamp || b.createdAt || b.date || 0);
+                        return dateB - dateA; // De más reciente a más antiguo
+                    });
+                    setLogs(sortedLogs);
+                    const now = new Date();
+                    setLastUpdate(now);
+                    if (typeof onLastUpdateChange === 'function') onLastUpdateChange(now);
+                } else {
+                    setError('Respuesta inválida del servidor');
+                }
             } catch (err) {
                 setError('Error al cargar los logs');
-                console.error(err);
+                // Si hay error de JSON, registrarlo de manera más específica
+                if (err.message && err.message.includes('DOCTYPE')) {
+                    setError('Error del servidor - respuesta HTML recibida');
+                }
             } finally {
                 setLoading(false);
             }
@@ -26,10 +48,10 @@ function ErrorDisplay() {
 
         fetchErrorLogs();
         
-        // Set up interval to refresh every 30 seconds
-        const interval = setInterval(fetchErrorLogs, 30000);
-        
-        return () => clearInterval(interval);
+            // Set up interval to refresh every 15 seconds for more responsive updates
+            const interval = setInterval(fetchErrorLogs, 15000);
+
+            return () => clearInterval(interval);
     }, []);
 
     const formatDateTime = (timestamp) => {
@@ -40,6 +62,10 @@ function ErrorDisplay() {
             second: '2-digit'
         });
     };
+
+    const getRemainingLogsCount = () => Math.max(0, logs.length - 5);
+
+
 
     if (loading) {
         return (
@@ -60,12 +86,7 @@ function ErrorDisplay() {
     }
 
     return (
-        <div className="flex-grow-1" style={{ 
-            overflowY: 'scroll', 
-            maxHeight: '200px',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#909090ff #f8f9fa'
-        }}>
+        <div style={{ position: 'relative', height: '100%' }}>
             <style>
                 {`
                 .error-display-container {
@@ -89,60 +110,88 @@ function ErrorDisplay() {
                 }
                 `}
             </style>
-            {logs.length === 0 ? (
-                <span className="text-muted">No hay errores recientes</span>
-            ) : (
-                <ul className="list-group list-group-flush">
-                    {(showAllErrors ? logs : logs.slice(0, 3)).map((log, index) => (
-                        <li
-                            key={log._id || index}
-                            className="list-group-item py-1 px-2"
-                            style={{ 
-                                background: '#fff', 
-                                border: '1px solid #e0e0e0', 
-                                borderRadius: '6px', 
-                                marginBottom: '4px', 
-                                boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                            }}
-                        >
-                            <div className="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>
-                                        <i className="bi bi-exclamation-triangle-fill text-danger me-1"></i>
-                                        {log.eventType || 'Error de Monitoreo'}
-                                    </strong>
-                                    <br />
-                                    <small className="text-muted">{formatDateTime(log.timestamp)}</small>
-                                    <br />
-                                    <small style={{ color: '#495057' }}>{log.message}</small>
-                                </div>
-                                <span className="badge bg-danger">error</span>
-                            </div>
-                        </li>
-                    ))}
-                    {logs.length > 3 && (
-                        <li className="list-group-item py-1 px-2 text-center">
-                            <button
-                                className="btn btn-link btn-sm p-0 text-decoration-none"
-                                onClick={() => setShowAllErrors(!showAllErrors)}
-                                style={{ fontSize: '0.8rem' }}
+            
+            {/* Área de contenido scrollable */}
+            <div 
+                className="error-display-container" 
+                style={{ 
+                    overflowY: 'auto', 
+                    maxHeight: '180px',
+                    paddingBottom: '10px',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#909090ff #f8f9fa'
+                }}
+            >
+                {logs.length === 0 ? (
+                    <span className="text-muted">No hay registros recientes</span>
+                ) : (
+                    <ul className="list-group list-group-flush">
+                        {(showAllErrors ? logs : logs.slice(0, 5)).map((log, index) => {
+                        // Definir colores e iconos según el nivel del log
+                        const getLogStyle = (level) => {
+                            switch(level) {
+                                case 'error':
+                                    return {
+                                        icon: 'bi-exclamation-triangle-fill text-danger',
+                                        badge: 'bg-danger',
+                                        text: 'error'
+                                    };
+                                case 'warning':
+                                    return {
+                                        icon: 'bi-exclamation-triangle-fill text-warning',
+                                        badge: 'bg-warning',
+                                        text: 'warning'
+                                    };
+                                case 'info':
+                                    return {
+                                        icon: 'bi-info-circle-fill text-info',
+                                        badge: 'bg-info',
+                                        text: 'info'
+                                    };
+                                default:
+                                    return {
+                                        icon: 'bi-circle-fill text-secondary',
+                                        badge: 'bg-secondary',
+                                        text: 'log'
+                                    };
+                            }
+                        };
+                        
+                        const logStyle = getLogStyle(log.level);
+                        
+                        return (
+                            <li
+                                key={log._id || index}
+                                className="list-group-item py-1 px-2"
+                                style={{ 
+                                    background: '#fff', 
+                                    border: '1px solid #e0e0e0', 
+                                    borderRadius: '6px', 
+                                    marginBottom: '4px', 
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                                }}
                             >
-                                {showAllErrors ? (
-                                    <>
-                                        <i className="bi bi-chevron-up me-1"></i>
-                                        Mostrar menos
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="bi bi-chevron-down me-1"></i>
-                                        +{logs.length - 3} errores más...
-                                    </>
-                                )}
-                            </button>
-                        </li>
-                    )}
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>
+                                            <i className={`bi ${logStyle.icon} me-1`}></i>
+                                            {log.eventType || 'Registro del Sistema'}
+                                        </strong>
+                                        <br />
+                                        <small className="text-muted">{formatDateTime(log.timestamp)}</small>
+                                        <br />
+                                        <small style={{ color: '#495057' }}>{log.message}</small>
+                                    </div>
+                                    <span className={`badge ${logStyle.badge}`}>{logStyle.text}</span>
+                                </div>
+                            </li>
+                        );
+                    })}
                 </ul>
-            )}
+                )}
+            </div>
+            
+            {/* Controles de fecha / mostrar más ahora se renderizan en el header por el componente padre */}
         </div>
     );
 }

@@ -6,6 +6,7 @@ import cors from 'cors';
 import corsOptions from './libs/cors.js';
 import { iniciarMonitoreoSalud } from './controller/network.controller.js'; // 👈 Agrega esta línea
 import packageRoutes from "./middlewares/packages.routes.js"; // <-- Corrige el nombre aquí
+// Logger imports removed for privacy
 
 //Config
 dotenv.config();
@@ -17,11 +18,12 @@ app.use(cors(corsOptions));
 configureRoutes(app);
 app.use('/api/services', packageRoutes);
 
+// Logging functions removed for privacy
+
 // Inicia monitoreo de red 
 iniciarMonitoreoSalud();
 
 //Server
 app.listen(process.env.PORT, () => {
-    console.log('App running');
     console.log(`${process.env.HOST}:${process.env.PORT}/api`);
 });

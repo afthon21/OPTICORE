@@ -1,6 +1,6 @@
 import styleNotes from '../css/clientNotes.module.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import ApiRequest from '../../hooks/apiRequest';
 
 import { LoadFragment } from '../../fragments/Load.fragment';
@@ -13,20 +13,20 @@ function ClientNotes({ client }) {
     const [select, setSelect] = useState(null);
     const [sortOrder, setSortOrder] = useState('desc');
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const res = await makeRequest(`/note/all/${client}`);
             setData(res);
-        } catch (error) {
-            console.log(error);
+        } catch (err) {
+            console.log(err);
         }
-    };
+    }, [makeRequest, client]);
 
     useEffect(() => {
         if (client) {
             fetchData();
         }
-    }, [client]);
+    }, [client, fetchData]);
 
     const handleSortByDate = () => {
         setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');

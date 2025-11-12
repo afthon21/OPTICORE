@@ -56,7 +56,12 @@ export const createPayment = async (req, res) => {
         newPayment.setFolio(newPayment._id, clientName, newPayment.CreateDate)
 
         await newPayment.save();
-        return res.status(201).json({ message: 'New payment created' });
+        // Populate related fields before returning so frontend can update UI immediately
+        const populated = await payment.findById(newPayment._id)
+            .populate('Client', 'Name LastName Location')
+            .populate('Admin', 'UserName')
+            .exec();
+        return res.status(201).json(populated);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error creating pay' });
@@ -140,7 +145,11 @@ export const createPaymentById = async (req, res) => {
         newPayment.setFolio(newPayment._id, clientName, newPayment.CreateDate)
 
         await newPayment.save();
-        return res.status(201).json({ message: 'New payment created' });
+        const populated = await payment.findById(newPayment._id)
+            .populate('Client', 'Name LastName Location')
+            .populate('Admin', 'UserName')
+            .exec();
+        return res.status(201).json(populated);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error creating payment' });
@@ -158,7 +167,8 @@ export const vieWClientPayments = async (req, res) => {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
 
-        const payments = await payment.find({ Client: idClient })
+        // Buscar pagos por el _id del cliente (usar el ObjectId, no el documento completo)
+        const payments = await payment.find({ Client: idClient._id })
             .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
             .exec();

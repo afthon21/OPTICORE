@@ -36,9 +36,12 @@ function TicketComponent() {
             <TicketInfo
            ticket={select}
            onStatusChange={(updatedTicket) => {
-            setData (prev =>
+            // Actualizar la lista de tickets con el ticket modificado
+            setData(prev =>
                 prev.map(t => t._id === updatedTicket._id ? updatedTicket : t)
             );
+            // Actualizar también el ticket seleccionado
+            setSelect(updatedTicket);
            }}
            />
            )}

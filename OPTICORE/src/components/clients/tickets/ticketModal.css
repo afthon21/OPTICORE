@@ -1,0 +1,134 @@
+/* Estilos para mejorar el modal de información del ticket */
+
+#TicketClientModal .modal-dialog {
+    margin: 1.75rem auto !important;
+    max-width: 800px !important;
+}
+
+#TicketClientModal .modal-dialog-centered {
+    display: flex !important;
+    align-items: center !important;
+    min-height: calc(100% - 3.5rem) !important;
+}
+
+#TicketClientModal .modal-content {
+    border-radius: 15px !important;
+    border: none !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+    overflow: hidden !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    background: white !important;
+}
+
+#TicketClientModal .modal-header {
+    border-top-left-radius: 15px !important;
+    border-top-right-radius: 15px !important;
+    padding: 2rem !important;
+    border-bottom: none !important;
+}
+
+#TicketClientModal .modal-body {
+    padding: 1.5rem 2rem !important;
+}
+
+#TicketClientModal .modal-footer {
+    border-bottom-left-radius: 15px !important;
+    border-bottom-right-radius: 15px !important;
+    justify-content: center !important;
+    padding: 1rem 2rem 1.5rem !important;
+    background-color: #f8f9fa !important;
+    border-top: 1px solid #dee2e6 !important;
+}
+
+#TicketClientModal .btn-close {
+    position: absolute !important;
+    right: 1rem !important;
+    top: 1rem !important;
+    z-index: 1060 !important;
+    background-color: rgba(255,255,255,0.9) !important;
+    border-radius: 50% !important;
+    padding: 0.5rem !important;
+    width: 35px !important;
+    height: 35px !important;
+    opacity: 0.8 !important;
+    transition: all 0.3s ease !important;
+}
+
+#TicketClientModal .btn-close:hover {
+    opacity: 1 !important;
+    background-color: rgba(255,255,255,1) !important;
+    transform: scale(1.1) !important;
+}
+
+/* Mejorar la apariencia de los dropdowns en el header */
+#TicketClientModal .dropdown-menu {
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    padding: 0.5rem !important;
+}
+
+#TicketClientModal .dropdown-item {
+    border-radius: 6px !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s ease !important;
+}
+
+#TicketClientModal .dropdown-item:hover {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #TicketClientModal .modal-dialog {
+        margin: 1rem !important;
+        max-width: calc(100% - 2rem) !important;
+    }
+    
+    #TicketClientModal .modal-header {
+        padding: 1.5rem !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    
+    #TicketClientModal .modal-header .d-flex:last-child {
+        margin-top: 1rem !important;
+        align-self: flex-end !important;
+    }
+    
+    #TicketClientModal .btn-close {
+        right: 0.5rem !important;
+        top: 0.5rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    #TicketClientModal .modal-dialog {
+        margin: 0.5rem !important;
+        max-width: calc(100% - 1rem) !important;
+    }
+    
+    #TicketClientModal .modal-content {
+        max-height: 95vh !important;
+    }
+}
+
+/* Animaciones suaves */
+#TicketClientModal.fade .modal-dialog {
+    transition: transform 0.3s ease-out !important;
+    transform: translate(0, -50px) !important;
+}
+
+#TicketClientModal.show .modal-dialog {
+    transform: none !important;
+}
+
+/* Mejorar la apariencia de los badges de estado */
+#TicketClientModal .badge {
+    font-size: 0.9rem !important;
+    padding: 8px 12px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+}

@@ -190,7 +190,21 @@ function AddressModal({ client, isOpen, onClose }) {
         }
     }, [isOpen, client]);
 
-    // Agregar estilos CSS para la animación
+    // (Removed duplicate useEffect that injected animation CSS. The same
+    // effect is already declared earlier to ensure hooks are called in a
+    // stable order.)
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                handleClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    });
+
+    // Agregar estilos CSS para la animación (moved before render/early return)
     useEffect(() => {
         const styleSheet = document.createElement('style');
         styleSheet.innerHTML = `
@@ -205,16 +219,6 @@ function AddressModal({ client, isOpen, onClose }) {
             document.head.removeChild(styleSheet);
         };
     }, []);
-
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') {
-                handleClose();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    });
 
     // Verificación de renderizado - DESPUÉS de todos los hooks
     if (!isOpen || !client) {
@@ -371,21 +375,7 @@ function AddressModal({ client, isOpen, onClose }) {
         }
     };
 
-    // Agregar estilos CSS para la animación
-    useEffect(() => {
-        const styleSheet = document.createElement('style');
-        styleSheet.innerHTML = `
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(styleSheet);
-        
-        return () => {
-            document.head.removeChild(styleSheet);
-        };
-    }, []);
+    
 
     return (
         <div style={styles.backdrop} onClick={handleBackdropClick}>

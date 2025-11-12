@@ -38,20 +38,34 @@ function ClientsComponent() {
 
     if (error) return <p>Error!</p>
 
-    const handleUpdateClient = (updated) => {
-        setData(prev => prev.map(c => c._id === updated._id ? updated : c));
-        setSelect(prev => prev && prev._id === updated._id ? updated : prev);
-    }
+    // Función global para refrescar cliente y paquetes
+    const refreshClientAndPackages = async (clientId) => {
+        try {
+            const clientsRes = await makeRequest('/client/all');
+            setData(clientsRes);
+            if (clientId) {
+                // Buscar el cliente actualizado
+                const updatedClient = clientsRes.find(c => c._id === clientId);
+                setSelect(updatedClient || null);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
         <div className="container-fluid d-flex mt-1 ms-4">
             <ClientsCard clients={data ? data : []} onSelected={setSelect} />
 
+<<<<<<< HEAD
             <ClientsInfo 
                 client={select ? select: ''} 
                 initialActiveTab={activeTab} 
                 onGlobalUpdate={handleUpdateClient}
             />
+=======
+            <ClientsInfo client={select ? select: ''} initialActiveTab={activeTab} onGlobalUpdate={refreshClientAndPackages} />
+>>>>>>> origin/Yanez
         </div>
     );
 }
