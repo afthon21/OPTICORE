@@ -97,7 +97,6 @@ return (
       </span>
     </div>
 
-    {/* Tabla */}
     <div className="table-responsive">
       <table className="table table-hover align-middle text-center shadow-sm border rounded-3 w-100">
         <thead className={styleCard['head-table']}>

@@ -76,7 +76,3 @@ export const handleArchivePayments = (navigate, adminId) => {
     navigate(`/payment/archived/${adminId}`);
 };
 
-export const handleArchivedPackages = (navigate, adminId) => {
-    navigate(`/packageServices/archived/${adminId}`);
-};
-
