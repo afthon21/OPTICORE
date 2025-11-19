@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { useRegion } from '../../hooks/RegionContext';
 
 import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket, handleArchiveTickets} from './js/Routes.js';
-import { handleClients, handleCreateClient, handlePayments, handleCreatePayment } from './js/Routes.js';
-import { handlePackages, handleCreatePackages, handleArchiveClients, handleArchivePayments} from './js/Routes.js';
+import { handleClients, handleCreateClient, handlePayments, handleCreatePayment, handleTechnicians, handleCreateTechnician } from './js/Routes.js';
+import { handlePackages, handleCreatePackages, handleArchiveClients} from './js/Routes.js';
+
 
 export function NavbarFragmentAll() {
     const navigate = useNavigate();
@@ -213,20 +214,41 @@ export function NavbarFragmentAll() {
                                 Ver
                             </a>
                         </li>
-                        <li className="ms-4">
-                            <a
-                                className="nav-link"
-                                onClick={() => handleArchivePayments(navigate, adminId)}
-                                role="button"
-                            >
-                                Archivados
-                            </a>
-                        </li>
-                         
-                        
                         
                     </ul>
                 </li>
+                
+                 <li className="nav-item item">
+                    <a
+                        className="nav-link d-flex align-items-center item-link"
+                        role="button"
+                    >
+                        <i className="bi bi-tools me-2"></i> 
+                        <span className="item-title">Técnicos</span>
+                    </a>
+                    <ul className="list-unstyled ps-3 sub-menu">
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => handleCreateTechnician(navigate, adminId)}
+                                role="button"
+                            >
+                                Crear
+                            </a>
+                        </li>
+
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => handleTechnicians(navigate, adminId)}
+                                role="button"
+                            >
+                                Ver
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li className="nav-item item">
                     <a
                         className="nav-link d-flex align-items-center item-link"

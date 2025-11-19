@@ -76,3 +76,11 @@ export const handleArchivePayments = (navigate, adminId) => {
     navigate(`/payment/archived/${adminId}`);
 };
 
+
+export const handleTechnicians = (navigate, adminId) => {
+    navigate(`/tecnicos/${adminId}`); 
+};
+
+export const handleCreateTechnician = (navigate, adminId) => {
+    navigate(`/tecnicos/create/${adminId}`);
+};
