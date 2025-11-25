@@ -8,14 +8,8 @@ import { logError, logWarning, logInfo } from '../libs/logger.js';
 //Registrar nuevo Administrador
 export const registerUser = async (req, res) => {
     const {
-        Name: {
-            FirstName,
-            SecondName
-        },
-        LastName: {
-            FatherLastName,
-            MotherLastName
-        },
+        Name: {FirstName,SecondName },
+        LastName: {FatherLastName, MotherLastName },
         Email,
         Password,
         Role,
@@ -34,14 +28,8 @@ export const registerUser = async (req, res) => {
 
         //Crear Usuario
         const createUser = new admin({
-            Name: {
-                FirstName,
-                SecondName
-            },
-            LastName: {
-                FatherLastName,
-                MotherLastName
-            },
+            Name: { FirstName, SecondName },
+            LastName: { FatherLastName, MotherLastName },
             Email,
             Password: hashedPassword,
             Role,
