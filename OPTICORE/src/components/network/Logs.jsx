@@ -19,7 +19,16 @@ function Logs() {
                     const dateB = new Date(b.timestamp || b.createdAt || b.date || 0);
                     return dateB - dateA; // De más reciente a más antiguo
                 });
-                setLogs(sortedLogs);
+                // Filtrar logs para no mostrar los inicios de sesión de autenticación
+                const filteredLogs = sortedLogs.filter(log => {
+                    // Normalizar propiedades por si vienen con nombres distintos
+                    const source = (log.source || log.fuente || '').toString();
+                    const eventType = (log.eventType || log.tipoEvento || log.event || '').toString();
+                    // Ocultar registros de 'Autenticación' cuyo tipo de evento sea 'Inicio de Sesión'
+                    if (source === 'Autenticación' && eventType === 'Inicio de Sesión') return false;
+                    return true;
+                });
+                setLogs(filteredLogs);
             } catch (err) {
                 setError('Error al cargar los logs');
                 console.error(err);

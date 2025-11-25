@@ -28,7 +28,15 @@ function ErrorDisplay({ showAll = false, onToggleShowAll = null, onLastUpdateCha
                         const dateB = new Date(b.timestamp || b.createdAt || b.date || 0);
                         return dateB - dateA; // De más reciente a más antiguo
                     });
-                    setLogs(sortedLogs);
+                    // Filtrar logs para no mostrar los inicios de sesión de autenticación
+                    const filteredLogs = sortedLogs.filter(log => {
+                        const source = (log.source || log.fuente || '').toString().toLowerCase();
+                        const eventType = (log.eventType || log.tipoEvento || log.event || '').toString().toLowerCase();
+                        // Ocultar registros de 'Autenticación' cuyo tipo de evento contenga 'inicio'
+                        if (source.includes('autentic') && eventType.includes('inicio')) return false;
+                        return true;
+                    });
+                    setLogs(filteredLogs);
                     const now = new Date();
                     setLastUpdate(now);
                     if (typeof onLastUpdateChange === 'function') onLastUpdateChange(now);

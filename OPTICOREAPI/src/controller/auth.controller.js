@@ -85,7 +85,6 @@ export const loginUser = async (req, res) => {
         }
 
         const token = jwt.sign({ id: User._id }, process.env.JWT_SECRET);
-        await logInfo('Autenticación', 'Inicio de Sesión', `Login exitoso para usuario: ${User.UserName} (${Email})`);
         return res.status(200).json({ 
             token, 
             adminId: User._id, 

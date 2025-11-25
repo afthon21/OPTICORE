@@ -33,6 +33,13 @@ export const logWarning = async (source, eventType, message) => {
 
 export const logInfo = async (source, eventType, message) => {
     try {
+        // Evitar registrar eventos de 'Inicio de Sesión' en 'Autenticación'
+        const src = (source || '').toString().toLowerCase();
+        const ev = (eventType || '').toString().toLowerCase();
+        if (src.includes('autentic') && ev.includes('inicio')) {
+            return; // No guardar este tipo de log
+        }
+
         const logEntry = new Log({
             source,
             eventType,
