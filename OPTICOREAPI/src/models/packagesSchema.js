@@ -19,8 +19,6 @@ const packageSchema = new mongoose.Schema({
     Admin: { type: mongoose.Schema.Types.ObjectId, ref: 'admin' }
 });
 
-// Índice compuesto para optimizar consultas (sin restricción única)
-// Esto permite que un cliente tenga múltiples paquetes del mismo tipo
 packageSchema.index({ name: 1, Client: 1 });
 
 export default mongoose.model('Packages', packageSchema);
