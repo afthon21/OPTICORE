@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiRequest from "../hooks/apiRequest";
+import Swal from 'sweetalert2';
 
 export function CreateTechnician() {
     const navigate = useNavigate();
@@ -9,18 +10,50 @@ export function CreateTechnician() {
         nombre: '',
         apellidoP: '',
         apellidoA: '',
-        telefono: '', 
-        email: '',    
-        activo: false,
-        numEmpleado: '',
+        email: '',
+        mercado: 'Estado de México',
+        zona: '',
+        telefono: '',
+        activo: true
     });
+
+    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
+
+    // Zonas disponibles por mercado
+    const zonesByMercado = {
+        'Estado de México': [
+            'Zona de los Volcanes',
+            'Zona Metropolitana del Valle de México',
+            'Zona Norte',
+            'Zona Oriente',
+            'Zona Sur',
+            'Zona de Tierra Caliente',
+            'Zona de las Sierras'
+        ],
+        'Puebla': [
+            'Centro',
+            'Angelópolis',
+            'Mixteca',
+            'Sierra Norte',
+            'Sierra Nororiental',
+            'Sierra Negra',
+            'Valle de Tehuacán',
+            'Valle de Serdán',
+            'Valle de Atlixco y Matamoros',
+            'Mixteca Baja'
+        ]
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prevData => ({
-            ...prevData,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+        setFormData(prevData => {
+            const next = { ...prevData, [name]: type === 'checkbox' ? checked : value };
+            // Si cambia el mercado, resetear la zona seleccionada
+            if (name === 'mercado') {
+                next.zona = '';
+            }
+            return next;
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -30,34 +63,55 @@ export function CreateTechnician() {
             nombre: formData.nombre,
             apellidoP: formData.apellidoP,
             apellidoA: formData.apellidoA,
-            activo: formData.activo 
+            email: formData.email,
+            telefono: formData.telefono,
+            mercado: formData.mercado,
+            zona: formData.zona,
+            activo: formData.activo
         };
 
         try {
-           
-           
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(technicianData),
-            });
+            // Use makeRequest from ApiRequest hook so it includes auth header and base URL
+            const res = await makeRequest('/tecnicos/new', 'POST', technicianData);
 
-            if (response.ok) {
-                alert(`✅ Técnico ${formData.nombre} registrado con éxito.`);
-                setFormData({
-                    nombre: '', apellidoP: '', apellidoA: '', telefono: '', email: '', 
-                    activo: true, numEmpleado: '' 
+            if (res) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: `Técnico ${formData.nombre} registrado con éxito.`,
+                    timer: 2200,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top',
+                    timerProgressBar: true,
                 });
+                setFormData({ nombre: '', apellidoP: '', apellidoA: '', email: '', mercado: '', zona: '', telefono: '', activo: true });
+                // Redirect to technicians list
+                navigate(`/tecnicos/${sessionStorage.getItem('adminId') || ''}`);
             } else {
-                const errorResult = await response.json();
-                alert(`❌ Error al registrar: ${errorResult.message}`);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error al registrar el técnico',
+                    text: 'Revisa la consola para más detalles.',
+                    timer: 3500,
+                    showConfirmButton: true,
+                    toast: false,
+                    position: 'center',
+                    timerProgressBar: true,
+                });
             }
 
         } catch (error) {
             console.error('Error de red o servidor:', error);
-            alert('❌ No se pudo conectar con el servidor. Verifica la URL de la API.');
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo conectar con el servidor. Verifica la URL de la API.',
+                timer: 3500,
+                showConfirmButton: true,
+                toast: false,
+                position: 'center',
+                timerProgressBar: true,
+            });
         }
     };
 
@@ -94,12 +148,26 @@ export function CreateTechnician() {
 
                     <div className="col-md-6">
                         <div className="form-floating mb-3">
-                            <input type="email" className="form-control" name="email" placeholder="Correo Electrónico" value={formData.email} onChange={handleChange} />
+                            <input type="email" className="form-control" name="email" placeholder="Correo Electrónico" value={formData.email} onChange={handleChange} required />
                             <label htmlFor="email">Correo Electrónico</label>
                         </div>
+
                         <div className="form-floating mb-3">
-                            <input type="text" className="form-control" name="numEmpleado" placeholder="Número de Empleado" value={formData.numEmpleado} onChange={handleChange} />
-                            <label htmlFor="numEmpleado">Número de Empleado</label>
+                            <select className="form-select" name="mercado" value={formData.mercado} onChange={handleChange} required>
+                                <option value="Estado de México">Estado de México</option>
+                                <option value="Puebla">Puebla</option>
+                            </select>
+                            <label htmlFor="mercado">Mercado</label>
+                        </div>
+
+                        <div className="form-floating mb-3">
+                            <select className="form-select" name="zona" value={formData.zona} onChange={handleChange} required>
+                                <option value="">Seleccione una zona</option>
+                                {(zonesByMercado[formData.mercado] || []).map((z) => (
+                                    <option key={z} value={z}>{z}</option>
+                                ))}
+                            </select>
+                            <label htmlFor="zona">Zona</label>
                         </div>
                         
                         <div className="form-check form-switch mt-4">

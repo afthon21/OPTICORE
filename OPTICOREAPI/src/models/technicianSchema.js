@@ -4,6 +4,8 @@ const technicianSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     telefono: { type: String },
     mercado: { type: String },
+    zona: { type: String },
+    email: { type: String },
     ticketsAsignados: { type: Number, default: 0 },
     // Campos opcionales para compatibilidad
     apellidoP: { type: String },

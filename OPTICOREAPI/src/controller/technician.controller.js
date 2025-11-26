@@ -6,7 +6,11 @@ export const newTechnician = async(req, res) => {
         nombre,
         apellidoP,
         apellidoA,
-        activo // <-- Nuevo campo
+        activo, // <-- Nuevo campo
+        telefono,
+        mercado,
+        zona,
+        email
     } = req.body;
 
     try {
@@ -14,7 +18,11 @@ export const newTechnician = async(req, res) => {
             nombre,
             apellidoP,
             apellidoA,
-            activo // <-- Nuevo campo
+            activo, // <-- Nuevo campo
+            telefono: telefono || '',
+            mercado: mercado || '',
+            zona: zona || '',
+            email: email || ''
         });
 
         await newTech.save();
