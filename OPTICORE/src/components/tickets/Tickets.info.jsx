@@ -146,11 +146,20 @@ function TicketInfo({ ticket: ticketProp, onStatusChange }) {
     }
     
     return (
-        <div className="modal fade" id="TicketModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-            <div className="modal-dialog modal-lg" style={{
-                marginTop: '2rem',
-                marginBottom: 'auto'
-            }}>
+        <div className="modal fade" id="TicketModal" tabIndex="-1" aria-labelledby="ModalLabel" aria-hidden="true" style={{ zIndex: 2060 }}>
+            <div
+                className="modal-dialog"
+                style={{
+                    position: 'fixed',
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '1200px',
+                    maxWidth: '95vw',
+                    margin: 0,
+                    padding: 0,
+                }}
+            >
                 <div className="modal-content" style={{
                     borderRadius: '15px',
                     border: 'none',
