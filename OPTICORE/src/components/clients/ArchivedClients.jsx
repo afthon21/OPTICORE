@@ -30,7 +30,7 @@ function ArchivedClients() {
     const refetchClients = async () => {
       try {
         const res = await makeRequest('/client/all');
-        console.log('Refrescando clientes archivados'); // Debug
+        console.log('Refrescando clientes archivados'); 
         const archivedClients = (res || []).filter(c => c.Archived === true);
         setClients(archivedClients);
       } catch (error) {

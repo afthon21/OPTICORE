@@ -12,11 +12,10 @@ import ClientTickets from './tickets/Client.tickets';
 import ClientNotes from './notes/client.notes';
 import ClientLocation from './location/location.map';
 
-<<<<<<< HEAD
+
 function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) {
-=======
-function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGlobalUpdate }) {
->>>>>>> origin/Yanez
+
+
     const [show, setShow] = useState({
         personal: initialActiveTab === 'personal',
         payments: initialActiveTab === 'payments',
@@ -28,16 +27,16 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
 
     // Estado local para el cliente seleccionado
     const [currentClient, setCurrentClient] = useState(client);
-<<<<<<< HEAD
+
     
     // Estado para la lista completa de clientes (necesario para el apartado "Activos")
     const [clients, setClients] = useState([]);
     
     // Estado para controlar cuando refrescar la lista de activos
     const [shouldRefreshActives, setShouldRefreshActives] = useState(false);
-=======
+
     const [paymentsRefreshKey, setPaymentsRefreshKey] = useState(0);
->>>>>>> origin/Yanez
+
 
     // Si el prop client cambia (por ejemplo, seleccionas otro cliente), actualiza el estado local
     useEffect(() => {
@@ -271,7 +270,7 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
 
                     {/* Ver pagos */}
                     {show.payments && (
-                        <ClientPayments client={currentClient?._id} refreshKey={paymentsRefreshKey} />
+                        <ClientPayments isArchived={currentClient?.Archived} client={currentClient?._id} refreshKey={paymentsRefreshKey} />
                     )}
 
                     {/* Ver tickets */}

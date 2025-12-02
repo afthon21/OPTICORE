@@ -16,7 +16,7 @@ import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import CreatePay from './CreatePay.modal.jsx';
 import InfoPay from './Client.infoPay.jsx';
 
-function ClientPayments({ client, refreshKey = 0 }) {
+function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
@@ -47,7 +47,7 @@ function ClientPayments({ client, refreshKey = 0 }) {
     const fetchData = useCallback(async () => {
         if (!client) return; // No hacer fetch si no hay cliente
         try {
-            const res = await makeRequest(`/pay/all/${client}`);
+            const res = await makeRequest(`/pay/all/${client}${isArchived ? '?archived=true' : ''}`);
             // Asegurarnos de que res sea un array; si no, normalizar a array vacío
             if (Array.isArray(res)) {
                 setData(res);
@@ -65,7 +65,7 @@ function ClientPayments({ client, refreshKey = 0 }) {
     const fetchClientPackage = useCallback(async () => {
         if (!client) return;
         try {
-            const res = await makeRequest(`/packages/client/${client}`);
+            const res = await makeRequest(`/packages/client/${client}${isArchived ? '?archived=true' : ''}`);
             // Si el cliente tiene múltiples paquetes, tomamos el primero activo
             if (Array.isArray(res)) {
                 setClientPackage(res.length > 0 ? res[0] : null);

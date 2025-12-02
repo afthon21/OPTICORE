@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import client from '../models/clientSchema.js';
 import document from '../models/documentSchema.js';
 import notes from '../models/notesSchema.js';
@@ -74,7 +75,17 @@ export const newClient = async(req, res) => {
 //View all clients
 export const viewAllClient = async(req, res) => {
     try {
-        const allClients = await client.find();
+        // Devolver clientes con sus paquetes relacionados (incluye archivados)
+        const allClients = await client.aggregate([
+            {
+                $lookup: {
+                    from: 'packages',
+                    localField: '_id',
+                    foreignField: 'Client',
+                    as: 'Packages'
+                }
+            }
+        ]);
 
         return res.status(200).json(allClients);
     } catch (error) {
@@ -89,7 +100,19 @@ export const viewIdClient = async(req, res) => {
     const id = req.params.id;
 
     try {
-        const idClient = await client.findById(id);
+        // Devolver el cliente junto con sus paquetes (incluso archivados)
+        const idClientResult = await client.aggregate([
+            { $match: { _id: mongoose.Types.ObjectId(id) } },
+            {
+                $lookup: {
+                    from: 'packages',
+                    localField: '_id',
+                    foreignField: 'Client',
+                    as: 'Packages'
+                }
+            }
+        ]);
+        const idClient = idClientResult[0];
         if (!idClient) {
             return res.status(404).json({ message: 'Client does not exist yet' })
         }
@@ -184,14 +207,15 @@ export const archiveClient = async (req, res) => {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
         idClient.Archived = true;
+        idClient.ArchivedAt = new Date();
         await idClient.save();
         // Archivar en cascada: tickets, pagos, notas, documentos y paquetes
         await Promise.all([
-            ticket.updateMany({ Client: id }, { $set: { Archived: true } }),
-            payment.updateMany({ Client: id }, { $set: { Archived: true } }),
-            notes.updateMany({ Client: id }, { $set: { Archived: true } }),
-            document.updateMany({ Client: id }, { $set: { Archived: true } }),
-            packages.updateMany({ Client: id }, { $set: { Archived: true } })
+            ticket.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            payment.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            notes.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            document.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            packages.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } })
         ]);
 
         return res.status(200).json({ message: 'Client archived', client: idClient });
@@ -210,13 +234,14 @@ export const unarchiveClient = async (req, res) => {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
         idClient.Archived = false;
+        idClient.ArchivedAt = null;
         await idClient.save();
         await Promise.all([
-            ticket.updateMany({ Client: id }, { $set: { Archived: false } }),
-            payment.updateMany({ Client: id }, { $set: { Archived: false } }),
-            notes.updateMany({ Client: id }, { $set: { Archived: false } }),
-            document.updateMany({ Client: id }, { $set: { Archived: false } }),
-            packages.updateMany({ Client: id }, { $set: { Archived: false } })
+            ticket.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            payment.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            notes.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            document.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            packages.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } })
         ]);
 
         return res.status(200).json({ message: 'Client unarchived', client: idClient });

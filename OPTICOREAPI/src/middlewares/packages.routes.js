@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createPackage, getAllPackages, getPackageByName, getPackageById, updatePackage, deletePackage, getPackagesByClient } from '../controller/packages.controller.js';
+import { createPackage, getAllPackages, getPackageByName, getPackageById, updatePackage, deletePackage, getPackagesByClient, archivePackage, unarchivePackage } from '../controller/packages.controller.js';
 import { protectRoute, getProfile } from '../controller/auth.controller.js';
 
 

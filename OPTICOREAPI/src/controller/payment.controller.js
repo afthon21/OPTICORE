@@ -167,8 +167,12 @@ export const vieWClientPayments = async (req, res) => {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
 
+        // Si se envía ?archived=true, devolver solo pagos archivados
+        const archivedQuery = req.query.archived === 'true';
+        const query = archivedQuery ? { Client: idClient._id, Archived: true } : { Client: idClient._id, Archived: { $ne: true } };
+
         // Buscar pagos por el _id del cliente (usar el ObjectId, no el documento completo)
-        const payments = await payment.find({ Client: idClient._id })
+        const payments = await payment.find(query)
             .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
             .exec();
@@ -244,6 +248,7 @@ export const archivePayments = async (req, res) => {
         }
 
         idPayment.Archived = true;
+        idPayment.ArchivedAt = new Date();
         await idPayment.save();
 
         return res.status(200).json({ message: 'Payment archived successfully' });
@@ -263,6 +268,7 @@ export const unarchivePayments = async (req, res) => {
         }
 
         idPayment.Archived = false;
+        idPayment.ArchivedAt = null;
         await idPayment.save();
 
         return res.status(200).json({ message: 'Payment unarchived successfully' });

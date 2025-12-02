@@ -20,11 +20,17 @@ const packageSchema = new mongoose.Schema({
     Archived: {
         type: Boolean,
         default: false
+    },
+    ArchivedAt: {
+        type: Date,
+        default: null
     }
 });
 
 // Índice compuesto para optimizar consultas (sin restricción única)
 // Esto permite que un cliente tenga múltiples paquetes del mismo tipo
 packageSchema.index({ name: 1, Client: 1 });
+// Index para eliminar automáticamente paquetes archivados después de 30 días
+packageSchema.index({ ArchivedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
 
 export default mongoose.model('Packages', packageSchema);

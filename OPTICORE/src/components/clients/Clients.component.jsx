@@ -57,15 +57,11 @@ function ClientsComponent() {
         <div className="container-fluid d-flex mt-1 ms-4">
             <ClientsCard clients={data ? data : []} onSelected={setSelect} />
 
-<<<<<<< HEAD
             <ClientsInfo 
                 client={select ? select: ''} 
                 initialActiveTab={activeTab} 
-                onGlobalUpdate={handleUpdateClient}
+                onGlobalUpdate={refreshClientAndPackages}
             />
-=======
-            <ClientsInfo client={select ? select: ''} initialActiveTab={activeTab} onGlobalUpdate={refreshClientAndPackages} />
->>>>>>> origin/Yanez
         </div>
     );
 }

@@ -171,7 +171,11 @@ export const getPackagesByClient = async(req, res) => {
             return res.status(404).json({ message: 'Cliente no encontrado' });
         }
 
-        const packages = await Package.find({ Client: clientId })
+        // Si se envía ?archived=true, devolver solo los paquetes archivados
+        const archivedQuery = req.query.archived === 'true';
+        const query = archivedQuery ? { Client: clientId, Archived: true } : { Client: clientId, Archived: { $ne: true } };
+
+        const packages = await Package.find(query)
             .populate('Admin', 'UserName')
             .exec();
 
@@ -190,6 +194,7 @@ export const archivePackage = async(req, res) => {
             return res.status(404).json({ message: 'Paquete no encontrado' });
         }
         packageToArchive.Archived = true;
+        packageToArchive.ArchivedAt = new Date();
         await packageToArchive.save();
         return res.status(200).json({ 
             message: 'Paquete archivado correctamente',
@@ -211,6 +216,7 @@ export const unarchivePackage = async(req, res) => {
             return res.status(404).json({ message: 'Paquete no encontrado' });
         }
         packageToUnarchive.Archived = false;
+        packageToUnarchive.ArchivedAt = null;
         await packageToUnarchive.save();
         return res.status(200).json({ 
             message: 'Paquete desarchivado correctamente',
