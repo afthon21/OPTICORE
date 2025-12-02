@@ -57,7 +57,11 @@ function ClientsComponent() {
         <div className="container-fluid d-flex mt-1 ms-4">
             <ClientsCard clients={data ? data : []} onSelected={setSelect} />
 
-            <ClientsInfo client={select ? select: ''} initialActiveTab={activeTab} onGlobalUpdate={refreshClientAndPackages} />
+            <ClientsInfo 
+                client={select ? select: ''} 
+                initialActiveTab={activeTab} 
+                onGlobalUpdate={refreshClientAndPackages}
+            />
         </div>
     );
 }

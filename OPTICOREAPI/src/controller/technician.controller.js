@@ -119,3 +119,20 @@ export const viewInactiveTechnicians = async(req, res) => {
         return res.status(500).json({ message: 'Error finding technicians' });
     }
 }
+
+export const archiveTechnician = async(req, res) => {
+    const id = req.params.id;
+    try {
+        const idTechnicians = await technician.findById(id);
+        if (!idTechnicians) {
+            return res.status(404).json({ message: 'Technician does not exist yet' });
+        }
+        idTechnicians.Archived = true;
+        await idTechnicians.save();
+        return res.status(200).json({ message: 'Technician archived successfully' });
+    } catch (error) { 
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
+        
+    }
+}

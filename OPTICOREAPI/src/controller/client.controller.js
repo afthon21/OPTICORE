@@ -1,9 +1,10 @@
+import mongoose from 'mongoose';
 import client from '../models/clientSchema.js';
 import document from '../models/documentSchema.js';
 import notes from '../models/notesSchema.js';
 import payment from '../models/paymentsSchema.js';
 import ticket from '../models/ticketsSchema.js';
-import { logError, logWarning, logInfo } from '../libs/logger.js';
+import packages from '../models/packagesSchema.js';
 
 //Create a new client
 export const newClient = async(req, res) => {
@@ -74,7 +75,18 @@ export const newClient = async(req, res) => {
 //View all clients
 export const viewAllClient = async(req, res) => {
     try {
-        const allClients = await client.find();
+        // Devolver clientes con sus paquetes relacionados (incluye archivados)
+        const allClients = await client.aggregate([
+            {
+                $lookup: {
+                    from: 'packages',
+                    localField: '_id',
+                    foreignField: 'Client',
+                    as: 'Packages'
+                }
+            }
+        ]);
+
         return res.status(200).json(allClients);
     } catch (error) {
         await logError('Gestión de Clientes', 'Consultar Clientes', 'Error al obtener lista de clientes', error);
@@ -88,7 +100,19 @@ export const viewIdClient = async(req, res) => {
     const id = req.params.id;
 
     try {
-        const idClient = await client.findById(id);
+        // Devolver el cliente junto con sus paquetes (incluso archivados)
+        const idClientResult = await client.aggregate([
+            { $match: { _id: mongoose.Types.ObjectId(id) } },
+            {
+                $lookup: {
+                    from: 'packages',
+                    localField: '_id',
+                    foreignField: 'Client',
+                    as: 'Packages'
+                }
+            }
+        ]);
+        const idClient = idClientResult[0];
         if (!idClient) {
             return res.status(404).json({ message: 'Client does not exist yet' })
         }
@@ -163,14 +187,15 @@ export const deleteClient = async(req, res) => {
             notes.deleteMany({ Client: id }),
             document.deleteMany({ Client: id }),
             payment.deleteMany({ Client: id }),
-            ticket.deleteMany({ Client: id })
+            ticket.deleteMany({ Client: id }),
+            packages.deleteMany({ Client: id })
         ]);
 
         await client.findByIdAndDelete(id);
         return res.status(200).json({ message: 'Client deleted' });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: 'Server Erro!' });
+        return res.status(500).json({ message: 'Server Error!' });
     }
 }
 //Archivar cliente
@@ -182,8 +207,44 @@ export const archiveClient = async (req, res) => {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
         idClient.Archived = true;
+        idClient.ArchivedAt = new Date();
         await idClient.save();
+        // Archivar en cascada: tickets, pagos, notas, documentos y paquetes
+        await Promise.all([
+            ticket.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            payment.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            notes.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            document.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } }),
+            packages.updateMany({ Client: id }, { $set: { Archived: true, ArchivedAt: new Date() } })
+        ]);
+
         return res.status(200).json({ message: 'Client archived', client: idClient });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error!' });
+    }
+}
+
+// Desarchivar cliente
+export const unarchiveClient = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const idClient = await client.findById(id);
+        if (!idClient) {
+            return res.status(404).json({ message: 'Client does not exist yet' });
+        }
+        idClient.Archived = false;
+        idClient.ArchivedAt = null;
+        await idClient.save();
+        await Promise.all([
+            ticket.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            payment.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            notes.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            document.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } }),
+            packages.updateMany({ Client: id }, { $set: { Archived: false, ArchivedAt: null } })
+        ]);
+
+        return res.status(200).json({ message: 'Client unarchived', client: idClient });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server error!' });

@@ -11,8 +11,10 @@ const technicianSchema = new mongoose.Schema({
     apellidoP: { type: String },
     apellidoA: { type: String },
     activo: { type: Boolean, default: true },
-}, {
-    timestamps: true
+    Archived: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const technician = mongoose.model('tecnicos', technicianSchema);

@@ -131,6 +131,9 @@ const handleTechOptionClick = (option) => {
         if (!formValues.Priority || formValues.Priority === priority[0].name){
             errors.Priority = 'Selecciona la prioridad';
         }
+        if (!formValues.tecnico || formValues.tecnico.trim() === '') {
+            errors.tecnico = 'Debe seleccionar un técnico.';
+        }
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;

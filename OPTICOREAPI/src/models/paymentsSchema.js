@@ -42,6 +42,11 @@ const paymentSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
+    ,
+    ArchivedAt: {
+        type: Date,
+        default: null
+    }
 });
 
 paymentSchema.methods.setFolio = function setFolio(id,clientName,date) {
@@ -58,5 +63,8 @@ paymentSchema.methods.setFolio = function setFolio(id,clientName,date) {
     const folio = 'PY'+identifier+'-'+formDate+clientChars;
     this.Folio = folio;
 }
+
+// Index para eliminar automáticamente pagos archivados después de 30 días
+paymentSchema.index({ ArchivedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
 
 export default model('payment',paymentSchema);
