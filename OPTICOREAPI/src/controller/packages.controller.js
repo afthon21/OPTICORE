@@ -28,6 +28,23 @@ export const createPackage = async(req, res) => {
             return res.status(404).json({ message: 'El cliente seleccionado no existe' });
         }
 
+        // Validación: evitar asignar más de un paquete activo al mismo cliente
+        const existingPackage = await Package.findOne({
+            Client: clientId,
+            Archived: { $ne: true }
+        });
+
+        if (existingPackage) {
+            return res.status(400).json({
+                message: 'Este cliente ya tiene un paquete activo asignado. No se pueden asignar paquetes duplicados.',
+                existingPackage: {
+                    folio: existingPackage.folio,
+                    name: existingPackage.name,
+                    type: existingPackage.type
+                }
+            });
+        }
+
         // Generar folio único
         const folio = `PKG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         
