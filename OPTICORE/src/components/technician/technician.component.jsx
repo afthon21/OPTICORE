@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ApiRequest from "../hooks/apiRequest";
 import Swal from 'sweetalert2';
+import Swal from 'sweetalert2';
 import './technician.css';
 
 export function ViewTechnicians() {
@@ -489,6 +490,8 @@ export function ViewTechnicians() {
                                         borderRadius: 8,
                                         padding: '10px 14px',
                                         marginBottom: 10,
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                                        cursor: 'pointer'
                                         boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                                         cursor: 'pointer'
                                     }}>
