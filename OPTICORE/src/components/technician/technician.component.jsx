@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ApiRequest from "../hooks/apiRequest";
+import Swal from 'sweetalert2';
 import './technician.css';
 
 export function ViewTechnicians() {
@@ -83,6 +84,300 @@ export function ViewTechnicians() {
     const closeTicketsModal = () => {
         setTicketsModalOpen(false);
         setShowAllTickets(false);
+    };
+
+    // Función para mostrar el modal con información del ticket
+    const handleTicketClick = (ticket) => {
+        const colors = {
+            primary: '#26a69a',
+            secondary: '#4db6ac',
+        };
+        Swal.fire({
+            title: false,
+            html: `
+                <div style="margin: -29px -29px 0 -29px;">
+                    <!-- Encabezado con gradiente -->
+                    <div style="
+                        background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);
+                        color: white;
+                        padding: 20px 10px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        border-radius: 19px 15px 0 0;
+                    ">
+                        <div style="
+                            width: 35px;
+                            height: 35px;
+                            backgroundColor: rgba(255,255,255,0.2);
+                            borderRadius: 50%;
+                            display: flex;
+                            alignItems: center;
+                            justifyContent: center;
+                        ">
+                            <i class="bi bi-ticket-detailed-fill" style="font-size: 18px;"></i>
+                        </div>
+                        <h5 style="margin: 0; fontWeight: 600; fontSize: 1.2rem;">
+                            Información del Ticket
+                        </h5>
+                    </div>
+                    
+                    <!-- Contenido del modal -->
+                    <div style="padding: 2rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-hash" style="margin-right: 8px;"></i>
+                                    Folio:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    font-size: 1.1rem;
+                                    font-weight: 500;
+                                    color: #333;
+                                ">
+                                    ${ticket.Folio || 'Sin folio'}
+                                </p>
+                            </div>
+                            
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-flag" style="margin-right: 8px;"></i>
+                                    Estado:
+                                </label>
+                                <span class="badge ${
+                                    ticket.Status === 'Abierto' ? 'bg-primary' :
+                                    ticket.Status === 'En espera' ? 'bg-warning' :
+                                    ticket.Status === 'En Progreso' || ticket.Status === 'En proceso' ? 'bg-info' :
+                                    ticket.Status === 'Retenido' ? 'bg-danger' :
+                                    ticket.Status === 'Cerrado' || ticket.Status === 'Resuelto' ? 'bg-success' : 'bg-secondary'
+                                }" style="font-size: 0.9rem; padding: 8px 12px;">
+                                    ${ticket.Status || 'Sin estado'}
+                                </span>
+                            </div>
+                            
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-exclamation-triangle" style="margin-right: 8px;"></i>
+                                    Prioridad:
+                                </label>
+                                <span class="badge ${
+                                    ticket.Priority === 'Urgente' ? 'bg-danger' :
+                                    ticket.Priority === 'Alta' ? 'bg-warning' :
+                                    ticket.Priority === 'Media' ? 'bg-info' :
+                                    ticket.Priority === 'Baja' ? 'bg-secondary' : 'bg-light text-dark'
+                                }" style="font-size: 0.9rem; padding: 8px 12px;">
+                                    ${ticket.Priority || 'Sin prioridad'}
+                                </span>
+                            </div>
+                            
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-calendar3" style="margin-right: 8px;"></i>
+                                    Fecha:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    color: #333;
+                                    font-weight: 500;
+                                ">
+                                    ${ticket.CreateDate ? new Date(ticket.CreateDate).toLocaleDateString('es-ES', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    }) : 'Sin fecha'}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            border-left: 4px solid ${colors.primary};
+                            padding-left: 15px;
+                            padding-top: 5px;
+                            padding-bottom: 5px;
+                            margin-bottom: 1rem;
+                        ">
+                            <label style="
+                                color: ${colors.primary};
+                                font-weight: 600;
+                                font-size: 0.9rem;
+                                margin-bottom: 5px;
+                                display: flex;
+                                align-items: center;
+                            ">
+                                <i class="bi bi-card-text" style="margin-right: 8px;"></i>
+                                Asunto:
+                            </label>
+                            <p style="
+                                margin: 0;
+                                color: #333;
+                                font-weight: 500;
+                            ">
+                                ${ticket.Issue || 'Sin asunto'}
+                            </p>
+                        </div>
+                        
+                        <div style="
+                            border-left: 4px solid ${colors.primary};
+                            padding-left: 15px;
+                            padding-top: 5px;
+                            padding-bottom: 5px;
+                            margin-bottom: 1rem;
+                        ">
+                            <label style="
+                                color: ${colors.primary};
+                                font-weight: 600;
+                                font-size: 0.9rem;
+                                margin-bottom: 5px;
+                                display: flex;
+                                align-items: center;
+                            ">
+                                <i class="bi bi-file-text" style="margin-right: 8px;"></i>
+                                Descripción:
+                            </label>
+                            <p style="
+                                margin: 0;
+                                color: #333;
+                            ">
+                                ${ticket.Description || 'Sin descripción'}
+                            </p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-person" style="margin-right: 8px;"></i>
+                                    Cliente:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    color: #333;
+                                    font-weight: 500;
+                                ">
+                                    ${ticket.Client?.Name?.FirstName ? ticket.Client.Name.FirstName + ' ' + (ticket.Client.Name.LastName || '') : 'Sin cliente'}
+                                </p>
+                            </div>
+                            
+                            <div style="
+                                border-left: 4px solid ${colors.primary};
+                                padding-left: 15px;
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                            ">
+                                <label style="
+                                    color: ${colors.primary};
+                                    font-weight: 600;
+                                    font-size: 0.9rem;
+                                    margin-bottom: 5px;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="bi bi-tools" style="margin-right: 8px;"></i>
+                                    Técnico:
+                                </label>
+                                <p style="
+                                    margin: 0;
+                                    color: #333;
+                                    font-weight: 500;
+                                ">
+                                    ${ticket.tecnico || 'Sin técnico'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            showClass: {
+                popup: 'swal2-show'
+            },
+            hideClass: {
+                popup: 'swal2-hide'
+            },
+            confirmButtonText: 'Cerrar',
+            confirmButtonColor: colors.primary,
+            width: 700,
+            position: 'center',
+            allowOutsideClick: true,
+            customClass: {
+                popup: 'swal2-border-radius',
+                htmlContainer: 'swal2-html-custom',
+                container: 'swal2-modal-technician'
+            },
+            didOpen: () => {
+                const popup = Swal.getPopup();
+                if (popup) {
+                    popup.style.borderRadius = '15px';
+                    popup.style.boxShadow = `0 15px 35px rgba(0,0,0,0.15)`;
+                    popup.style.overflow = 'hidden';
+                    popup.style.zIndex = '9999';
+                }
+                // Asegurarse de que el backdrop también tenga z-index alto
+                const backdrop = document.querySelector('.swal2-container.swal2-modal-technician');
+                if (backdrop) {
+                    backdrop.style.zIndex = '9998';
+                }
+            }
+        });
     };
 
     if (isLoading) return <div className="p-5 text-center">Cargando técnicos...</div>;
@@ -187,7 +482,10 @@ export function ViewTechnicians() {
                                 <div>No hay tickets asignados.</div>
                             ) : (
                                 (showAllTickets ? technicianTickets : technicianTickets.slice(0, 3)).map((ticket, idx) => (
-                                    <div key={ticket._id} style={{
+                                    <div 
+                                        key={ticket._id} 
+                                        onClick={() => handleTicketClick(ticket)}
+                                        style={{
                                         display: 'flex',
                                         flexDirection: 'column',
                                         background: '#f8f9fa',
@@ -195,7 +493,8 @@ export function ViewTechnicians() {
                                         borderRadius: 8,
                                         padding: '10px 14px',
                                         marginBottom: 10,
-                                        boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                                        cursor: 'pointer'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
