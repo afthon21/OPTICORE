@@ -35,6 +35,8 @@ import Onus from './components/network/Onus.jsx';
 import ArchivedClients from './components/clients/ArchivedClients.jsx';
 import ArchivedTickets from './components/tickets/Ticket.Archived.jsx';
 import ArchivedPayments from './components/payments/ArchivedPayments.jsx';
+import { ViewTechnicians } from './components/technician/technician.component.jsx';
+import { CreateTechnician } from './components/technician/create.technician.jsx';
 
 
 
@@ -72,6 +74,10 @@ function App() {
             <Route path='/packageServices/:id' element={<ProtectedRoute> <PackagesContainer /> </ProtectedRoute>}></Route>
             <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
            
+            {/* Técnicos rutas */}
+            <Route path='/tecnicos/:adminId' element={<ProtectedRoute> <ViewTechnicians /> </ProtectedRoute>}></Route>
+            <Route path='/tecnicos/create/:adminId' element={<ProtectedRoute> <CreateTechnician /> </ProtectedRoute>}></Route>
+
             {/* Monitoreo de red */}
             <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
             <Route path='/network/radiofrecuencia/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>

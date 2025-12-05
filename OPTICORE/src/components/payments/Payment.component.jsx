@@ -22,6 +22,12 @@ function PaymentComponent() {
         handleLoad()
     }, [handleLoad]);
 
+    useEffect(() => {
+        const handleCloseInfo = () => setSelect(null);
+        window.addEventListener('closePaymentInfo', handleCloseInfo);
+        return () => window.removeEventListener('closePaymentInfo', handleCloseInfo);
+    }, []);
+
     const handlePaymentUpdate = (paymentId) => {
         setData(prev => prev.filter(p => p._id !== paymentId));
         // Si el pago actualizado está seleccionado, lo deseleccionamos
@@ -36,23 +42,24 @@ function PaymentComponent() {
 
     return (
         <>
-            <div className="container-fluid d-flex justify-content-center mt-1">
-                <PaymentCard 
-                    payments={data ? data : []} 
-                    onSelected={setSelect} 
-                    onPaymentUpdate={handlePaymentUpdate}
-                />
+            <div className="container-fluid mt-1" style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <PaymentCard 
+                        payments={data ? data : []} 
+                        onSelected={setSelect} 
+                        onPaymentUpdate={handlePaymentUpdate}
+                    />
+                </div>
                 {select && (
                     <PaymentInfo
-                    payment={select}
-                    onStatusChange={(updatedPayment)=> {
-                        setData (prev =>
-                            prev.map(t => t._id=== updatedPayment._id ? updatedPayment : t)
-                        );
-                    }}
+                        payment={select}
+                        onStatusChange={(updatedPayment)=> {
+                            setData (prev =>
+                                prev.map(t => t._id=== updatedPayment._id ? updatedPayment : t)
+                            );
+                        }}
                     />
                 )}
-                
             </div>
         </>
     );
