@@ -20,11 +20,12 @@ function ClientsCard({ clients = [], onSelected }) {
         ${client.LastName.FatherLastName}  
         ${client.LastName.MotherLastName}`
             .replace(/\s+/g, ' ').trim();
-        // Filtrar por nombre, región y excluir archivados
+        // Filtrar por nombre y excluir archivados
         const matchesName = clientName.toLowerCase().includes(search.toLowerCase());
-        const matchesRegion = client.Location?.State === region;
-        const isNotArchived = !client.Archived; // Excluir clientes archivados
-        return matchesName && matchesRegion && isNotArchived;
+        const isNotArchived = client.Archived !== true; // Excluir clientes archivados (true) pero mostrar los que no tienen el campo
+        // Si hay región seleccionada y el cliente tiene ubicación, filtrar por región. Si no, mostrar el cliente
+        const matchesRegion = region ? (client.Location?.State === region || !client.Location?.State) : true;
+        return matchesName && isNotArchived && matchesRegion;
     });
 
     return (

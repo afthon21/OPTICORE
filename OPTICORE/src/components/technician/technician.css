@@ -4,26 +4,3 @@
 .tech-details .value{color:#0f172a}
 .tech-details .pill{background:#17a2b8;color:#fff;border-radius:9999px;padding:6px 14px;font-weight:700;letter-spacing:.5px}
 .tech-details .muted{color:#6b7280}
-
-/* Estilos para SweetAlert2 */
-.swal2-border-radius {
-    border-radius: 15px !important;
-}
-
-.swal2-html-custom {
-    text-align: left;
-}
-
-.badge {
-    font-size: 0.9rem;
-    padding: 8px 12px;
-}
-
-/* Asegurar que el modal SweetAlert2 esté por encima del modal de tickets */
-.swal2-modal-technician {
-    z-index: 9998 !important;
-}
-
-.swal2-modal-technician .swal2-popup {
-    z-index: 9999 !important;
-}

@@ -39,6 +39,8 @@ function PaymentCard({ payments = [], onSelected }) {
 
     const filteredData = payments.filter(payment => {
         if (payment.Archived || archivedIds.includes(payment._id)) return false;
+        // Excluir pagos de clientes archivados
+        if (payment.Client?.Archived) return false;
         // ...existing code...
         const matchesRegion = payment.Client?.Location?.State === region;
         if (!matchesRegion) return false;

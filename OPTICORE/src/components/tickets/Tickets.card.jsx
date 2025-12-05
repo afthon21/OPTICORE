@@ -26,6 +26,11 @@ function TicketsCard({ tickets = [], onSelected }) {
 
     // Filtro por región primero
     const ticketsByRegion = tickets.filter(ticket => {
+        // Excluir tickets de clientes archivados
+        if (ticket.Client?.Archived) return false;
+        // Excluir tickets archivados
+        if (ticket.Archived || archivedIds.includes(ticket._id)) return false;
+        
         // Si no hay región seleccionada, mostrar todos
         if (!region) return true;
         
@@ -180,8 +185,6 @@ function TicketsCard({ tickets = [], onSelected }) {
                             className={`${styleTable['selected-row']}`}
                             key={item._id} 
                             onClick={() => onSelected(item)}
-                            data-bs-toggle="modal" 
-                            data-bs-target="#TicketModal"
                         >
                             <td>{item.Folio}</td>
                             <td>{`${item.Client.Name.FirstName} 

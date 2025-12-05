@@ -35,6 +35,7 @@ import Onus from './components/network/Onus.jsx';
 import ArchivedClients from './components/clients/ArchivedClients.jsx';
 import ArchivedTickets from './components/tickets/Ticket.Archived.jsx';
 import ArchivedPayments from './components/payments/ArchivedPayments.jsx';
+import ArchivedPackages from './components/services packages/ArchivedPackages.jsx';
 import { ViewTechnicians } from './components/technician/technician.component.jsx';
 import { CreateTechnician } from './components/technician/create.technician.jsx';
 
@@ -73,6 +74,7 @@ function App() {
             {/* Paquetes rutas */}
             <Route path='/packageServices/:id' element={<ProtectedRoute> <PackagesContainer /> </ProtectedRoute>}></Route>
             <Route path='/packageServices/create/:id' element={<ProtectedRoute> <CreatePackage /> </ProtectedRoute>}></Route>
+            <Route path='/packageServices/archived/:id' element={<ProtectedRoute> <ArchivedPackages /> </ProtectedRoute>}></Route>
            
             {/* Técnicos rutas */}
             <Route path='/tecnicos/:adminId' element={<ProtectedRoute> <ViewTechnicians /> </ProtectedRoute>}></Route>

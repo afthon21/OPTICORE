@@ -61,6 +61,11 @@ function PackagesCard({ packages = [], setPackages, onSelected }) {
 
     // Filtrar paquetes por región si está definida
     const packagesByRegion = packages.filter(pkg => {
+        // Excluir paquetes de clientes archivados
+        if (pkg.Client?.Archived) return false;
+        // Excluir paquetes archivados
+        if (pkg.Archived) return false;
+        
         if (!region) return true;
         
         // Si el paquete tiene cliente y el cliente tiene ubicación
@@ -195,27 +200,14 @@ function PackagesCard({ packages = [], setPackages, onSelected }) {
           )}
         </tbody>
       </table>
-      {/* Modal de edición de paquete */}
-      {showEditModal && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.3)', zIndex: 9999 }}
-          onClick={handleCloseModal}
-        >
-          <div
-            style={{ position: 'relative', maxWidth: 600, margin: '5% auto', background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', padding: 24 }}
-            onClick={e => e.stopPropagation()}
-          >
-            <button
-              style={{ position: 'absolute', top: 12, right: 12, background: 'transparent', border: 'none', fontSize: 22, cursor: 'pointer' }}
-              onClick={handleCloseModal}
-              aria-label="Cerrar"
-            >
-              ×
-            </button>
-            {/* Renderizar el modal de edición, pasando el paquete seleccionado y la función de guardado */}
-            <EditPackageModal pkg={selectedPackage} onClose={handleCloseModal} onSave={handleSavePackage} />
-          </div>
-        </div>
-      )}
+      
+      {/* Panel lateral de edición de paquete */}
+      <EditPackageModal 
+        pkg={selectedPackage} 
+        isOpen={showEditModal}
+        onClose={handleCloseModal} 
+        onSave={handleSavePackage} 
+      />
     </div>
   );
 }

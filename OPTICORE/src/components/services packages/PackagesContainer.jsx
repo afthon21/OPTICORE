@@ -6,7 +6,6 @@ export default function PackagesContainer() {
   const { makeRequest, error, loading } = ApiRequest(import.meta.env.VITE_API_BASE);
   const [packages, setPackages] = useState([]);
 
-
   const fetchPackages = async () => {
     try {
       const res = await makeRequest("/packages/all");

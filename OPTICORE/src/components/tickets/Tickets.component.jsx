@@ -43,6 +43,7 @@ function TicketComponent() {
             // Actualizar también el ticket seleccionado
             setSelect(updatedTicket);
            }}
+           onClose={() => setSelect(null)}
            />
            )}
            

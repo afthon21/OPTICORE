@@ -316,6 +316,11 @@ export function NavbarFragmentAll() {
                                 onClick={() => handlePackages(navigate, adminId)}
                                 role="button">Ver</a>
                         </li>
+                        <li className="ms-4">
+                            <a className="nav-link"
+                                onClick={() => navigate(`/packageServices/archived/${adminId}`)}
+                                role="button">Archivados</a>
+                        </li>
                     </ul>
                 </li>
                 {/* NetWork con submenú */}
