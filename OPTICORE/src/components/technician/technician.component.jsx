@@ -243,7 +243,7 @@ export function ViewTechnicians() {
                                             title="Editar técnico"
                                             style={{ marginLeft: '10px' }}
                                         >
-                                            <i className="bi bi-pencil-fill"></i>
+                                            <i className="bi bi-pencil-square"></i>
                                         </button>
                                     )}
                                 </button>

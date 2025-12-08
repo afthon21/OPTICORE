@@ -85,14 +85,10 @@ export const editTechnician = async(req, res) => {
         
         // Si cambió el nombre, actualizar todos los tickets asociados en cascada
         if (oldFullName !== newFullName) {
-            console.log(`🔄 Actualizando tickets en cascada...`);
-            console.log(`   Nombre anterior: "${oldFullName}"`);
-            console.log(`   Nombre nuevo: "${newFullName}"`);
-            
             // Actualizar todos los tickets usando updateMany con regex case-insensitive
             const result = await tickets.updateMany(
                 { 
-                    tecnico: new RegExp(`^${oldFullName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') // Case-insensitive exact match, escapando caracteres especiales
+                    tecnico: new RegExp(`^${oldFullName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')
                 },
                 { 
                     $set: { tecnico: newFullName } 
@@ -100,8 +96,6 @@ export const editTechnician = async(req, res) => {
             );
             
             const updatedCount = result.modifiedCount || 0;
-            
-            console.log(`✅ Técnico actualizado: ${updatedCount} ticket(s) actualizados en cascada.`);
             
             return res.status(200).json({ 
                 message: 'Technician updated', 
