@@ -221,7 +221,7 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
 
             {/* Resumen de abonos acumulados */}
             <div className="row mb-3">
-                <div className="col-md-4">
+                <div className="col-md-6 mb-3">
                     <div style={{background: '#fff', border: '2px solid #17a2b8', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
                         <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
                             <i className="bi bi-credit-card" style={{color: '#17a2b8', fontSize: '1.5rem', marginRight: '8px'}}></i>
@@ -235,40 +235,116 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
                         )}
                     </div>
                 </div>
-                <div className="col-md-4">
-                    <div style={{background: '#fff', border: '2px solid #28a745', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', cursor: 'pointer'}} onClick={() => setShowAbonosModal(true)}>
-                        <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
-                            <i className="bi bi-folder" style={{color: '#28a745', fontSize: '1.5rem', marginRight: '8px'}}></i>
-                            <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1.1rem'}}>Total Abonos</span>
-                        </div>
-                        <div style={{color: '#28a745', fontSize: '2rem', fontWeight: 'bold'}}>
-                            ${successfulAbonos.toLocaleString()}
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <div style={{background: '#fff', border: '2px solid #ffc107', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
-                        <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
-                            <i className="bi bi-clock-history" style={{color: '#ffc107', fontSize: '1.5rem', marginRight: '8px'}}></i>
-                            <span style={{color: '#ffc107', fontWeight: 'bold', fontSize: '1.1rem'}}>Monto Pendiente</span>
-                        </div>
-                        <div style={{color: '#ffc107', fontSize: '2rem', fontWeight: 'bold'}}>
-                            ${(() => {
-                                const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                                const pendiente = totalPackage - successfulAbonos;
-                                return pendiente >= 0 ? pendiente.toLocaleString() : '0';
-                            })()}
-                        </div>
-                        {(() => {
-                            const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                            const pendiente = totalPackage - successfulAbonos;
-                            return pendiente <= 0 && totalPackage > 0 ? (
-                                <div style={{color: '#28a745', fontSize: '1rem', marginTop: '8px'}}>
-                                    <i className="bi bi-check-circle me-1"></i>
-                                    Completamente pagado
+                <div className="col-md-6 mb-3">
+                    <div className="row h-100">
+                        <div className="col-12 mb-3">
+                            <div style={{background: '#fff', border: '2px solid #28a745', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', cursor: 'pointer'}} onClick={() => setShowAbonosModal(true)}>
+                                <div style={{display: 'flex', alignItems: 'center', marginBottom: '6px'}}>
+                                    <i className="bi bi-folder" style={{color: '#28a745', fontSize: '1.3rem', marginRight: '6px'}}></i>
+                                    <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1rem'}}>Total Abonos</span>
                                 </div>
-                            ) : null;
-                        })()}
+                                <div style={{color: '#28a745', fontSize: '1.6rem', fontWeight: 'bold'}}>
+                                    ${successfulAbonos.toLocaleString()}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-6">
+                            <div style={{background: '#fff', border: '2px solid #ffc107', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
+                                <div style={{display: 'flex', alignItems: 'center', marginBottom: '6px'}}>
+                                    <i className="bi bi-clock-history" style={{color: '#ffc107', fontSize: '1.2rem', marginRight: '6px'}}></i>
+                                    <span style={{color: '#ffc107', fontWeight: 'bold', fontSize: '0.95rem'}}>Pendiente</span>
+                                </div>
+                                <div style={{color: '#ffc107', fontSize: '1.5rem', fontWeight: 'bold'}}>
+                                    ${(() => {
+                                        const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
+                                        const pendiente = totalPackage - successfulAbonos;
+                                        return pendiente >= 0 ? pendiente.toLocaleString() : '0';
+                                    })()}
+                                </div>
+                                {(() => {
+                                    const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
+                                    const pendiente = totalPackage - successfulAbonos;
+                                    return pendiente <= 0 && totalPackage > 0 ? (
+                                        <div style={{color: '#28a745', fontSize: '0.85rem', marginTop: '4px'}}>
+                                            <i className="bi bi-check-circle me-1"></i>
+                                            Pagado
+                                        </div>
+                                    ) : null;
+                                })()}
+                            </div>
+                        </div>
+                        <div className="col-6">
+                            <div style={{background: '#fff', border: '2px solid #6f42c1', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
+                                <div style={{display: 'flex', alignItems: 'center', marginBottom: '6px'}}>
+                                    <i className="bi bi-calendar-event" style={{color: '#6f42c1', fontSize: '1.2rem', marginRight: '6px'}}></i>
+                                    <span style={{color: '#6f42c1', fontWeight: 'bold', fontSize: '0.95rem'}}>Próximo Pago</span>
+                                </div>
+                                <div style={{color: '#6f42c1', fontSize: '1.2rem', fontWeight: 'bold'}}>
+                                    {(() => {
+                                        if (!clientPackage?.createdAt) return 'Sin fecha';
+                                        const createdDate = new Date(clientPackage.createdAt);
+                                        const today = new Date();
+                                        
+                                        // Calcular cuántos ciclos de 30 días han pasado desde la creación
+                                        const daysSinceCreation = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                                        const cyclesPassed = Math.floor(daysSinceCreation / 30);
+                                        
+                                        // Calcular la fecha del próximo pago (siguiente ciclo de 30 días)
+                                        const nextPaymentDate = new Date(createdDate);
+                                        nextPaymentDate.setDate(nextPaymentDate.getDate() + ((cyclesPassed + 1) * 30));
+                                        
+                                        return nextPaymentDate.toLocaleDateString('es-MX', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        });
+                                    })()}
+                                </div>
+                                {clientPackage?.createdAt && (
+                                    <div style={{color: '#888', fontSize: '0.75rem', marginTop: '4px'}}>
+                                        Creado: {new Date(clientPackage.createdAt).toLocaleDateString('es-MX', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        })}
+                                    </div>
+                                )}
+                                {(() => {
+                                    if (!clientPackage?.createdAt) return null;
+                                    const createdDate = new Date(clientPackage.createdAt);
+                                    const today = new Date();
+                                    const daysSinceCreation = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                                    const cyclesPassed = Math.floor(daysSinceCreation / 30);
+                                    const nextPaymentDate = new Date(createdDate);
+                                    nextPaymentDate.setDate(nextPaymentDate.getDate() + ((cyclesPassed + 1) * 30));
+                                    const daysUntilNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
+                                    
+                                    if (daysUntilNextPayment <= 7 && daysUntilNextPayment > 0) {
+                                        return (
+                                            <div style={{color: '#dc3545', fontSize: '0.75rem', marginTop: '2px'}}>
+                                                <i className="bi bi-exclamation-circle me-1"></i>
+                                                Faltan {daysUntilNextPayment} días
+                                            </div>
+                                        );
+                                    } else if (daysUntilNextPayment === 0) {
+                                        return (
+                                            <div style={{color: '#dc3545', fontSize: '0.75rem', marginTop: '2px', fontWeight: 'bold'}}>
+                                                <i className="bi bi-exclamation-triangle-fill me-1"></i>
+                                                ¡Vence hoy!
+                                            </div>
+                                        );
+                                    } else if (daysUntilNextPayment < 0) {
+                                        return (
+                                            <div style={{color: '#dc3545', fontSize: '0.75rem', marginTop: '2px', fontWeight: 'bold'}}>
+                                                <i className="bi bi-x-circle-fill me-1"></i>
+                                                Vencido ({Math.abs(daysUntilNextPayment)} días)
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
