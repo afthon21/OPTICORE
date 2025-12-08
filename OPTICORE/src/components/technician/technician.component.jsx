@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import ApiRequest from "../hooks/apiRequest";
 import TechnicianTicketInfo from './TechnicianTicketInfo';
 import './technician.css';
@@ -12,6 +13,9 @@ export function ViewTechnicians() {
     const [loadingTickets, setLoadingTickets] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [ticketsModalOpen, setTicketsModalOpen] = useState(false);
+    // Estados para modal de edición
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editFormData, setEditFormData] = useState(null);
 
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
@@ -87,6 +91,118 @@ export function ViewTechnicians() {
         setTicketsModalOpen(false);
     };
 
+    // Zonas disponibles por mercado
+    const zonesByMercado = {
+        'Estado de México': [
+            'Zona de los Volcanes',
+            'Zona Metropolitana del Valle de México',
+            'Zona Norte',
+            'Zona Oriente',
+            'Zona Sur',
+            'Zona de Tierra Caliente',
+            'Zona de las Sierras'
+        ],
+        'Puebla': [
+            'Centro',
+            'Angelópolis',
+            'Mixteca',
+            'Sierra Norte',
+            'Sierra Nororiental',
+            'Sierra Negra',
+            'Valle de Tehuacán',
+            'Valle de Serdán',
+            'Valle de Atlixco y Matamoros',
+            'Mixteca Baja'
+        ]
+    };
+
+    // Funciones para el modal de edición
+    const handleOpenEditModal = () => {
+        if (!selectedTechnician) return;
+        setEditFormData({
+            nombre: selectedTechnician.nombre || '',
+            apellidoP: selectedTechnician.apellidoP || '',
+            apellidoA: selectedTechnician.apellidoA || '',
+            email: selectedTechnician.email || '',
+            telefono: selectedTechnician.telefono || '',
+            mercado: selectedTechnician.mercado || 'Estado de México',
+            zona: selectedTechnician.zona || '',
+            activo: selectedTechnician.activo
+        });
+        setEditModalOpen(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setEditModalOpen(false);
+        setEditFormData(null);
+    };
+
+    const handleEditFormChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setEditFormData(prev => {
+            const next = { ...prev, [name]: type === 'checkbox' ? checked : value };
+            if (name === 'mercado') {
+                next.zona = '';
+            }
+            return next;
+        });
+    };
+
+    const handleSaveEdit = async () => {
+        if (!selectedTechnician || !editFormData) return;
+        
+        try {
+            const response = await makeRequest(`/tecnicos/edit/${selectedTechnician._id}`, 'POST', editFormData);
+            
+            // Actualizar la lista de técnicos
+            const updatedTech = { ...selectedTechnician, ...editFormData };
+            setAllTechnicians(allTechnicians.map(tech => 
+                tech._id === selectedTechnician._id ? updatedTech : tech
+            ));
+            setSelectedTechnician(updatedTech);
+            
+            // Si el nombre cambió, recargar los tickets del técnico actualizado
+            const oldFullName = `${selectedTechnician.nombre} ${selectedTechnician.apellidoP} ${selectedTechnician.apellidoA}`.trim();
+            const newFullName = `${editFormData.nombre} ${editFormData.apellidoP} ${editFormData.apellidoA}`.trim();
+            
+            if (oldFullName !== newFullName) {
+                // Recargar tickets con el nombre actualizado
+                fetchTechnicianTickets(newFullName);
+            }
+            
+            handleCloseEditModal();
+            
+            // Mostrar mensaje con información de tickets actualizados
+            const ticketsUpdated = response?.ticketsUpdated || 0;
+            const message = ticketsUpdated > 0 
+                ? `Técnico actualizado correctamente.\n${ticketsUpdated} ticket(s) actualizado(s) en cascada.`
+                : 'Técnico actualizado correctamente';
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: message,
+                toast: true,
+                position: 'top',
+                timer: ticketsUpdated > 0 ? 3500 : 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        } catch (error) {
+            console.error('Error al editar técnico:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo actualizar el técnico',
+                toast: true,
+                position: 'top',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    };
+
     if (isLoading) return <div className="p-5 text-center">Cargando técnicos...</div>;
 
     return (
@@ -110,11 +226,26 @@ export function ViewTechnicians() {
                                 <button
                                     key={tech._id}
                                     type="button"
-                                    className={`list-group-item list-group-item-action ${selectedTechnician && selectedTechnician._id === tech._id ? 'active' : ''}`}
+                                    className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedTechnician && selectedTechnician._id === tech._id ? 'active' : ''}`}
                                     onClick={() => handleSelectTechnician(tech)}
                                 >
-                                    {tech.nombre} {tech.apellidoP}<br />
-                                    <small className={`text-${tech.activo ? 'success' : 'danger'}`}>{tech.activo ? 'Activo' : 'Inactivo'}</small>
+                                    <div>
+                                        {tech.nombre} {tech.apellidoP}<br />
+                                        <small className={`text-${tech.activo ? 'success' : 'danger'}`}>{tech.activo ? 'Activo' : 'Inactivo'}</small>
+                                    </div>
+                                    {selectedTechnician && selectedTechnician._id === tech._id && (
+                                        <button
+                                            className="btn btn-sm btn-light"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleOpenEditModal();
+                                            }}
+                                            title="Editar técnico"
+                                            style={{ marginLeft: '10px' }}
+                                        >
+                                            <i className="bi bi-pencil-fill"></i>
+                                        </button>
+                                    )}
                                 </button>
                             ))}
                             {filteredTechnicians.length === 0 && <p className="text-center text-muted mt-3">No se encontraron técnicos.</p>}
@@ -317,7 +448,199 @@ export function ViewTechnicians() {
                     onClose={() => setSelectedTicket(null)}
                 />
             )}
-            {/* Modal de información del ticket removido, ahora se usa SweetAlert2 */}
+            
+            {/* Modal de Edición de Técnico */}
+            {editModalOpen && editFormData && (
+                <div style={{ 
+                    position: 'fixed', 
+                    inset: 0, 
+                    zIndex: 1050, 
+                    background: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }} onClick={(e) => e.target === e.currentTarget && handleCloseEditModal()}>
+                    <div style={{ 
+                        background: 'white', 
+                        padding: 0, 
+                        minWidth: 600, 
+                        maxWidth: '90vw', 
+                        maxHeight: '85vh', 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        overflow: 'hidden', 
+                        borderRadius: 12,
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                    }}>
+                        {/* Header del modal */}
+                        <div style={{ 
+                            background: 'linear-gradient(135deg, #26a69a 0%, #4db6ac 100%)', 
+                            color: 'white', 
+                            padding: '20px 24px', 
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <i className="bi bi-pencil-square" style={{ fontSize: 24 }}></i>
+                                <h5 style={{ margin: 0, fontWeight: 600, fontSize: '1.3rem' }}>
+                                    Editar Técnico
+                                </h5>
+                            </div>
+                            <button 
+                                onClick={handleCloseEditModal}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: 36,
+                                    height: 36,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    color: 'white',
+                                    fontSize: 20,
+                                    transition: 'background 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                            >
+                                <i className="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        
+                        {/* Contenido del modal */}
+                        <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Nombre *</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        name="nombre"
+                                        value={editFormData.nombre}
+                                        onChange={handleEditFormChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Apellido Paterno *</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        name="apellidoP"
+                                        value={editFormData.apellidoP}
+                                        onChange={handleEditFormChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Apellido Materno *</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        name="apellidoA"
+                                        value={editFormData.apellidoA}
+                                        onChange={handleEditFormChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Teléfono</label>
+                                    <input 
+                                        type="tel" 
+                                        className="form-control" 
+                                        name="telefono"
+                                        value={editFormData.telefono}
+                                        onChange={handleEditFormChange}
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Correo Electrónico *</label>
+                                    <input 
+                                        type="email" 
+                                        className="form-control" 
+                                        name="email"
+                                        value={editFormData.email}
+                                        onChange={handleEditFormChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Mercado *</label>
+                                    <select 
+                                        className="form-select" 
+                                        name="mercado"
+                                        value={editFormData.mercado}
+                                        onChange={handleEditFormChange}
+                                        required
+                                    >
+                                        <option value="Estado de México">Estado de México</option>
+                                        <option value="Puebla">Puebla</option>
+                                    </select>
+                                </div>
+                                <div className="col-md-12">
+                                    <label className="form-label fw-bold">Zona *</label>
+                                    <select 
+                                        className="form-select" 
+                                        name="zona"
+                                        value={editFormData.zona}
+                                        onChange={handleEditFormChange}
+                                        required
+                                    >
+                                        <option value="">Seleccione una zona</option>
+                                        {(zonesByMercado[editFormData.mercado] || []).map((z) => (
+                                            <option key={z} value={z}>{z}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="col-md-12">
+                                    <div className="form-check form-switch">
+                                        <input 
+                                            className="form-check-input" 
+                                            type="checkbox" 
+                                            role="switch" 
+                                            id="activoSwitchEdit"
+                                            name="activo"
+                                            checked={editFormData.activo}
+                                            onChange={handleEditFormChange}
+                                        />
+                                        <label className="form-check-label fw-bold" htmlFor="activoSwitchEdit">
+                                            Técnico Activo
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Footer del modal */}
+                        <div style={{ 
+                            padding: '16px 24px', 
+                            borderTop: '1px solid #dee2e6',
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            gap: 12,
+                            background: '#f8f9fa'
+                        }}>
+                            <button 
+                                className="btn btn-secondary"
+                                onClick={handleCloseEditModal}
+                            >
+                                <i className="bi bi-x-circle me-2"></i>
+                                Cancelar
+                            </button>
+                            <button 
+                                className="btn btn-success"
+                                onClick={handleSaveEdit}
+                            >
+                                <i className="bi bi-check-lg me-2"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
