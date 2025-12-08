@@ -1,4 +1,5 @@
 import technician from '../models/technicianSchema.js';
+import tickets from '../models/ticketsSchema.js';
 
 // Crear un nuevo técnico
 export const newTechnician = async(req, res) => {
@@ -59,7 +60,7 @@ export const viewTechnicianById = async(req, res) => {
     }
 }
 
-// Editar técnico
+// Editar técnico con actualización en cascada de tickets
 export const editTechnician = async(req, res) => {
     const id = req.params.id;
 
@@ -69,13 +70,42 @@ export const editTechnician = async(req, res) => {
             return res.status(404).json({ message: 'Technician does not exist' });
         }
 
+        // Guardar el nombre completo ANTERIOR del técnico (antes de actualizar)
+        const oldFullName = `${tech.nombre} ${tech.apellidoP} ${tech.apellidoA}`.trim();
+        
         // Actualiza solo los campos enviados en el body
         Object.keys(req.body).forEach(key => {
             tech[key] = req.body[key];
         });
 
         await tech.save();
-        return res.status(200).json({ message: 'Technician updated' });
+        
+        // Calcular el nombre completo NUEVO del técnico (después de actualizar)
+        const newFullName = `${tech.nombre} ${tech.apellidoP} ${tech.apellidoA}`.trim();
+        
+        // Si cambió el nombre, actualizar todos los tickets asociados en cascada
+        if (oldFullName !== newFullName) {
+            // Actualizar todos los tickets usando updateMany con regex case-insensitive
+            const result = await tickets.updateMany(
+                { 
+                    tecnico: new RegExp(`^${oldFullName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')
+                },
+                { 
+                    $set: { tecnico: newFullName } 
+                }
+            );
+            
+            const updatedCount = result.modifiedCount || 0;
+            
+            return res.status(200).json({ 
+                message: 'Technician updated', 
+                ticketsUpdated: updatedCount,
+                oldName: oldFullName,
+                newName: newFullName
+            });
+        }
+        
+        return res.status(200).json({ message: 'Technician updated', ticketsUpdated: 0 });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Server error!' });
