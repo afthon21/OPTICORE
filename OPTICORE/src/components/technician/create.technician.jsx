@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiRequest from "../hooks/apiRequest";
 import Swal from 'sweetalert2';
+import { zoneRegionCatalog } from '../../lib/zoneRegionMapping.js';
+
+const zonesByMercado = Object.fromEntries(
+    Object.entries(zoneRegionCatalog).map(([state, entries]) => [
+        state,
+        [...new Set(entries.map(item => item.zone))]
+    ])
+);
 
 export function CreateTechnician() {
     const navigate = useNavigate();
@@ -18,31 +26,6 @@ export function CreateTechnician() {
     });
 
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
-
-    // Zonas disponibles por mercado
-    const zonesByMercado = {
-        'Estado de México': [
-            'Zona de los Volcanes',
-            'Zona Metropolitana del Valle de México',
-            'Zona Norte',
-            'Zona Oriente',
-            'Zona Sur',
-            'Zona de Tierra Caliente',
-            'Zona de las Sierras'
-        ],
-        'Puebla': [
-            'Centro',
-            'Angelópolis',
-            'Mixteca',
-            'Sierra Norte',
-            'Sierra Nororiental',
-            'Sierra Negra',
-            'Valle de Tehuacán',
-            'Valle de Serdán',
-            'Valle de Atlixco y Matamoros',
-            'Mixteca Baja'
-        ]
-    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -84,7 +67,7 @@ export function CreateTechnician() {
                     position: 'top',
                     timerProgressBar: true,
                 });
-                setFormData({ nombre: '', apellidoP: '', apellidoA: '', email: '', mercado: '', zona: '', telefono: '', activo: true });
+                setFormData({ nombre: '', apellidoP: '', apellidoA: '', email: '', mercado: 'Estado de México', zona: '', telefono: '', activo: true });
                 // Redirect to technicians list
                 navigate(`/tecnicos/${sessionStorage.getItem('adminId') || ''}`);
             } else {

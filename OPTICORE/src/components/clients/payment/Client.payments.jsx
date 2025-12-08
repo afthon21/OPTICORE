@@ -275,73 +275,132 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
 
             <InfoPay payment={select ? select : ''} />
 
-            {/* Modal Bootstrap estándar, sin estilos personalizados */}
+            {/* Lateral panel para Total Abonos, alineado al patrón de pagos/tickets/paquetes */}
             {showAbonosModal && (
-                <div onClick={() => setShowAbonosModal(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-                    <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 2px 16px rgba(0,0,0,0.12)', padding: '32px', minWidth: '420px', maxWidth: '90vw', position: 'relative' }}>
-                        <button onClick={() => setShowAbonosModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Cerrar">&times;</button>
-                        <button onClick={() => setShowAbonosModal(false)}
+                <>
+                    <div
+                        onClick={() => setShowAbonosModal(false)}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.15)', zIndex: 1040 }}
+                    />
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            right: 0,
+                            height: '100vh',
+                            width: '720px',
+                            maxWidth: '98vw',
+                            background: '#fff',
+                            boxShadow: '-6px 0 24px rgba(0,0,0,0.12)',
+                            zIndex: 1050,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            transform: 'translateX(0)',
+                            transition: 'transform 0.3s ease'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div
                             style={{
-                                position: 'absolute',
-                                top: '12px',
-                                right: '12px',
-                                background: '#e74c3c',
+                                padding: '18px 20px',
+                                background: 'linear-gradient(135deg, #1766a8 0%, #1d7bcf 100%)',
                                 color: '#fff',
-                                border: '2px solid #fff',
-                                borderRadius: '50%',
-                                width: '40px',
-                                height: '40px',
-                                fontSize: '2rem',
-                                fontWeight: 'bold',
-                                cursor: 'pointer',
-                                zIndex: 100,
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                opacity: 1
+                                justifyContent: 'space-between'
                             }}
-                            title="Cerrar"
                         >
-                            &times;
-                        </button>
-                        <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '18px', color: '#1766a8' }}>
-                            Total Abonos del Cliente
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <i className="bi bi-folder-fill" style={{ fontSize: '1.3rem' }} />
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>Total Abonos del Cliente</div>
+                                    <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Detalle de todos los abonos registrados</div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowAbonosModal(false)}
+                                style={{
+                                    border: 'none',
+                                    background: 'rgba(255,255,255,0.2)',
+                                    color: '#fff',
+                                    borderRadius: '50%',
+                                    width: '38px',
+                                    height: '38px',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    cursor: 'pointer'
+                                }}
+                                title="Cerrar"
+                            >
+                                <i className="bi bi-x-lg" />
+                            </button>
                         </div>
-                        <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem' }}>
-                                <thead>
-                                    <tr style={{ background: '#f2f2f2' }}>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Fecha</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Folio</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Método</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Monto</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Abono</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {sortedData.map((payment, index) => (
-                                        <tr key={payment._id || index}>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.CreateDate ? new Date(payment.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Folio}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Method}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>${Number(payment.Amount || 0).toLocaleString()}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>${(Number(payment.Abono || 0) > 0 ? Number(payment.Abono) : Number(payment.Amount || 0)).toLocaleString()}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Status || 'N/A'}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div style={{ marginTop: '12px', fontSize: '1.05rem' }}>
-                            <div><b>Total Monto (suma Amount):</b> ${totalAmount.toLocaleString()}</div>
-                            <div><b>Total Abonado:</b> ${successfulAbonos.toLocaleString()}</div>
-                            <div><b>Pagos registrados:</b> {totalPaymentsCount}</div>
-                            <div><b>Abonos registrados:</b> {abonosCount}</div>
+
+                        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1 }}>
+                            <div style={{ marginBottom: '12px', fontSize: '1.05rem', fontWeight: 600, color: '#1766a8' }}>
+                                Resumen
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+                                <div style={{ background: '#f1f6fb', border: '1px solid #d6e6f7', borderRadius: '10px', padding: '12px' }}>
+                                    <div style={{ color: '#1766a8', fontWeight: 600, marginBottom: '4px' }}>Total Monto (Amount)</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0d4f88' }}>${totalAmount.toLocaleString()}</div>
+                                </div>
+                                <div style={{ background: '#eef9f2', border: '1px solid #d6f2df', borderRadius: '10px', padding: '12px' }}>
+                                    <div style={{ color: '#1f8f4d', fontWeight: 600, marginBottom: '4px' }}>Total Abonado</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#177f42' }}>${successfulAbonos.toLocaleString()}</div>
+                                </div>
+                                <div style={{ background: '#fff7e6', border: '1px solid #ffe5b8', borderRadius: '10px', padding: '12px' }}>
+                                    <div style={{ color: '#c98200', fontWeight: 600, marginBottom: '4px' }}>Pagos registrados</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#a46900' }}>{totalPaymentsCount}</div>
+                                </div>
+                                <div style={{ background: '#f5f0ff', border: '1px solid #e0d4ff', borderRadius: '10px', padding: '12px' }}>
+                                    <div style={{ color: '#6b4fb5', fontWeight: 600, marginBottom: '4px' }}>Abonos registrados</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#5a3fa1' }}>{abonosCount}</div>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '10px', fontSize: '1.05rem', fontWeight: 600, color: '#1766a8' }}>Detalle de abonos</div>
+                            <div style={{ border: '1px solid #e5e8ef', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.04)' }}>
+                                <div style={{ background: '#f7f9fc', padding: '10px 12px', fontWeight: 600, color: '#4a5568', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '6px', fontSize: '0.95rem' }}>
+                                    <span>Fecha</span>
+                                    <span>Folio</span>
+                                    <span>Método</span>
+                                    <span>Monto</span>
+                                    <span>Abono</span>
+                                    <span>Estado</span>
+                                </div>
+                                <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
+                                    {sortedData.length === 0 ? (
+                                        <div style={{ padding: '18px', textAlign: 'center', color: '#6b7280' }}>
+                                            No hay abonos registrados.
+                                        </div>
+                                    ) : (
+                                        sortedData.map((payment, index) => (
+                                            <div
+                                                key={payment._id || index}
+                                                style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                                                    gap: '6px',
+                                                    padding: '10px 12px',
+                                                    borderTop: '1px solid #e5e8ef',
+                                                    background: index % 2 === 0 ? '#ffffff' : '#fbfcff'
+                                                }}
+                                            >
+                                                <span style={{ color: '#334155' }}>{payment.CreateDate ? new Date(payment.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</span>
+                                                <span style={{ color: '#334155' }}>{payment.Folio}</span>
+                                                <span style={{ color: '#334155' }}>{payment.Method}</span>
+                                                <span style={{ color: '#0d4f88', fontWeight: 600 }}>${Number(payment.Amount || 0).toLocaleString()}</span>
+                                                <span style={{ color: '#177f42', fontWeight: 600 }}>${(Number(payment.Abono || 0) > 0 ? Number(payment.Abono) : Number(payment.Amount || 0)).toLocaleString()}</span>
+                                                <span style={{ color: '#334155' }}>{payment.Status || 'N/A'}</span>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </>
             )}
         </>
     );
