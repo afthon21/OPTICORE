@@ -7,6 +7,7 @@ import ApiRequest from '../../hooks/apiRequest.jsx';
 function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
     const { makeRequest, loading } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
+        Type: 'pago', // 'pago' or 'abono'
         Method: '',
         Abono: '',
         Note: ''
@@ -36,6 +37,7 @@ function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
 
     const handleClear = () => {
         setFormValues({
+            Type: 'pago',
             Method: '',
             Abono: '',
             Note: ''
@@ -49,7 +51,7 @@ function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
             errors.Method = 'La forma de pago es obligatoria.';
         }
         if (!formValues.Abono || Number(formValues.Abono) <= 0) {
-            errors.Abono = 'El abono debe ser mayor a cero.';
+            errors.Abono = formValues.Type === 'abono' ? 'El abono debe ser mayor a cero.' : 'El pago debe ser mayor a cero.';
         }
         if (!formValues.Note.trim()) {
             errors.Note = 'La nota es obligatoria.';
@@ -82,13 +84,23 @@ function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
         const cleanedData = cleanData(formValues);
 
         try {
-                // Asegurar que se envíe Amount (requerido en el backend). Usamos el Abono como Amount si no se proporciona.
-                const payload = {
-                    ...cleanedData,
-                    Amount: cleanedData.Amount ? Number(cleanedData.Amount) : Number(formValues.Abono) || 0,
-                    Abono: Number(formValues.Abono) || 0,
-                    CreateDate: cleanedData.CreateDate || new Date().toISOString()
-                };
+                // Asegurar que se envíe Amount/Abono correctamente según el tipo seleccionado.
+                // Si es 'pago' enviamos Amount = valor y Abono = 0.
+                // Si es 'abono' enviamos Abono = valor y Amount = 0.
+                let payload = { ...cleanedData, CreateDate: cleanedData.CreateDate || new Date().toISOString() };
+                if (formValues.Type === 'abono') {
+                    payload = {
+                        ...payload,
+                        Amount: 0,
+                        Abono: Number(formValues.Abono) || 0
+                    };
+                } else {
+                    payload = {
+                        ...payload,
+                        Amount: Number(formValues.Abono) || (cleanedData.Amount ? Number(cleanedData.Amount) : 0),
+                        Abono: 0
+                    };
+                }
 
                 const res = await makeRequest(`/pay/new/${client}`, 'POST', payload);
 
@@ -168,6 +180,18 @@ function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
                     </div>
                     <div className={`${StyleFormPay['body']} modal-body`}>
                         <form onSubmit={handleSubmit} noValidate>
+                            {/* Tipo: Pago o Abono */}
+                            <label className="form-label">Tipo</label>
+                            <select
+                                className="form-select mb-2"
+                                name="Type"
+                                value={formValues.Type}
+                                onChange={handleChange}
+                            >
+                                <option value="pago">Pago</option>
+                                <option value="abono">Abono</option>
+                            </select>
+
                             {/* Método de Pago */}
                             <label className="form-label">Forma de Pago</label>
                             <select
@@ -186,8 +210,8 @@ function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
                             )}
                             <br />
 
-                            {/* Abono */}
-                            <label className="form-label">Abono</label> 
+                            {/* Monto: muestra 'Pago' o 'Abono' según el tipo seleccionado */}
+                            <label className="form-label">{formValues.Type === 'pago' ? 'Pago' : 'Abono'}</label>
                             <div className="input-group">
                                 <span className="input-group-text">$</span>
                                 <input
@@ -196,7 +220,7 @@ function CreatePay({ client, onPaymentCreated, onPaymentAdded, onSuccess }) {
                                     name="Abono"
                                     value={formValues.Abono}
                                     onChange={handleChange}
-                                    placeholder="Ingrese el monto del abono"
+                                    placeholder={formValues.Type === 'pago' ? 'Ingrese el monto del pago' : 'Ingrese el monto del abono'}
                                     min="0.01"
                                     step="0.01"
                                 />

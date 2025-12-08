@@ -1,11 +1,3 @@
-    // Permite refrescar datos globalmente cuando se edite un paquete
-    const handlePackageEdited = () => {
-        if (onGlobalUpdate && client) {
-            onGlobalUpdate(client);
-            fetchData();
-            fetchClientPackage();
-        }
-    };
 import stylePayment from '../css/clientPayments.module.css'
 
 import { useEffect, useState, useCallback } from "react";
@@ -172,9 +164,10 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
     const sortedData = getSortedData();
 
     // Totales y contadores usados en el modal de abonos
+    // totalAmount = suma de los campos Amount (valor nominal)
     const totalAmount = data.reduce((total, payment) => total + (Number(payment.Amount) || 0), 0);
     // Sólo considerar como "abonado" los pagos con estado 'Exitoso' (case-insensitive).
-    // Si el campo Abono es 0 pero el pago fue exitoso, usar Amount como valor pagado.
+    // Si existe un Abono (parcial), se toma ese valor como lo realmente abonado; si no, se toma Amount.
     const successfulAbonos = data.reduce((total, payment) => {
         const status = payment?.Status || '';
         const isSuccess = /exitoso/i.test(status);
@@ -183,13 +176,9 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
         const amount = Number(payment.Amount || 0);
         return total + (abono > 0 ? abono : amount);
     }, 0);
-    const totalPaymentsCount = data.length;
-    const abonosCount = data.filter(payment => {
-        const isSuccess = /exitoso/i.test(payment?.Status || '');
-        const abono = Number(payment.Abono || 0);
-        const amount = Number(payment.Amount || 0);
-        return isSuccess && (abono > 0 || amount > 0);
-    }).length;
+    // Contadores más explícitos: pagos (Amount>0) y abonos (Abono>0)
+    const totalPaymentsCount = data.filter(p => Number(p.Amount || 0) > 0).length;
+    const abonosCount = data.filter(p => Number(p.Abono || 0) > 0).length;
 
     if (loading) return <LoadFragment />
     if (error) return <p>Error!</p>
