@@ -150,7 +150,7 @@ function LoginComponent() {
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="staticBackdropLabel">Iniciar Sesión</h1>
-                            <button type="button" className="btn" data-bs-dismiss="modal" aria-label="Close" style={{ border: 'none', background: 'transparent', fontSize: '1.5rem', color: '#333', padding: 0, lineHeight: 1 }}>
+                            <button type="button" className="btn" data-bs-dismiss="modal" aria-label="Close" style={{ border: 'none', background: 'transparent', fontSize: '1.5rem', color: '#fff', padding: 0, lineHeight: 1 }}>
                                 <i className="bi bi-x-lg"></i>
                             </button>
                         </div>
