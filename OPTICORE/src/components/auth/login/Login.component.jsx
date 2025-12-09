@@ -150,38 +150,46 @@ function LoginComponent() {
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="staticBackdropLabel">Iniciar Sesión</h1>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" className="btn" data-bs-dismiss="modal" aria-label="Close" style={{ border: 'none', background: 'transparent', fontSize: '1.5rem', color: '#333', padding: 0, lineHeight: 1 }}>
+                                <i className="bi bi-x-lg"></i>
+                            </button>
                         </div>
                         <div className="modal-body">
 
                             <form onSubmit={handleSubmit}>
-                                <div className="input-group mb-3">
-                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Correo:</span>
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">Correo:</label>
 
                                     <input type="email"
                                         className="form-control"
+                                        placeholder="Correo Electrónico"
                                         value={formValues.Email}
-                                        onChange={(e) => setFormValues({ ...formValues, Email: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, Email: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
 
-                                    {formErrors?.Email && (<p style={{ color: 'red' }}>{formErrors.Email}</p>)}
+                                    {formErrors?.Email && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' }}>{formErrors.Email}</p>)}
 
                                 </div>
-                                <div className="input-group mb-3">
-                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Contraseña:</span>
+                                <div className="mb-4">
+                                    <label className="form-label fw-semibold">Contraseña:</label>
 
                                     <input type="password"
                                         className="form-control"
+                                        placeholder="Contraseña"
                                         value={formValues.Password}
-                                        onChange={(e) => setFormValues({ ...formValues, Password: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, Password: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
 
-                                    {formErrors?.Email && (<p style={{ color: 'red' }}>{formErrors.Email}</p>)}
+                                    {formErrors?.Password && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' }}>{formErrors.Password}</p>)}
 
                                 </div>
-                                <span>¿Olvidaste tu contraseña? <a href="#" onClick={(e) => {
-                                    e.preventDefault();
-                                    handleCloseModal();
-                                    handleRecoveryPassword(navigate);
-                                }}>Recupérala aquí</a></span>
+                                <div className="mb-3">
+                                    <span>¿Olvidaste tu contraseña? <a href="#" onClick={(e) => {
+                                        e.preventDefault();
+                                        handleCloseModal();
+                                        handleRecoveryPassword(navigate);
+                                    }}>Recupérala aquí</a></span>
+                                </div>
                                 <div className="d-flex justify-content-center" >
                                     <button className="btn btn-primary" type="submit">{loading ? 'Iniciando...' : 'Iniciar Sesión'}</button>
                                 </div>

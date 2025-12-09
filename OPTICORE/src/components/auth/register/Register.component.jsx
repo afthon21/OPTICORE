@@ -157,97 +157,106 @@ function RegisterComponent() {
     return (
         <>
             <div className="modal fade" id="registerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg">
+                <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered" style={{ maxWidth: '600px' }}>
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="staticBackdropLabel">Regístrate</h1>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" className="btn" data-bs-dismiss="modal" aria-label="Close" style={{ border: 'none', background: 'transparent', fontSize: '1.5rem', color: '#333', padding: 0, lineHeight: 1 }}>
+                                <i className="bi bi-x-lg"></i>
+                            </button>
                         </div>
                         <div className="modal-body">
 
                             <form onSubmit={handleSubmit}>
-                                <div className="input-group mb-3">
-                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Nombre(s):</span>
-
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">Nombre(s):</label>
                                     <input type="text"
-                                        className="form-control"
+                                        className="form-control mb-2"
                                         placeholder="Primer Nombre"
                                         value={formValues.FirstName}
-                                        onChange={(e) => setFormValues({ ...formValues, FirstName: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, FirstName: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
 
-                                    {formErrors?.FirstName && (<p style={{ color: 'red' }}>{formErrors.FirstName}</p>)}
+                                    {formErrors?.FirstName && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '-0.5rem' }}>{formErrors.FirstName}</p>)}
 
                                     <input type="text"
                                         className="form-control"
                                         placeholder="Segundo Nombre (Opcional)"
                                         value={formValues.SecondName}
-                                        onChange={(e) => setFormValues({ ...formValues, SecondName: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, SecondName: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
                                 </div>
-                                <div className="input-group mb-3">
-                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Apellidos:</span>
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">Apellidos:</label>
 
                                     <input type="text"
-                                        className="form-control"
+                                        className="form-control mb-2"
                                         placeholder="Apellido Paterno"
                                         value={formValues.FatherLastName}
-                                        onChange={(e) => setFormValues({ ...formValues, FatherLastName: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, FatherLastName: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
 
-                                    {formErrors?.FatherLastName && (<p style={{ color: 'red' }}>{formErrors.FatherLastName}</p>)}
+                                    {formErrors?.FatherLastName && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '-0.5rem' }}>{formErrors.FatherLastName}</p>)}
 
                                     <input type="text"
                                         className="form-control"
                                         placeholder="Apellido Materno"
                                         value={formValues.MotherLastName}
-                                        onChange={(e) => setFormValues({ ...formValues, MotherLastName: e.target.value })} />
-                                    {formErrors?.MotherLastName && (<p style={{ color: 'red' }}>{formErrors.MotherLastName}</p>)}
+                                        onChange={(e) => setFormValues({ ...formValues, MotherLastName: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
+                                    {formErrors?.MotherLastName && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '-0.5rem' }}>{formErrors.MotherLastName}</p>)}
 
                                 </div>
-                                <div className="input-group mb-3">
-                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Correo:</span>
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">Correo:</label>
 
                                     <input type="email"
                                         className="form-control"
                                         placeholder="Correo Electrónico"
                                         value={formValues.Email}
-                                        onChange={(e) => setFormValues({ ...formValues, Email: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, Email: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
 
-                                    {formErrors?.Email && (<p style={{ color: 'red' }}>{formErrors.Email}</p>)}
+                                    {formErrors?.Email && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' }}>{formErrors.Email}</p>)}
 
                                 </div>
 
-                                <div className="input-group mb-3">
-                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Contraseña:</span>
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">Contraseña:</label>
 
                                     <input type="password"
-                                        className="form-control"
+                                        className="form-control mb-2"
                                         placeholder="Crear Contraseña"
                                         value={formValues.Password}
-                                        onChange={(e) => setFormValues({ ...formValues, Password: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, Password: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
 
-                                    {formErrors?.Password && (<p style={{ color: 'red' }}>{formErrors.Password}</p>)}
+                                    {formErrors?.Password && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '-0.5rem' }}>{formErrors.Password}</p>)}
 
                                     <input type="password"
                                         className="form-control"
                                         placeholder="Confirmar Contraseña"
                                         value={formValues.ConfirmPassword}
-                                        onChange={(e) => setFormValues({ ...formValues, ConfirmPassword: e.target.value })} />
+                                        onChange={(e) => setFormValues({ ...formValues, ConfirmPassword: e.target.value })}
+                                        style={{ borderRadius: '8px' }} />
 
-                                    {formErrors?.ConfirmPassword && (<p style={{ color: 'red' }}>{formErrors.ConfirmPassword}</p>)}
+                                    {formErrors?.ConfirmPassword && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' }}>{formErrors.ConfirmPassword}</p>)}
 
                                 </div>
-                                                                <div className="input-group mb-3">
-                                    <span className="input-group-tex w-25 text-center align-content-center" style={{ background: '#efefef' }}>Región:</span>
+                                <div className="mb-4">
+                                    <label className="form-label fw-semibold">Región:</label>
 
                                     <select 
                                         className="form-control"
                                         value={formValues.Region}
                                         onChange={(e) => setFormValues({ ...formValues, Region: e.target.value })}
+                                        style={{ borderRadius: '8px' }}
                                     >
                                         <option value="Estado de México">Estado de México</option>
                                         <option value="Puebla">Puebla</option>
                                     </select>
 
-                                    {formErrors?.Region && (<p style={{ color: 'red' }}>{formErrors.Region}</p>)}
+                                    {formErrors?.Region && (<p style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' }}>{formErrors.Region}</p>)}
 
                                 </div>
                                 <div className="d-flex justify-content-center" >
