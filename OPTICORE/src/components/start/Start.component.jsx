@@ -35,16 +35,18 @@ function StartComponent() {
                 {/* Botones */}
                 <div className="d-flex flex-column align-items-center" style={{ width: '280px' }}>
                     <button
-                        className="btn btn-light btn-lg w-100 mb-3"
+                        className="btn btn-light btn-lg w-100 mb-3 text-center"
                         data-bs-toggle="modal"
                         data-bs-target="#loginModal"
+                        style={{ fontSize: '1.1rem' }}
                     >
                         Iniciar Sesión
                     </button>
                     <button
-                        className="btn btn-outline-light btn-lg w-100"
+                        className="btn btn-outline-light btn-lg w-100 text-center"
                         data-bs-toggle="modal"
                         data-bs-target="#registerModal"
+                        style={{ fontSize: '1.1rem' }}
                     >
                         Regístrate
                     </button>

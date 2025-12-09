@@ -226,7 +226,7 @@ export function ViewTechnicians() {
                                 <button
                                     key={tech._id}
                                     type="button"
-                                    className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedTechnician && selectedTechnician._id === tech._id ? 'active' : ''}`}
+                                    className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedTechnician && selectedTechnician._id === tech._id ? 'tech-selected' : ''}`}
                                     onClick={() => handleSelectTechnician(tech)}
                                 >
                                     <div>

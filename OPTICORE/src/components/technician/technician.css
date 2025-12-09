@@ -4,3 +4,13 @@
 .tech-details .value{color:#0f172a}
 .tech-details .pill{background:#17a2b8;color:#fff;border-radius:9999px;padding:6px 14px;font-weight:700;letter-spacing:.5px}
 .tech-details .muted{color:#6b7280}
+
+.tech-selected {
+    background-color: #f0f0f0 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    border-left: 3px solid #6c757d !important;
+}
+
+.tech-selected:hover {
+    background-color: #e8e8e8 !important;
+}
