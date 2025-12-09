@@ -136,8 +136,8 @@ function PaymentCard({ payments = [], onSelected }) {
                             <td>{item.Status}</td>
                             <td>{`${item.Client?.Name?.FirstName ?? ''} ${item.Client?.Name?.SecondName ?? ''} ${item.Client?.LastName?.FatherLastName ?? ''} ${item.Client?.LastName?.MotherLastName ?? ''}`}</td>
                             <td>{item.Method}</td>
-                            <td>{item.Amount}</td>
-                            <td>{item.Abono}</td>
+                            <td>{Number(item.Amount) > 0 ? `$${Number(item.Amount).toLocaleString()}` : '-----'}</td>
+                            <td>{Number(item.Abono) > 0 ? `$${Number(item.Abono).toLocaleString()}` : '-----'}</td>
                             {/* Mostrar el administrador */}
                             <td>{item.Admin?.UserName ?? 'Sin asignar'}</td>
                             <td>{item.CreateDate?.split("T")[0]}</td>

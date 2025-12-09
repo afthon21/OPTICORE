@@ -7,7 +7,9 @@ import ApiRequest from '../../hooks/apiRequest.jsx';
 function CreatePay({ client, onPaymentCreated, onSuccess }) {
     const { makeRequest, loading } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [formValues, setFormValues] = useState({
+        Type: 'Pago', // 'Pago' or 'Abono'
         Method: '',
+        Amount: '',
         Abono: '',
         Note: ''
     });
@@ -36,7 +38,9 @@ function CreatePay({ client, onPaymentCreated, onSuccess }) {
 
     const handleClear = () => {
         setFormValues({
+            Type: 'Pago',
             Method: '',
+            Amount: '',
             Abono: '',
             Note: ''
         });
@@ -48,8 +52,15 @@ function CreatePay({ client, onPaymentCreated, onSuccess }) {
         if (!formValues.Method || formValues.Method === 'Método de pago...') {
             errors.Method = 'La forma de pago es obligatoria.';
         }
-        if (!formValues.Abono || Number(formValues.Abono) <= 0) {
-            errors.Abono = 'El abono debe ser mayor a cero.';
+        // Validate depending on Type
+        if (formValues.Type === 'Abono') {
+            if (!formValues.Abono || Number(formValues.Abono) <= 0) {
+                errors.Abono = 'El abono debe ser mayor a cero.';
+            }
+        } else {
+            if (!formValues.Amount || Number(formValues.Amount) <= 0) {
+                errors.Amount = 'El monto es obligatorio y debe ser mayor a cero.';
+            }
         }
         if (!formValues.Note.trim()) {
             errors.Note = 'La nota es obligatoria.';
@@ -79,7 +90,16 @@ function CreatePay({ client, onPaymentCreated, onSuccess }) {
 
         if (!validateForm()) return;
 
-        const cleanedData = cleanData(formValues);
+        // Prepare payload: ensure numeric values and always send both Amount and Abono (0 when not applicable)
+        const payload = {
+            Method: formValues.Method,
+            Note: formValues.Note,
+            Amount: formValues.Type === 'Pago' ? Number(formValues.Amount) : 0,
+            Abono: formValues.Type === 'Abono' ? Number(formValues.Abono) : 0
+        };
+
+    // send payload as-is so Amount and Abono are always present (0 when not applicable)
+    const cleanedData = payload;
 
         try {
             const res = await makeRequest(`/pay/new/${client}`, 'POST', cleanedData);
@@ -148,6 +168,17 @@ function CreatePay({ client, onPaymentCreated, onSuccess }) {
                     </div>
                     <div className={`${StyleFormPay['body']} modal-body`}>
                         <form onSubmit={handleSubmit} noValidate>
+                            {/* Tipo: Pago o Abono */}
+                            <label className="form-label">Tipo</label>
+                            <select
+                                className="form-select mb-2"
+                                name="Type"
+                                value={formValues.Type}
+                                onChange={handleChange}>
+                                <option value="Pago">Pago</option>
+                                <option value="Abono">Abono</option>
+                            </select>
+
                             {/* Método de Pago */}
                             <label className="form-label">Forma de Pago</label>
                             <select
@@ -165,24 +196,47 @@ function CreatePay({ client, onPaymentCreated, onSuccess }) {
                                 <div className="text-danger mt-1" style={{ fontSize: '0.9em' }}>{formErrors.Method}</div>
                             )}
                             <br />
-
-                            {/* Abono */}
-                            <label className="form-label">Abono</label> 
-                            <div className="input-group">
-                                <span className="input-group-text">$</span>
-                                <input
-                                    type="number"
-                                    className={`form-control ${formErrors.Abono ? 'is-invalid' : ''}`}
-                                    name="Abono"
-                                    value={formValues.Abono}
-                                    onChange={handleChange}
-                                    placeholder="Ingrese el monto del abono"
-                                    min="0.01"
-                                    step="0.01"
-                                />
-                            </div>
-                            {formErrors.Abono && (
-                                <div className="text-danger mt-1" style={{fontSize: '0.9em' }}>{formErrors.Abono}</div>
+                            {/* Monto / Abono inputs (conditional validation) */}
+                            {formValues.Type === 'Pago' ? (
+                                <>
+                                    <label className="form-label">Monto</label>
+                                    <div className="input-group">
+                                        <span className="input-group-text">$</span>
+                                        <input
+                                            type="number"
+                                            className={`form-control ${formErrors.Amount ? 'is-invalid' : ''}`}
+                                            name="Amount"
+                                            value={formValues.Amount}
+                                            onChange={handleChange}
+                                            placeholder="Ingrese el monto"
+                                            min="0.01"
+                                            step="0.01"
+                                        />
+                                    </div>
+                                    {formErrors.Amount && (
+                                        <div className="text-danger mt-1" style={{fontSize: '0.9em' }}>{formErrors.Amount}</div>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <label className="form-label">Abono</label>
+                                    <div className="input-group">
+                                        <span className="input-group-text">$</span>
+                                        <input
+                                            type="number"
+                                            className={`form-control ${formErrors.Abono ? 'is-invalid' : ''}`}
+                                            name="Abono"
+                                            value={formValues.Abono}
+                                            onChange={handleChange}
+                                            placeholder="Ingrese el monto del abono"
+                                            min="0.01"
+                                            step="0.01"
+                                        />
+                                    </div>
+                                    {formErrors.Abono && (
+                                        <div className="text-danger mt-1" style={{fontSize: '0.9em' }}>{formErrors.Abono}</div>
+                                    )}
+                                </>
                             )}
                            <br/>
 
