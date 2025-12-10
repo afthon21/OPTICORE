@@ -10,7 +10,7 @@ import packageRoutes from '../middlewares/packages.routes.js';
 import technicianRoutes from '../middlewares/technician.routes.js';
 import logRoutes from '../middlewares/log.routes.js';
 import networkRoutes from '../middlewares/network.routes.js'; //RUTA NETWORK
-
+import vpnConfigRoutes from '../middlewares/vpnConfig.routes.js';
 
 const configureRoutes = (app) => {
     const principal = '/api'
@@ -27,6 +27,7 @@ const configureRoutes = (app) => {
     app.use(`${principal}/logs`, logRoutes);
     app.use(`${principal}/network`, networkRoutes);
     app.use(`${principal}/tecnicos`, technicianRoutes);
+    app.use(`${principal}/vpn`, vpnConfigRoutes);
 }
 
 export default configureRoutes;
