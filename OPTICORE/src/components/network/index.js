@@ -1,5 +1,5 @@
 // Barrel for network components
-export { default as Radiofrecuencia } from './Radiofrecuencia.jsx';
+//export { default as Radiofrecuencia } from './Radiofrecuencia.jsx';
 export { default as FibraOptica } from './FibraOptica.jsx';
 export { default as Mapa } from './Mapa.jsx';
 export { default as Topologia } from './Topologia.jsx';

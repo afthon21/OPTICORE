@@ -333,7 +333,7 @@ export function NavbarFragmentAll() {
                     
                     <ul className="list-unstyled ps-3 sub-menu">
                         <li className="ms-4 item">
-                            <a
+                           {/* <a
                                 className="nav-link"
                                 onClick={() => navigate(`/network/radiofrecuencia/${adminId}`)}
                                 role="button"
@@ -362,7 +362,7 @@ export function NavbarFragmentAll() {
                                         Logs
                                     </a>
                                 </li>
-                            </ul>
+                            </ul>*/}
                         </li>
                         <li className="ms-4 item">
                             <a

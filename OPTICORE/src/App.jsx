@@ -23,8 +23,7 @@ import RecoveryPwdComponent from './components/auth/recoveryPwd/recovery.compone
 import ResetPwdComponent from './components/auth/recoveryPwd/resetPwd.components.jsx';
 import { NavbarFragmentAll } from './components/fragments/Navbar.fragment.jsx';
 import { RegionProvider } from './hooks/RegionContext';
-
-import Radiofrecuencia from './components/network/Radiofrecuencia.jsx';
+//import Radiofrecuencia from './components/network/Radiofrecuencia.jsx';
 import FibraOptica from './components/network/FibraOptica.jsx';
 import Mapa from './components/network/Mapa.jsx';
 import Topologia from './components/network/Topologia.jsx';
@@ -81,13 +80,13 @@ function App() {
             <Route path='/tecnicos/create/:adminId' element={<ProtectedRoute> <CreateTechnician /> </ProtectedRoute>}></Route>
 
             {/* Monitoreo de red */}
-            <Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
+            {/**<Route path='/network/radiofrecuencia/:adminId' element={<Radiofrecuencia />}></Route>
             <Route path='/network/radiofrecuencia/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
             <Route path='/network/radiofrecuencia/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>
             <Route path='/network/radiofrecuencia/mapa/:adminId' element={<ProtectedRoute><Mapa /></ProtectedRoute>}></Route>
             <Route path='/network/radiofrecuencia/topologia/:adminId' element={<ProtectedRoute><Topologia /></ProtectedRoute>}></Route>
             <Route path='/network/radiofrecuencia/logs/:adminId' element={<ProtectedRoute><Logs /></ProtectedRoute>}></Route>
-            <Route path='/network/radiofrecuencia/onus/:adminId' element={<ProtectedRoute><Onus /></ProtectedRoute>}></Route>
+            <Route path='/network/radiofrecuencia/onus/:adminId' element={<ProtectedRoute><Onus /></ProtectedRoute>}></Route>**/}
             <Route path='/network/fibra-optica/:adminId' element={<FibraOptica />}></Route>
             <Route path='/network/fibra-optica/ports/:adminId' element={<ProtectedRoute><OltPorts /></ProtectedRoute>}></Route>
             <Route path='/network/fibra-optica/health/:adminId' element={<ProtectedRoute><NetworkHealth /></ProtectedRoute>}></Route>

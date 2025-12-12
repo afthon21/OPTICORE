@@ -11,13 +11,13 @@ const fiberPackages = [
   { name: "200 Megas", price: 445 },
   { name: "300 Megas", price: 495 },
 ];
-
+/*
 const radioPackages = [
   { name: "10 Megas", price: 295 },
   { name: "15 Megas", price: 360 },
   { name: "20 Megas", price: 395 },
 ];
-
+*/
 // Plataformas con logo HBO Max con texto
 const platforms = [
   {
@@ -95,7 +95,7 @@ export default function Card({ onPackageCreated }) {
   };
 
   const getTotal = () => {
-    const pkg = [...fiberPackages, ...radioPackages].find(
+    const pkg = [...fiberPackages].find(
       (p) => p.name === selectedPackage
     );
     const basePrice = pkg ? pkg.price : 0;
@@ -255,7 +255,6 @@ export default function Card({ onPackageCreated }) {
       >
         {[
           { label: "Fibra Óptica", value: "fiber" },
-          { label: "Radio Frecuencia", value: "radio" }
         ].map(({ label, value }) => {
           const selected = type === value;
           return (
