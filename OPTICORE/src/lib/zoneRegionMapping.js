@@ -1,4 +1,4 @@
-// Catalog of zones and regions by state with municipality coverage
+// Catalogo de Zonas/Regiones y sus municipios
 export const zoneRegionCatalog = {
   'Estado de México': [
     {
@@ -151,7 +151,7 @@ export const zoneRegionCatalog = {
     {
       zone: 'Valle de Atlixco y Matamoros',
       region: 'Microrregión Izúcar de Matamoros',
-      municipios: ['Izúcar de Matamoros', 'Tepeojuma', 'Tepexco']
+      municipios: ['Izúcar', 'Izúcar de Matamoros', 'Tepeojuma', 'Tepexco']
     },
     {
       zone: 'Mixteca',

@@ -54,15 +54,73 @@ function ClientsComponent() {
     };
 
     return (
-        <div className="container-fluid d-flex mt-1 ms-4">
-            <ClientsCard clients={data ? data : []} onSelected={setSelect} />
+        <>
+            <style>{`
+                @media (max-width: 992px) {
+                    .clients-container {
+                        flex-direction: column !important;
+                    }
+                    .clients-list-wrapper {
+                        max-width: 100% !important;
+                        margin-bottom: 1rem;
+                    }
+                    .clients-info-wrapper {
+                        min-width: 100% !important;
+                        max-width: 100% !important;
+                    }
+                }
+            `}</style>
+            <div className="container-fluid mt-1 clients-container" style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: '1rem',
+                padding: '0 1rem',
+                maxWidth: '100%',
+                overflow: 'hidden'
+            }}>
+                <div className="clients-list-wrapper" style={{
+                    flex: '0 0 auto',
+                    minWidth: '280px',
+                    maxWidth: '350px',
+                    width: '100%'
+                }}>
+                    <ClientsCard clients={data ? data : []} onSelected={setSelect} />
+                </div>
 
-            <ClientsInfo 
-                client={select ? select: ''} 
-                initialActiveTab={activeTab} 
-                onGlobalUpdate={refreshClientAndPackages}
-            />
-        </div>
+                <div className="clients-info-wrapper" style={{
+                    flex: '1 1 auto',
+                    minWidth: '300px',
+                    overflow: 'auto'
+                }}>
+                    {select ? (
+                        <ClientsInfo 
+                            client={select} 
+                            initialActiveTab={activeTab} 
+                            onGlobalUpdate={refreshClientAndPackages}
+                        />
+                    ) : (
+                        <div className="card mt-3" style={{
+                            background: 'transparent',
+                            border: '1px solid #ededed',
+                            height: 'calc(100vh - 120px)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <div style={{
+                                textAlign: 'center',
+                                color: '#6c757d',
+                                padding: '2rem'
+                            }}>
+                                <i className="bi bi-person-x" style={{ fontSize: '4rem', marginBottom: '1rem' }}></i>
+                                <h5>Selecciona un cliente</h5>
+                                <p>Haz clic en un cliente de la lista para ver su información</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
     );
 }
 

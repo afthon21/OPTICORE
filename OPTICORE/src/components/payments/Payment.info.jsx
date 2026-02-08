@@ -194,7 +194,7 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
     }
 
     return (
-        <div className={`${styleInfo['info-container']} position-fixed end-0 top-0 h-100 shadow-lg`} style={{ width: '400px', zIndex: 1000, overflowY: 'auto', backgroundColor: '#fff' }}>
+        <div className={`${styleInfo['info-container']} position-fixed end-0 top-0 h-100 shadow-lg`} style={{ width: '400px', zIndex: 1100, overflowY: 'auto', backgroundColor: '#fff' }}>
             <div className={`${styleInfo['header']} d-flex justify-content-between align-items-center p-3 border-bottom`} style={{ backgroundColor: '#f8f9fa' }}>
                 <span className={`${styleInfo['title']} fs-5`} style={{ margin: 0 }}>
                     <i className="bi bi-clipboard2-pulse-fill me-2"></i> 
@@ -246,6 +246,14 @@ function PaymentInfo({ payment: paymentProp, onStatusChange }) {
                         className={`form-control ${styleInfo['input']}`}
                         disabled
                         value={`$${payment.Amount || '0'}`} />
+                </div>
+
+                <p className="form-label"><strong>Abono:</strong></p>
+                <div className="input-group mb-3">
+                    <input
+                        className={`form-control ${styleInfo['input']}`}
+                        disabled
+                        value={`$${payment.Abono || '0'}`} />
                 </div>
 
                 <p className="form-label"><strong>Nota:</strong></p>

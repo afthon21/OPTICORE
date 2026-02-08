@@ -7,6 +7,7 @@ import ApiRequest from '../../hooks/apiRequest.jsx';
 import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import CreatePay from './CreatePay.modal.jsx';
 import InfoPay from './Client.infoPay.jsx';
+import PaymentInfo from '../../payments/Payment.info.jsx';
 
 function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
@@ -18,6 +19,7 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
     const [showAbonosModal, setShowAbonosModal] = useState(false);
     const [modalMaxHeight, setModalMaxHeight] = useState(null); // Altura dinámica para el modal
     const [mouseY, setMouseY] = useState(null); // Posición Y del mouse
+    const [selectedPaymentInModal, setSelectedPaymentInModal] = useState(null); // Pago seleccionado en el modal
 
     // Captura la posición Y del mouse al abrir el modal
     const handleOpenAbonosModal = (e) => {
@@ -98,6 +100,13 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
         window.addEventListener('payment:created', handler);
         return () => window.removeEventListener('payment:created', handler);
     }, [client, fetchClientPackage]);
+
+    // Listener para cerrar el panel de PaymentInfo
+    useEffect(() => {
+        const handleClosePaymentInfo = () => setSelectedPaymentInModal(null);
+        window.addEventListener('closePaymentInfo', handleClosePaymentInfo);
+        return () => window.removeEventListener('closePaymentInfo', handleClosePaymentInfo);
+    }, []);
     
     // Mostrar mensaje si no hay cliente seleccionado
     if (!client) {
@@ -164,8 +173,13 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
     const sortedData = getSortedData();
 
     // Totales y contadores usados en el modal de abonos
-    // totalAmount = suma de los campos Amount (valor nominal)
-    const totalAmount = data.reduce((total, payment) => total + (Number(payment.Amount) || 0), 0);
+    // totalAmount = suma SOLO de los pagos con estado 'Exitoso'
+    const totalAmount = data.reduce((total, payment) => {
+        const status = payment?.Status || '';
+        const isSuccess = /exitoso/i.test(status);
+        if (!isSuccess) return total;
+        return total + (Number(payment.Amount) || 0);
+    }, 0);
     // Sólo considerar como "abonado" los pagos con estado 'Exitoso' (case-insensitive).
     // Si existe un Abono (parcial), se toma ese valor como lo realmente abonado; si no, se toma Amount.
     const successfulAbonos = data.reduce((total, payment) => {
@@ -176,9 +190,82 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
         const amount = Number(payment.Amount || 0);
         return total + (abono > 0 ? abono : amount);
     }, 0);
-    // Contadores más explícitos: pagos (Amount>0) y abonos (Abono>0)
-    const totalPaymentsCount = data.filter(p => Number(p.Amount || 0) > 0).length;
-    const abonosCount = data.filter(p => Number(p.Abono || 0) > 0).length;
+    // Contadores: solo pagos exitosos
+    const totalPaymentsCount = data.filter(p => {
+        const status = p?.Status || '';
+        const isSuccess = /exitoso/i.test(status);
+        return isSuccess && Number(p.Amount || 0) > 0;
+    }).length;
+    const abonosCount = data.filter(p => {
+        const status = p?.Status || '';
+        const isSuccess = /exitoso/i.test(status);
+        return isSuccess && Number(p.Abono || 0) > 0;
+    }).length;
+
+    // ========== NUEVA LÓGICA: CICLOS DE 30 DÍAS CON ADEUDO ACUMULADO ==========
+    // Calcula todo lo relacionado con ciclos y adeudos
+    const calculatePaymentCycles = () => {
+        if (!clientPackage?.createdAt) {
+            return { accumulatedDebt: 0, currentCyclePaid: 0, currentCycleRemaining: 0, totalDue: 0 };
+        }
+        
+        const createdDate = new Date(clientPackage.createdAt);
+        const today = new Date();
+        const basePrice = Number(clientPackage.price) || 0;
+        const daysSinceCreation = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+        const currentCycleIndex = Math.floor(daysSinceCreation / 30);
+        
+        let accumulatedDebt = 0;
+        let currentCyclePaid = 0;
+        
+        // Revisar todos los ciclos hasta el actual
+        for (let i = 0; i <= currentCycleIndex; i++) {
+            const cycleStart = new Date(createdDate);
+            cycleStart.setDate(cycleStart.getDate() + (i * 30));
+            
+            const cycleEnd = new Date(cycleStart);
+            cycleEnd.setDate(cycleEnd.getDate() + 30);
+            
+            // Sumar pagos exitosos de este ciclo
+            const cyclePaid = data.reduce((sum, payment) => {
+                const paymentDate = new Date(payment.CreateDate);
+                const status = payment?.Status || '';
+                const isSuccess = /exitoso/i.test(status);
+                
+                if (isSuccess && paymentDate >= cycleStart && paymentDate < cycleEnd) {
+                    const abono = Number(payment.Abono || 0);
+                    const amount = Number(payment.Amount || 0);
+                    return sum + (abono > 0 ? abono : amount);
+                }
+                return sum;
+            }, 0);
+            
+            // Si es el ciclo actual, guardar lo pagado
+            if (i === currentCycleIndex) {
+                currentCyclePaid = cyclePaid;
+            } 
+            // Si es un ciclo anterior completado, calcular adeudo
+            else if (i < currentCycleIndex) {
+                const cycleDebt = Math.max(0, basePrice - cyclePaid);
+                accumulatedDebt += cycleDebt;
+            }
+        }
+        
+        // Restante del ciclo actual
+        const currentCycleRemaining = Math.max(0, basePrice - currentCyclePaid);
+        
+        // Total a pagar = Restante del ciclo actual + Adeudo acumulado
+        const totalDue = currentCycleRemaining + accumulatedDebt;
+        
+        return { 
+            accumulatedDebt, 
+            currentCyclePaid, 
+            currentCycleRemaining, 
+            totalDue 
+        };
+    };
+
+    const { accumulatedDebt, currentCyclePaid, currentCycleRemaining, totalDue: nextCycleTotalDue } = calculatePaymentCycles();
 
     if (loading) return <LoadFragment />
     if (error) return <p>Error!</p>
@@ -211,58 +298,41 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
             {/* Resumen de abonos acumulados */}
             <div className="row mb-3">
                 <div className="col-md-6 mb-3">
-                    <div style={{background: '#fff', border: '2px solid #17a2b8', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
-                        <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
-                            <i className="bi bi-credit-card" style={{color: '#17a2b8', fontSize: '1.5rem', marginRight: '8px'}}></i>
-                            <span style={{color: '#17a2b8', fontWeight: 'bold', fontSize: '1.1rem'}}>Costo del Paquete</span>
-                        </div>
-                        <div style={{color: '#17a2b8', fontSize: '2rem', fontWeight: 'bold'}}>
-                            ${clientPackage?.price ? Number(clientPackage.price).toLocaleString() : '0'}
+                    <div style={{background: '#fff', border: '2px solid #17a2b8', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%'}}>
+                        <div>
+                            <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
+                                <i className="bi bi-credit-card" style={{color: '#17a2b8', fontSize: '1.5rem', marginRight: '8px'}}></i>
+                                <span style={{color: '#17a2b8', fontWeight: 'bold', fontSize: '1.1rem'}}>Costo del Paquete</span>
+                            </div>
+                            <div style={{color: '#17a2b8', fontSize: '2rem', fontWeight: 'bold'}}>
+                                ${clientPackage?.price ? Number(clientPackage.price).toLocaleString() : '0'}
+                            </div>
                         </div>
                         {clientPackage && (
-                            <div style={{color: '#888', fontSize: '0.95rem', marginTop: '8px'}}>{clientPackage.description || clientPackage.name || 'Sin descripción'}</div>
+                            <div style={{color: '#888', fontSize: '0.95rem'}}>{clientPackage.description || clientPackage.name || 'Sin descripción'}</div>
                         )}
                     </div>
                 </div>
                 <div className="col-md-6 mb-3">
                     <div className="row h-100">
                         <div className="col-12 mb-3">
-                            <div style={{background: '#fff', border: '2px solid #28a745', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', cursor: 'pointer'}} onClick={() => setShowAbonosModal(true)}>
-                                <div style={{display: 'flex', alignItems: 'center', marginBottom: '6px'}}>
-                                    <i className="bi bi-folder" style={{color: '#28a745', fontSize: '1.3rem', marginRight: '6px'}}></i>
-                                    <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1rem'}}>Total Abonos</span>
+                            <div style={{background: '#fff', border: '2px solid #28a745', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.3s ease'}} onClick={() => setShowAbonosModal(true)} onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 16px rgba(40, 167, 69, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'}>
+                                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px'}}>
+                                    <div style={{display: 'flex', alignItems: 'center'}}>
+                                        <i className="bi bi-folder" style={{color: '#28a745', fontSize: '1.3rem', marginRight: '6px'}}></i>
+                                        <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1rem'}}>Total Abonos</span>
+                                    </div>
+                                    <i className="bi bi-arrow-right" style={{color: '#28a745', fontSize: '1rem', opacity: 0.6}}></i>
                                 </div>
                                 <div style={{color: '#28a745', fontSize: '1.6rem', fontWeight: 'bold'}}>
                                     ${successfulAbonos.toLocaleString()}
                                 </div>
+                                <div style={{color: '#28a745', fontSize: '0.8rem', marginTop: '8px', opacity: 0.8, fontStyle: 'italic'}}>
+                                    <i className="bi bi-hand-index me-1"></i>Clic para ver a detalle
+                                </div>
                             </div>
                         </div>
-                        <div className="col-6">
-                            <div style={{background: '#fff', border: '2px solid #ffc107', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
-                                <div style={{display: 'flex', alignItems: 'center', marginBottom: '6px'}}>
-                                    <i className="bi bi-clock-history" style={{color: '#ffc107', fontSize: '1.2rem', marginRight: '6px'}}></i>
-                                    <span style={{color: '#ffc107', fontWeight: 'bold', fontSize: '0.95rem'}}>Pendiente</span>
-                                </div>
-                                <div style={{color: '#ffc107', fontSize: '1.5rem', fontWeight: 'bold'}}>
-                                    ${(() => {
-                                        const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                                        const pendiente = totalPackage - successfulAbonos;
-                                        return pendiente >= 0 ? pendiente.toLocaleString() : '0';
-                                    })()}
-                                </div>
-                                {(() => {
-                                    const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                                    const pendiente = totalPackage - successfulAbonos;
-                                    return pendiente <= 0 && totalPackage > 0 ? (
-                                        <div style={{color: '#28a745', fontSize: '0.85rem', marginTop: '4px'}}>
-                                            <i className="bi bi-check-circle me-1"></i>
-                                            Pagado
-                                        </div>
-                                    ) : null;
-                                })()}
-                            </div>
-                        </div>
-                        <div className="col-6">
+                        <div className="col-12">
                             <div style={{background: '#fff', border: '2px solid #6f42c1', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
                                 <div style={{display: 'flex', alignItems: 'center', marginBottom: '6px'}}>
                                     <i className="bi bi-calendar-event" style={{color: '#6f42c1', fontSize: '1.2rem', marginRight: '6px'}}></i>
@@ -406,10 +476,6 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
                                 Resumen
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '14px' }}>
-                                <div style={{ background: '#f1f6fb', border: '1px solid #d6e6f7', borderRadius: '10px', padding: '12px' }}>
-                                    <div style={{ color: '#1766a8', fontWeight: 600, marginBottom: '4px' }}>Total Monto (Amount)</div>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0d4f88' }}>${totalAmount.toLocaleString()}</div>
-                                </div>
                                 <div style={{ background: '#eef9f2', border: '1px solid #d6f2df', borderRadius: '10px', padding: '12px' }}>
                                     <div style={{ color: '#1f8f4d', fontWeight: 600, marginBottom: '4px' }}>Total Abonado</div>
                                     <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#177f42' }}>${successfulAbonos.toLocaleString()}</div>
@@ -443,14 +509,19 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
                                         sortedData.map((payment, index) => (
                                             <div
                                                 key={payment._id || index}
+                                                onClick={() => setSelectedPaymentInModal(payment)}
                                                 style={{
                                                     display: 'grid',
                                                     gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
                                                     gap: '6px',
                                                     padding: '10px 12px',
                                                     borderTop: '1px solid #e5e8ef',
-                                                    background: index % 2 === 0 ? '#ffffff' : '#fbfcff'
+                                                    background: index % 2 === 0 ? '#ffffff' : '#fbfcff',
+                                                    cursor: 'pointer',
+                                                    transition: 'background 0.2s ease'
                                                 }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#e6f2ff'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#ffffff' : '#fbfcff'}
                                             >
                                                 <span style={{ color: '#334155' }}>{payment.CreateDate ? new Date(payment.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</span>
                                                 <span style={{ color: '#334155' }}>{payment.Folio}</span>
@@ -466,6 +537,20 @@ function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
                         </div>
                     </div>
                 </>
+            )}
+
+            {/* Panel lateral para ver/editar pago desde el modal */}
+            {selectedPaymentInModal && (
+                <PaymentInfo
+                    payment={selectedPaymentInModal}
+                    onStatusChange={(updatedPayment) => {
+                        // Actualizar el pago en el array local
+                        setData(prev => prev.map(p => p._id === updatedPayment._id ? updatedPayment : p));
+                        // Refrescar datos completos
+                        fetchData();
+                        fetchClientPackage();
+                    }}
+                />
             )}
         </>
     );
