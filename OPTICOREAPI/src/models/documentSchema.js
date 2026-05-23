@@ -20,6 +20,10 @@ const documentSchema = new mongoose.Schema({
     Admin: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'admin'
+    },
+    Archived: {
+        type: Boolean,
+        default: false
     }
 });
 

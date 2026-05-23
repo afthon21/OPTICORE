@@ -1,12 +1,16 @@
 import styleCard from './css/paymentCard.module.css';
 import styleTable from './css/paymentCard.module.css';
 import { useRegion } from '../../hooks/RegionContext';
+import PropTypes from 'prop-types';
+import Swal from 'sweetalert2';
+import ApiRequest from '../hooks/apiRequest';
 
 import { useState } from 'react';
 
 function PaymentCard({ payments = [], onSelected }) {
     const { region } = useRegion();
     const [search, setSearch] = useState('');
+    const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
     
     const [sortField, setSortField] = useState(null);
     const [sortOrder, setSortOrder] = useState('asc');
@@ -25,11 +29,21 @@ function PaymentCard({ payments = [], onSelected }) {
         }
     };
 
+    const [archivedIds, setArchivedIds] = useState([]);
+    const handleArchive = async (id) => {
+        if (window.confirm('¿Seguro que quieres archivar este pago?')) {
+            await makeRequest(`/pay/archive/${id}`);
+            setArchivedIds(prev => [...prev, id]);
+        }
+    };
+
     const filteredData = payments.filter(payment => {
-        // Filtrar por región primero
+        if (payment.Archived || archivedIds.includes(payment._id)) return false;
+        // Excluir pagos de clientes archivados
+        if (payment.Client?.Archived) return false;
+        // ...existing code...
         const matchesRegion = payment.Client?.Location?.State === region;
         if (!matchesRegion) return false;
-
         const folio = payment.Folio?.toString().toLowerCase() || '';
         const method = payment.Method?.toString().toLowerCase() || '';
         const amount =(payment.Amount ?? '').toString().toLowerCase();
@@ -40,7 +54,6 @@ function PaymentCard({ payments = [], onSelected }) {
         ${payment.Client?.LastName.MotherLastName}`
         .replace(/\s+/g, ' ').trim()
         .toLowerCase();
-
         const searchLower = search.toLowerCase();
         return (
             clientName.includes(searchLower) || 
@@ -69,12 +82,13 @@ function PaymentCard({ payments = [], onSelected }) {
                 aValue = new Date(a.CreateDate);
                 bValue = new Date(b.CreateDate);
                 break;
-            case 'Cliente':
+            case 'Cliente': {
                 const aClient = `${a.Client?.Name?.FirstName ?? ''} ${a.Client?.Name?.SecondName ?? ''} ${a.Client?.LastName?.FatherLastName ?? ''} ${a.Client?.LastName?.MotherLastName ?? ''}`.toLowerCase();
                 const bClient = `${b.Client?.Name?.FirstName ?? ''} ${b.Client?.Name?.SecondName ?? ''} ${b.Client?.LastName?.FatherLastName ?? ''} ${b.Client?.LastName?.MotherLastName ?? ''}`.toLowerCase();
                 aValue = aClient;
                 bValue = bClient;
                 break;
+            }
             default:
                 return 0;
         }
@@ -109,9 +123,7 @@ function PaymentCard({ payments = [], onSelected }) {
                         <th onClick={() => handleHeaderClick('Folio')} style={{ cursor: 'pointer' }}>
                             Folio {sortField === 'Folio' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
-
                         <th>Estado</th>
-
                         <th onClick={() => handleHeaderClick('Cliente')} style={{ cursor: 'pointer' }}>
                             Cliente {sortField === 'Cliente' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
@@ -119,28 +131,37 @@ function PaymentCard({ payments = [], onSelected }) {
                             Método {sortField === 'Método' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
                         <th>Monto</th>
-                        {/* Nuevo encabezado */}
                         <th>Abono</th>
                         <th>Creado por</th>
                         <th onClick={() => handleHeaderClick('Fecha')} style={{ cursor: 'pointer' }}>
                             Fecha {sortField === 'Fecha' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                         </th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody className={`text-wrap ${styleCard['table-body']}`}>
                     {sortedData.map((item) => (
                         <tr className={styleTable['selected-row']}
-                            key={item._id} onClick={() => onSelected(item)}
-                            data-bs-toggle="modal" data-bs-target="#PaymentModal">
+                            key={item._id} onClick={() => onSelected(item)}>
                             <td>{item.Folio}</td>
                             <td>{item.Status}</td>
                             <td>{`${item.Client?.Name?.FirstName ?? ''} ${item.Client?.Name?.SecondName ?? ''} ${item.Client?.LastName?.FatherLastName ?? ''} ${item.Client?.LastName?.MotherLastName ?? ''}`}</td>
                             <td>{item.Method}</td>
                             <td>{item.Amount}</td>
                             <td>{item.Abono}</td>
-                            {/* Mostrar el administrador */}
                             <td>{item.Admin?.UserName ?? 'Sin asignar'}</td>
                             <td>{item.CreateDate?.split("T")[0]}</td>
+                            <td>
+                                <button 
+                                    className="btn btn-outline-danger btn-sm"
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        handleArchive(item._id);
+                                    }}
+                                >
+                                    Archivar
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -150,5 +171,31 @@ function PaymentCard({ payments = [], onSelected }) {
     );
     
 }
+
+PaymentCard.propTypes = {
+    payments: PropTypes.arrayOf(PropTypes.shape({
+        _id: PropTypes.string,
+        Folio: PropTypes.string,
+        Method: PropTypes.string,
+        Amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        CreateDate: PropTypes.string,
+        Archived: PropTypes.bool,
+        Client: PropTypes.shape({
+            Name: PropTypes.shape({
+                FirstName: PropTypes.string,
+                SecondName: PropTypes.string
+            }),
+            LastName: PropTypes.shape({
+                FatherLastName: PropTypes.string,
+                MotherLastName: PropTypes.string
+            }),
+            Location: PropTypes.shape({
+                State: PropTypes.string
+            })
+        })
+    })),
+    onSelected: PropTypes.func.isRequired,
+    onPaymentUpdate: PropTypes.func
+};
 
 export default PaymentCard;

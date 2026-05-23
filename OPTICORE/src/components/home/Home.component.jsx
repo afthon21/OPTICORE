@@ -204,7 +204,7 @@ function HomeComponent() {
 
     // Función para mostrar detalles del ticket en un modal
     const handleShowTicketDetails = (ticket, source = 'tickets') => {
-        // Usar siempre los mismos colores verdes para todas las ventanas
+        // Usar los mismos colores verdes para las ventanas
         const colors = {
             primary: '#26a69a',
             secondary: '#4db6ac',
@@ -831,11 +831,12 @@ function HomeComponent() {
                             </div>
                         </div>
 
-                        <ErrorDisplay
+                        {/* ErrorDisplay temporalmente oculto para grabación de video */}
+                        {/* <ErrorDisplay
                             showAll={showAllLogs}
                             onToggleShowAll={() => setShowAllLogs(prev => !prev)}
                             onLastUpdateChange={(date) => setLastLogsUpdate(date)}
-                        />
+                        /> */}
                 </div>
             </div>
 

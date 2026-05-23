@@ -1,0 +1,128 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+.active-clients-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 450px;
+  height: 100vh;
+  background-color: #fff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+  z-index: 1041;
+  overflow: hidden;
+  animation: slideRtL 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideRtL {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.3rem 1.6rem;
+  border-bottom: 1px solid #dee2e6;
+  background: linear-gradient(135deg, #5563d6, #6f3fb4);
+  border-radius: 0;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.2px;
+}
+
+.btn-close-modal {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  font-size: 1.25rem;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.35rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-close-modal:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+  min-height: 0;
+  background-attachment: fixed;
+}
+
+.clients-count {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.clients-count .badge {
+  font-size: 0.95rem;
+  padding: 0.55rem 1.1rem;
+  background-color: #5563d6;
+}
+
+.table-responsive {
+  margin-top: 0;
+}
+
+.table {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.table thead th {
+  background-color: #f1f5f9;
+  color: #0f2440;
+  font-weight: 700;
+  border-bottom: 2px solid #dde3eb;
+  padding: 0.8rem;
+}
+
+
+.client-row {
+  cursor: default;
+  transition: background-color 0.18s;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.client-row:hover {
+  background-color: #f8f9fc;
+}
+
+.client-name-cell {
+  font-weight: 600;
+  color: #0f2440;
+  padding: 0.85rem;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  padding: 0.85rem;
+}

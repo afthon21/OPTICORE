@@ -16,9 +16,19 @@ const packageSchema = new mongoose.Schema({
     platforms: [{ name: String, price: Number }], // Plataformas adicionales
     Client: { type: mongoose.Schema.Types.ObjectId, ref: 'client', required: true },
     createdAt: { type: Date, default: Date.now },
-    Admin: { type: mongoose.Schema.Types.ObjectId, ref: 'admin' }
+    Admin: { type: mongoose.Schema.Types.ObjectId, ref: 'admin' },
+    Archived: {
+        type: Boolean,
+        default: false
+    },
+    ArchivedAt: {
+        type: Date,
+        default: null
+    }
 });
 
 packageSchema.index({ name: 1, Client: 1 });
+// Index para eliminar automáticamente paquetes archivados después de 30 días
+packageSchema.index({ ArchivedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
 
 export default mongoose.model('Packages', packageSchema);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ApiRequest from '../hooks/apiRequest';
 import ClientLocation from '../clients/location/location.map';
+import { getZoneRegionByMunicipio } from '../../lib/zoneRegionMapping.js';
 import './css/ClientDetailsModal.css';
 
 function ClientDetailsModal({ client, isOpen, onClose }) {
@@ -62,13 +63,18 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
     const getClientZone = () => {
         if (!client) return 'Sin zona disponible';
 
-        if (client.Address) {
-            if (typeof client.Address === 'object') {
-                return client.Address.City || client.Address.Municipio || 'Sin zona disponible';
-            }
-        } else if (client.Location) {
-            return client.Location.Municipality || client.Location.State || 'Sin zona disponible';
+        const municipio = client.Address && typeof client.Address === 'object'
+            ? (client.Address.City || client.Address.Municipio)
+            : client.Location?.Municipality;
+
+        const estado = client.Location?.State || client.Address?.State;
+        const mapped = estado && municipio ? getZoneRegionByMunicipio(estado, municipio) : null;
+        if (mapped) {
+            return `${mapped.zone} / ${mapped.region}`;
         }
+
+        if (municipio) return municipio;
+        if (client.Location?.State) return client.Location.State;
         
         return 'Sin zona disponible';
     };
@@ -160,7 +166,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
             URL.revokeObjectURL(link.href);
         } catch (error) {
             console.error('Error al descargar la foto de fachada:', error);
-            // Podríamos agregar una notificación de error aquí si queremos
         }
     };
 
@@ -172,8 +177,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
     const handleCloseLocationModal = () => {
         setLocationModalOpen(false);
     };
-
-
 
     // Función principal para descargar la captura del mapa
     const handleDownloadLocationMap = async () => {

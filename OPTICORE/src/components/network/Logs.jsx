@@ -19,7 +19,22 @@ function Logs() {
                     const dateB = new Date(b.timestamp || b.createdAt || b.date || 0);
                     return dateB - dateA; // De más reciente a más antiguo
                 });
-                setLogs(sortedLogs);
+                // Filtrar para mostrar solo errores de servidores
+                const filteredLogs = sortedLogs.filter(log => {
+                    // Solo mostrar logs de nivel "error"
+                    const level = (log.level || '').toString().toLowerCase();
+                    if (level !== 'error') return false;
+                    
+                    // Normalizar propiedades por si vienen con nombres distintos
+                    const source = (log.source || log.fuente || '').toString();
+                    
+                    // Excluir errores de autenticación, creación de usuarios o clientes
+                    const excludedSources = ['Autenticación', 'Gestión de Usuarios', 'Gestión de Clientes'];
+                    if (excludedSources.includes(source)) return false;
+                    
+                    return true;
+                });
+                setLogs(filteredLogs);
             } catch (err) {
                 setError('Error al cargar los logs');
                 console.error(err);
@@ -41,7 +56,7 @@ function Logs() {
 
     return (
         <div style={{ padding: '20px' }}>
-            <h2>Logs de Fibra Óptica</h2>
+            <h2>Logs de Errores de Servidores</h2>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>

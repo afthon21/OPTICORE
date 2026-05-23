@@ -28,6 +28,23 @@ export const createPackage = async(req, res) => {
             return res.status(404).json({ message: 'El cliente seleccionado no existe' });
         }
 
+        // Validación: evitar asignar más de un paquete activo al mismo cliente
+        const existingPackage = await Package.findOne({
+            Client: clientId,
+            Archived: { $ne: true }
+        });
+
+        if (existingPackage) {
+            return res.status(400).json({
+                message: 'Este cliente ya tiene un paquete activo asignado. No se pueden asignar paquetes duplicados.',
+                existingPackage: {
+                    folio: existingPackage.folio,
+                    name: existingPackage.name,
+                    type: existingPackage.type
+                }
+            });
+        }
+
         // Generar folio único
         const folio = `PKG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         
@@ -68,7 +85,9 @@ export const createPackage = async(req, res) => {
 // Obtener todos los paquetes
 export const getAllPackages = async(req, res) => {
     try {
-        const packages = await Package.find()
+        const query = req.query.archived === 'true' ? { Archived: true } : { Archived: { $ne: true } };
+        
+        const packages = await Package.find(query)
             .populate('Client', 'Name LastName Email Location')
             .populate('Admin', 'UserName')
             .exec();
@@ -169,7 +188,11 @@ export const getPackagesByClient = async(req, res) => {
             return res.status(404).json({ message: 'Cliente no encontrado' });
         }
 
-        const packages = await Package.find({ Client: clientId })
+        // Si se envía ?archived=true, devolver solo los paquetes archivados
+        const archivedQuery = req.query.archived === 'true';
+        const query = archivedQuery ? { Client: clientId, Archived: true } : { Client: clientId, Archived: { $ne: true } };
+
+        const packages = await Package.find(query)
             .populate('Admin', 'UserName')
             .exec();
 
@@ -177,5 +200,47 @@ export const getPackagesByClient = async(req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Error al obtener los paquetes del cliente' });
+    }
+};
+// Archivar paquete
+export const archivePackage = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const packageToArchive = await Package.findById(id);
+        if (!packageToArchive) {
+            return res.status(404).json({ message: 'Paquete no encontrado' });
+        }
+        packageToArchive.Archived = true;
+        packageToArchive.ArchivedAt = new Date();
+        await packageToArchive.save();
+        return res.status(200).json({ 
+            message: 'Paquete archivado correctamente',
+            package: packageToArchive
+        });
+    } catch (error) {
+        console.error('ERROR archiving package:', error);
+        return res.status(500).json({ message: 'Error al archivar el paquete' });
+    }
+};
+
+// Desarchivar paquete
+export const unarchivePackage = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const packageToUnarchive = await Package.findById(id);
+
+        if (!packageToUnarchive) {
+            return res.status(404).json({ message: 'Paquete no encontrado' });
+        }
+        packageToUnarchive.Archived = false;
+        packageToUnarchive.ArchivedAt = null;
+        await packageToUnarchive.save();
+        return res.status(200).json({ 
+            message: 'Paquete desarchivado correctamente',
+            package: packageToUnarchive
+        });
+    } catch (error) {
+        console.error('ERROR unarchiving package:', error);
+        return res.status(500).json({ message: 'Error al desarchivar el paquete' });
     }
 };

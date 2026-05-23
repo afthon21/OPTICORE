@@ -50,3 +50,33 @@
 .btn:hover::after {
     content: "Nuevo ticket";
 }
+
+/* Responsive styles */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .header {
+        font-size: 12pt;
+    }
+    
+    .body {
+        font-size: 11pt;
+    }
+    
+    .btn:hover {
+        width: 6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        font-size: 10pt;
+    }
+    
+    .body {
+        font-size: 10pt;
+    }
+}

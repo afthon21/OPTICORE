@@ -7,8 +7,9 @@ import ApiRequest from '../../hooks/apiRequest.jsx';
 import { LoadFragment } from '../../fragments/Load.fragment.jsx';
 import CreatePay from './CreatePay.modal.jsx';
 import InfoPay from './Client.infoPay.jsx';
+import PaymentInfo from '../../payments/Payment.info.jsx';
 
-function ClientPayments({ client, refreshKey = 0 }) {
+function ClientPayments({ client, refreshKey = 0, isArchived = false }) {
     const { makeRequest, loading, error } = ApiRequest(import.meta.env.VITE_API_BASE);
     const [data, setData] = useState([]);
     const [select, setSelect] = useState(null);
@@ -18,6 +19,7 @@ function ClientPayments({ client, refreshKey = 0 }) {
     const [showAbonosModal, setShowAbonosModal] = useState(false);
     const [modalMaxHeight, setModalMaxHeight] = useState(null); // Altura dinámica para el modal
     const [mouseY, setMouseY] = useState(null); // Posición Y del mouse
+    const [selectedPaymentInModal, setSelectedPaymentInModal] = useState(null); // Pago seleccionado en el modal
 
     // Captura la posición Y del mouse al abrir el modal
     const handleOpenAbonosModal = (e) => {
@@ -39,7 +41,7 @@ function ClientPayments({ client, refreshKey = 0 }) {
     const fetchData = useCallback(async () => {
         if (!client) return; // No hacer fetch si no hay cliente
         try {
-            const res = await makeRequest(`/pay/all/${client}`);
+            const res = await makeRequest(`/pay/all/${client}${isArchived ? '?archived=true' : ''}`);
             // Asegurarnos de que res sea un array; si no, normalizar a array vacío
             if (Array.isArray(res)) {
                 setData(res);
@@ -57,7 +59,7 @@ function ClientPayments({ client, refreshKey = 0 }) {
     const fetchClientPackage = useCallback(async () => {
         if (!client) return;
         try {
-            const res = await makeRequest(`/packages/client/${client}`);
+            const res = await makeRequest(`/packages/client/${client}${isArchived ? '?archived=true' : ''}`);
             // Si el cliente tiene múltiples paquetes, tomamos el primero activo
             if (Array.isArray(res)) {
                 setClientPackage(res.length > 0 ? res[0] : null);
@@ -98,6 +100,13 @@ function ClientPayments({ client, refreshKey = 0 }) {
         window.addEventListener('payment:created', handler);
         return () => window.removeEventListener('payment:created', handler);
     }, [client, fetchClientPackage]);
+
+    // Listener para cerrar el panel de PaymentInfo
+    useEffect(() => {
+        const handleClosePaymentInfo = () => setSelectedPaymentInModal(null);
+        window.addEventListener('closePaymentInfo', handleClosePaymentInfo);
+        return () => window.removeEventListener('closePaymentInfo', handleClosePaymentInfo);
+    }, []);
     
     // Mostrar mensaje si no hay cliente seleccionado
     if (!client) {
@@ -164,8 +173,13 @@ function ClientPayments({ client, refreshKey = 0 }) {
     const sortedData = getSortedData();
 
     // Totales y contadores usados en el modal de abonos
-    // totalAmount = suma de los campos Amount (valor nominal)
-    const totalAmount = data.reduce((total, payment) => total + (Number(payment.Amount) || 0), 0);
+    // totalAmount = suma SOLO de los pagos con estado 'Exitoso'
+    const totalAmount = data.reduce((total, payment) => {
+        const status = payment?.Status || '';
+        const isSuccess = /exitoso/i.test(status);
+        if (!isSuccess) return total;
+        return total + (Number(payment.Amount) || 0);
+    }, 0);
     // Sólo considerar como "abonado" los pagos con estado 'Exitoso' (case-insensitive).
     // Si existe un Abono (parcial), se toma ese valor como lo realmente abonado; si no, se toma Amount.
     const successfulAbonos = data.reduce((total, payment) => {
@@ -176,9 +190,82 @@ function ClientPayments({ client, refreshKey = 0 }) {
         const amount = Number(payment.Amount || 0);
         return total + (abono > 0 ? abono : amount);
     }, 0);
-    // Contadores más explícitos: pagos (Amount>0) y abonos (Abono>0)
-    const totalPaymentsCount = data.filter(p => Number(p.Amount || 0) > 0).length;
-    const abonosCount = data.filter(p => Number(p.Abono || 0) > 0).length;
+    // Contadores: solo pagos exitosos
+    const totalPaymentsCount = data.filter(p => {
+        const status = p?.Status || '';
+        const isSuccess = /exitoso/i.test(status);
+        return isSuccess && Number(p.Amount || 0) > 0;
+    }).length;
+    const abonosCount = data.filter(p => {
+        const status = p?.Status || '';
+        const isSuccess = /exitoso/i.test(status);
+        return isSuccess && Number(p.Abono || 0) > 0;
+    }).length;
+
+    // ========== NUEVA LÓGICA: CICLOS DE 30 DÍAS CON ADEUDO ACUMULADO ==========
+    // Calcula todo lo relacionado con ciclos y adeudos
+    const calculatePaymentCycles = () => {
+        if (!clientPackage?.createdAt) {
+            return { accumulatedDebt: 0, currentCyclePaid: 0, currentCycleRemaining: 0, totalDue: 0 };
+        }
+        
+        const createdDate = new Date(clientPackage.createdAt);
+        const today = new Date();
+        const basePrice = Number(clientPackage.price) || 0;
+        const daysSinceCreation = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+        const currentCycleIndex = Math.floor(daysSinceCreation / 30);
+        
+        let accumulatedDebt = 0;
+        let currentCyclePaid = 0;
+        
+        // Revisar todos los ciclos hasta el actual
+        for (let i = 0; i <= currentCycleIndex; i++) {
+            const cycleStart = new Date(createdDate);
+            cycleStart.setDate(cycleStart.getDate() + (i * 30));
+            
+            const cycleEnd = new Date(cycleStart);
+            cycleEnd.setDate(cycleEnd.getDate() + 30);
+            
+            // Sumar pagos exitosos de este ciclo
+            const cyclePaid = data.reduce((sum, payment) => {
+                const paymentDate = new Date(payment.CreateDate);
+                const status = payment?.Status || '';
+                const isSuccess = /exitoso/i.test(status);
+                
+                if (isSuccess && paymentDate >= cycleStart && paymentDate < cycleEnd) {
+                    const abono = Number(payment.Abono || 0);
+                    const amount = Number(payment.Amount || 0);
+                    return sum + (abono > 0 ? abono : amount);
+                }
+                return sum;
+            }, 0);
+            
+            // Si es el ciclo actual, guardar lo pagado
+            if (i === currentCycleIndex) {
+                currentCyclePaid = cyclePaid;
+            } 
+            // Si es un ciclo anterior completado, calcular adeudo
+            else if (i < currentCycleIndex) {
+                const cycleDebt = Math.max(0, basePrice - cyclePaid);
+                accumulatedDebt += cycleDebt;
+            }
+        }
+        
+        // Restante del ciclo actual
+        const currentCycleRemaining = Math.max(0, basePrice - currentCyclePaid);
+        
+        // Total a pagar = Restante del ciclo actual + Adeudo acumulado
+        const totalDue = currentCycleRemaining + accumulatedDebt;
+        
+        return { 
+            accumulatedDebt, 
+            currentCyclePaid, 
+            currentCycleRemaining, 
+            totalDue 
+        };
+    };
+
+    const { accumulatedDebt, currentCyclePaid, currentCycleRemaining, totalDue: nextCycleTotalDue } = calculatePaymentCycles();
 
     if (loading) return <LoadFragment />
     if (error) return <p>Error!</p>
@@ -210,136 +297,260 @@ function ClientPayments({ client, refreshKey = 0 }) {
 
             {/* Resumen de abonos acumulados */}
             <div className="row mb-3">
-                <div className="col-md-4">
-                    <div style={{background: '#fff', border: '2px solid #17a2b8', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
-                        <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
-                            <i className="bi bi-credit-card" style={{color: '#17a2b8', fontSize: '1.5rem', marginRight: '8px'}}></i>
-                            <span style={{color: '#17a2b8', fontWeight: 'bold', fontSize: '1.1rem'}}>Costo del Paquete</span>
-                        </div>
-                        <div style={{color: '#17a2b8', fontSize: '2rem', fontWeight: 'bold'}}>
-                            ${clientPackage?.price ? Number(clientPackage.price).toLocaleString() : '0'}
+                <div className="col-md-6 mb-3">
+                    <div style={{background: '#fff', border: '2px solid #17a2b8', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%'}}>
+                        <div>
+                            <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
+                                <i className="bi bi-credit-card" style={{color: '#17a2b8', fontSize: '1.5rem', marginRight: '8px'}}></i>
+                                <span style={{color: '#17a2b8', fontWeight: 'bold', fontSize: '1.1rem'}}>Costo del Paquete</span>
+                            </div>
+                            <div style={{color: '#17a2b8', fontSize: '2rem', fontWeight: 'bold'}}>
+                                ${clientPackage?.price ? Number(clientPackage.price).toLocaleString() : '0'}
+                            </div>
                         </div>
                         {clientPackage && (
-                            <div style={{color: '#888', fontSize: '0.95rem', marginTop: '8px'}}>{clientPackage.description || clientPackage.name || 'Sin descripción'}</div>
+                            <div style={{color: '#888', fontSize: '0.95rem'}}>{clientPackage.description || clientPackage.name || 'Sin descripción'}</div>
                         )}
                     </div>
                 </div>
-                <div className="col-md-4">
-                    <div style={{background: '#fff', border: '2px solid #28a745', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', cursor: 'pointer'}} onClick={() => setShowAbonosModal(true)}>
-                        <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
-                            <i className="bi bi-folder" style={{color: '#28a745', fontSize: '1.5rem', marginRight: '8px'}}></i>
-                            <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1.1rem'}}>Total Abonos</span>
-                        </div>
-                        <div style={{color: '#28a745', fontSize: '2rem', fontWeight: 'bold'}}>
-                            ${successfulAbonos.toLocaleString()}
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <div style={{background: '#fff', border: '2px solid #ffc107', borderRadius: '10px', padding: '18px', minHeight: '170px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
-                        <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
-                            <i className="bi bi-clock-history" style={{color: '#ffc107', fontSize: '1.5rem', marginRight: '8px'}}></i>
-                            <span style={{color: '#ffc107', fontWeight: 'bold', fontSize: '1.1rem'}}>Monto Pendiente</span>
-                        </div>
-                        <div style={{color: '#ffc107', fontSize: '2rem', fontWeight: 'bold'}}>
-                            ${(() => {
-                                const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                                const pendiente = totalPackage - successfulAbonos;
-                                return pendiente >= 0 ? pendiente.toLocaleString() : '0';
-                            })()}
-                        </div>
-                        {(() => {
-                            const totalPackage = clientPackage?.price ? Number(clientPackage.price) : 0;
-                            const pendiente = totalPackage - successfulAbonos;
-                            return pendiente <= 0 && totalPackage > 0 ? (
-                                <div style={{color: '#28a745', fontSize: '1rem', marginTop: '8px'}}>
-                                    <i className="bi bi-check-circle me-1"></i>
-                                    Completamente pagado
+                <div className="col-md-6 mb-3">
+                    <div className="row h-100">
+                        <div className="col-12 mb-3">
+                            <div style={{background: '#fff', border: '2px solid #28a745', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.3s ease'}} onClick={() => setShowAbonosModal(true)} onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 16px rgba(40, 167, 69, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'}>
+                                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px'}}>
+                                    <div style={{display: 'flex', alignItems: 'center'}}>
+                                        <i className="bi bi-folder" style={{color: '#28a745', fontSize: '1.3rem', marginRight: '6px'}}></i>
+                                        <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1rem'}}>Total Abonos</span>
+                                    </div>
+                                    <i className="bi bi-arrow-right" style={{color: '#28a745', fontSize: '1rem', opacity: 0.6}}></i>
                                 </div>
-                            ) : null;
-                        })()}
+                                <div style={{color: '#28a745', fontSize: '1.6rem', fontWeight: 'bold'}}>
+                                    ${successfulAbonos.toLocaleString()}
+                                </div>
+                                <div style={{color: '#28a745', fontSize: '0.8rem', marginTop: '8px', opacity: 0.8, fontStyle: 'italic'}}>
+                                    <i className="bi bi-hand-index me-1"></i>Clic para ver a detalle
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-12">
+                            <div style={{background: '#fff', border: '2px solid #6f42c1', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)'}}>
+                                <div style={{display: 'flex', alignItems: 'center', marginBottom: '6px'}}>
+                                    <i className="bi bi-calendar-event" style={{color: '#6f42c1', fontSize: '1.2rem', marginRight: '6px'}}></i>
+                                    <span style={{color: '#6f42c1', fontWeight: 'bold', fontSize: '0.95rem'}}>Próximo Pago</span>
+                                </div>
+                                <div style={{color: '#6f42c1', fontSize: '1.2rem', fontWeight: 'bold'}}>
+                                    {(() => {
+                                        if (!clientPackage?.createdAt) return 'Sin fecha';
+                                        const createdDate = new Date(clientPackage.createdAt);
+                                        const today = new Date();
+                                        
+                                        // Calcular cuántos ciclos de 30 días han pasado desde la creación
+                                        const daysSinceCreation = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                                        const cyclesPassed = Math.floor(daysSinceCreation / 30);
+                                        
+                                        // Calcular la fecha del próximo pago (siguiente ciclo de 30 días)
+                                        const nextPaymentDate = new Date(createdDate);
+                                        nextPaymentDate.setDate(nextPaymentDate.getDate() + ((cyclesPassed + 1) * 30));
+                                        
+                                        return nextPaymentDate.toLocaleDateString('es-MX', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        });
+                                    })()}
+                                </div>
+                                {clientPackage?.createdAt && (
+                                    <div style={{color: '#888', fontSize: '0.75rem', marginTop: '4px'}}>
+                                        Creado: {new Date(clientPackage.createdAt).toLocaleDateString('es-MX', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        })}
+                                    </div>
+                                )}
+                                {(() => {
+                                    if (!clientPackage?.createdAt) return null;
+                                    const createdDate = new Date(clientPackage.createdAt);
+                                    const today = new Date();
+                                    const daysSinceCreation = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                                    const cyclesPassed = Math.floor(daysSinceCreation / 30);
+                                    const nextPaymentDate = new Date(createdDate);
+                                    nextPaymentDate.setDate(nextPaymentDate.getDate() + ((cyclesPassed + 1) * 30));
+                                    const daysUntilNextPayment = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
+                                    
+                                    if (daysUntilNextPayment <= 7 && daysUntilNextPayment > 0) {
+                                        return (
+                                            <div style={{color: '#dc3545', fontSize: '0.75rem', marginTop: '2px'}}>
+                                                <i className="bi bi-exclamation-circle me-1"></i>
+                                                Faltan {daysUntilNextPayment} días
+                                            </div>
+                                        );
+                                    } else if (daysUntilNextPayment === 0) {
+                                        return (
+                                            <div style={{color: '#dc3545', fontSize: '0.75rem', marginTop: '2px', fontWeight: 'bold'}}>
+                                                <i className="bi bi-exclamation-triangle-fill me-1"></i>
+                                                ¡Vence hoy!
+                                            </div>
+                                        );
+                                    } else if (daysUntilNextPayment < 0) {
+                                        return (
+                                            <div style={{color: '#dc3545', fontSize: '0.75rem', marginTop: '2px', fontWeight: 'bold'}}>
+                                                <i className="bi bi-x-circle-fill me-1"></i>
+                                                Vencido ({Math.abs(daysUntilNextPayment)} días)
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <InfoPay payment={select ? select : ''} />
 
-            {/* Modal Bootstrap estándar, sin estilos personalizados */}
+            {/* Lateral panel para Total Abonos, alineado al patrón de pagos/tickets/paquetes */}
             {showAbonosModal && (
-                <div onClick={() => setShowAbonosModal(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-                    <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 2px 16px rgba(0,0,0,0.12)', padding: '32px', minWidth: '420px', maxWidth: '90vw', position: 'relative' }}>
-                        <button onClick={() => setShowAbonosModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Cerrar">&times;</button>
-                        <button onClick={() => setShowAbonosModal(false)}
+                <>
+                    <div
+                        onClick={() => setShowAbonosModal(false)}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.15)', zIndex: 1040 }}
+                    />
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            right: 0,
+                            height: '100vh',
+                            width: '720px',
+                            maxWidth: '98vw',
+                            background: '#fff',
+                            boxShadow: '-6px 0 24px rgba(0,0,0,0.12)',
+                            zIndex: 1050,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            transform: 'translateX(0)',
+                            transition: 'transform 0.3s ease'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div
                             style={{
-                                position: 'absolute',
-                                top: '12px',
-                                right: '12px',
-                                background: '#e74c3c',
+                                padding: '18px 20px',
+                                background: 'linear-gradient(135deg, #1766a8 0%, #1d7bcf 100%)',
                                 color: '#fff',
-                                border: '2px solid #fff',
-                                borderRadius: '50%',
-                                width: '40px',
-                                height: '40px',
-                                fontSize: '2rem',
-                                fontWeight: 'bold',
-                                cursor: 'pointer',
-                                zIndex: 100,
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                opacity: 1
+                                justifyContent: 'space-between'
                             }}
-                            title="Cerrar"
                         >
-                            &times;
-                        </button>
-                        <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '18px', color: '#1766a8' }}>
-                            Total Abonos del Cliente
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <i className="bi bi-folder-fill" style={{ fontSize: '1.3rem' }} />
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>Total Abonos del Cliente</div>
+                                    <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Detalle de todos los abonos registrados</div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowAbonosModal(false)}
+                                style={{
+                                    border: 'none',
+                                    background: 'rgba(255,255,255,0.2)',
+                                    color: '#fff',
+                                    borderRadius: '50%',
+                                    width: '38px',
+                                    height: '38px',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    cursor: 'pointer'
+                                }}
+                                title="Cerrar"
+                            >
+                                <i className="bi bi-x-lg" />
+                            </button>
                         </div>
-                        <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem' }}>
-                                <thead>
-                                    <tr style={{ background: '#f2f2f2' }}>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Fecha</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Folio</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Método</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Monto</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Abono</th>
-                                        <th style={{ border: '1px solid #ddd', padding: '8px', fontWeight: 'bold' }}>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {sortedData
-                                        // Mostrar sólo filas que representen un pago o un abono (Amount>0 o Abono>0)
-                                        .filter(payment => Number(payment.Amount || 0) > 0 || Number(payment.Abono || 0) > 0)
-                                        .map((payment, index) => (
-                                        <tr key={payment._id || index}>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.CreateDate ? new Date(payment.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Folio || (Number(payment.Abono || 0) > 0 ? '----' : '')}</td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Method || (Number(payment.Abono || 0) > 0 ? '----' : '')}</td>
-                                            {/* Monto: si no existe Amount, mostrar '---' */}
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>
-                                                {Number(payment.Amount || 0) > 0 ? `$${Number(payment.Amount).toLocaleString()}` : '----'}
-                                            </td>
-                                            {/* Abono: si existe Abono mostrarlo; si no y existe Amount, dejar '---' (no asumir que Amount es abono) */}
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>
-                                                {Number(payment.Abono || 0) > 0 ? `$${Number(payment.Abono).toLocaleString()}` : '----'}
-                                            </td>
-                                            <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>{payment.Status || 'N/A'}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div style={{ marginTop: '12px', fontSize: '1.05rem' }}>
-                            <div><b>Total Monto (suma Amount):</b> ${totalAmount.toLocaleString()}</div>
-                            <div><b>Total Abonado:</b> ${successfulAbonos.toLocaleString()}</div>
-                            <div><b>Pagos registrados:</b> {totalPaymentsCount}</div>
-                            <div><b>Abonos registrados:</b> {abonosCount}</div>
+
+                        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1 }}>
+                            <div style={{ marginBottom: '12px', fontSize: '1.05rem', fontWeight: 600, color: '#1766a8' }}>
+                                Resumen
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+                                <div style={{ background: '#eef9f2', border: '1px solid #d6f2df', borderRadius: '10px', padding: '12px' }}>
+                                    <div style={{ color: '#1f8f4d', fontWeight: 600, marginBottom: '4px' }}>Total Abonado</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#177f42' }}>${successfulAbonos.toLocaleString()}</div>
+                                </div>
+                                <div style={{ background: '#fff7e6', border: '1px solid #ffe5b8', borderRadius: '10px', padding: '12px' }}>
+                                    <div style={{ color: '#c98200', fontWeight: 600, marginBottom: '4px' }}>Pagos registrados</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#a46900' }}>{totalPaymentsCount}</div>
+                                </div>
+                                <div style={{ background: '#f5f0ff', border: '1px solid #e0d4ff', borderRadius: '10px', padding: '12px' }}>
+                                    <div style={{ color: '#6b4fb5', fontWeight: 600, marginBottom: '4px' }}>Abonos registrados</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#5a3fa1' }}>{abonosCount}</div>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '10px', fontSize: '1.05rem', fontWeight: 600, color: '#1766a8' }}>Detalle de abonos</div>
+                            <div style={{ border: '1px solid #e5e8ef', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.04)' }}>
+                                <div style={{ background: '#f7f9fc', padding: '10px 12px', fontWeight: 600, color: '#4a5568', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '6px', fontSize: '0.95rem' }}>
+                                    <span>Fecha</span>
+                                    <span>Folio</span>
+                                    <span>Método</span>
+                                    <span>Monto</span>
+                                    <span>Abono</span>
+                                    <span>Estado</span>
+                                </div>
+                                <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
+                                    {sortedData.length === 0 ? (
+                                        <div style={{ padding: '18px', textAlign: 'center', color: '#6b7280' }}>
+                                            No hay abonos registrados.
+                                        </div>
+                                    ) : (
+                                        sortedData.map((payment, index) => (
+                                            <div
+                                                key={payment._id || index}
+                                                onClick={() => setSelectedPaymentInModal(payment)}
+                                                style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                                                    gap: '6px',
+                                                    padding: '10px 12px',
+                                                    borderTop: '1px solid #e5e8ef',
+                                                    background: index % 2 === 0 ? '#ffffff' : '#fbfcff',
+                                                    cursor: 'pointer',
+                                                    transition: 'background 0.2s ease'
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#e6f2ff'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#ffffff' : '#fbfcff'}
+                                            >
+                                                <span style={{ color: '#334155' }}>{payment.CreateDate ? new Date(payment.CreateDate).toLocaleDateString('es-ES') : 'Sin fecha'}</span>
+                                                <span style={{ color: '#334155' }}>{payment.Folio}</span>
+                                                <span style={{ color: '#334155' }}>{payment.Method}</span>
+                                                <span style={{ color: '#0d4f88', fontWeight: 600 }}>${Number(payment.Amount || 0).toLocaleString()}</span>
+                                                <span style={{ color: '#177f42', fontWeight: 600 }}>${(Number(payment.Abono || 0) > 0 ? Number(payment.Abono) : Number(payment.Amount || 0)).toLocaleString()}</span>
+                                                <span style={{ color: '#334155' }}>{payment.Status || 'N/A'}</span>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </>
+            )}
+
+            {/* Panel lateral para ver/editar pago desde el modal */}
+            {selectedPaymentInModal && (
+                <PaymentInfo
+                    payment={selectedPaymentInModal}
+                    onStatusChange={(updatedPayment) => {
+                        // Actualizar el pago en el array local
+                        setData(prev => prev.map(p => p._id === updatedPayment._id ? updatedPayment : p));
+                        // Refrescar datos completos
+                        fetchData();
+                        fetchClientPackage();
+                    }}
+                />
             )}
         </>
     );

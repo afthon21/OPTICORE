@@ -1,7 +1,7 @@
 import styleCard from './css/clientInfo.module.css';
 import styleNav from './css/navbar.module.css';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ApiRequest from '../hooks/apiRequest.jsx';
 import Swal from 'sweetalert2';
@@ -11,8 +11,13 @@ import ClientDocuments from './documents/Clients.documents';
 import ClientTickets from './tickets/Client.tickets';
 import ClientNotes from './notes/client.notes';
 import ClientLocation from './location/location.map';
+import ActiveClientPanel from './ActiveClientPanel';
+import ActiveClientsModal from './ActiveClientsModal';
 
-function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGlobalUpdate }) {
+
+function ClientsInfo({ client, initialActiveTab = 'personal', onGlobalUpdate }) {
+
+
     const [show, setShow] = useState({
         personal: initialActiveTab === 'personal',
         payments: initialActiveTab === 'payments',
@@ -24,7 +29,17 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
 
     // Estado local para el cliente seleccionado
     const [currentClient, setCurrentClient] = useState(client);
+
+    
+    // Estado para la lista completa de clientes (modal de activos)
+    const [clients, setClients] = useState([]);
     const [paymentsRefreshKey, setPaymentsRefreshKey] = useState(0);
+
+    // Estados para modal + panel de clientes activos
+    const [showActiveClientsModal, setShowActiveClientsModal] = useState(false);
+    const [showActiveClientPanel, setShowActiveClientPanel] = useState(false);
+    const [selectedActiveClient, setSelectedActiveClient] = useState(null);
+
 
     // Si el prop client cambia (por ejemplo, seleccionas otro cliente), actualiza el estado local
     useEffect(() => {
@@ -66,40 +81,65 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
             location: false,
             tickets: false,
             notes: false,
-            active: false,
             [data]: true
-        })
-    }
+        });
+    };
 
     const { makeRequest } = ApiRequest(import.meta.env.VITE_API_BASE);
 
+    // Función para cargar todos los clientes (necesario para el apartado "Activos")
+    const loadAllClients = useCallback(async () => {
+        try {
+            const response = await makeRequest('/client/all');
+            setClients(response || []);
+        } catch (error) {
+            console.error('Error loading clients:', error);
+            setClients([]);
+        }
+    }, [makeRequest]);
+
+
     const toggleStatusFromActive = async (item) => {
-        const newStatus = item.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-        const actionText = newStatus === 'ACTIVE' ? 'activar' : 'desactivar';
+        const willArchive = !item.Archived;
+        const actionText = willArchive ? 'archivar' : 'desarchivar';
         const clientName = `${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g, ' ').trim();
         
         const result = await Swal.fire({
             title: '¿Estás seguro?',
-            text: `¿Quieres ${actionText} al cliente ${clientName}?`,
-            icon: 'question',
+            text: willArchive 
+                ? `¿Quieres archivar al cliente ${clientName}? Esto archivará todos sus pagos, tickets y paquetes relacionados.`
+                : `¿Quieres desarchivar al cliente ${clientName}?`,
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: newStatus === 'ACTIVE' ? '#28a745' : '#dc3545',
+            confirmButtonColor: willArchive ? '#dc3545' : '#28a745',
             cancelButtonColor: '#6c757d',
             confirmButtonText: `Sí, ${actionText}`,
             cancelButtonText: 'Cancelar'
         });
         
         if (result.isConfirmed) {
-            const updated = await makeRequest(`/client/edit/${item._id}`,'POST',{ Status: newStatus });
-            if (updated) {
-                if (onGlobalUpdate) onGlobalUpdate(updated);
-                // si el cliente mostrado es el que se actualizó, reflejarlo
-                setCurrentClient(prev => prev && prev._id === updated._id ? updated : prev);
+            const endpoint = willArchive ? `/client/archive/${item._id}` : `/client/unarchive/${item._id}`;
+            const response = await makeRequest(endpoint, 'POST');
+            
+            if (response) {
+                if (onGlobalUpdate) onGlobalUpdate(item._id);
+                
+                // Remover de la lista si fue archivado
+                if (willArchive) {
+                    setClients(prev => prev.filter(c => c._id !== item._id));
+                    // Si el cliente actual es el que se archivó, limpiarlo
+                    if (currentClient && currentClient._id === item._id) {
+                        setCurrentClient(null);
+                    }
+                }
+                
                 Swal.fire({
                     icon: 'success',
-                    title: 'Estado actualizado',
-                    text: `Cliente ahora ${newStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}`,
-                    timer: 1100,
+                    title: willArchive ? 'Cliente archivado' : 'Cliente desarchivado',
+                    text: willArchive 
+                        ? 'El cliente y todos sus datos relacionados han sido archivados' 
+                        : 'El cliente ha sido desarchivado',
+                    timer: 2000,
                     toast: true,
                     position: 'top',
                     showConfirmButton: false
@@ -108,7 +148,7 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'No se pudo actualizar el estado',
+                    text: `No se pudo ${actionText} el cliente`,
                     timer: 1400,
                     toast: true,
                     position: 'top',
@@ -188,13 +228,6 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
                                         Notas
                                 </a>
                             </li>
-                            <li className="nav-item">
-                                <a className="nav-link"
-                                    role="button"
-                                    onClick={() => toggleData('active')}>
-                                        Activos
-                                </a>
-                            </li>
                         </ul>
                     </div>
                 </div>
@@ -203,7 +236,19 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
             <div className={`card ${styleCard['card-container']}`}>
 
                 <div className={`d-flex justify-content-between align-items-center mt-1 mx-3 ${styleCard['header']}`}>
-                    <span className={styleCard['title']}><i className="bi bi-person-fill"></i> Client Details</span>
+                  <span className={styleCard['title']}><i className="bi bi-person-fill"></i> Client Details</span>
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={() => {
+                        loadAllClients();
+                        setShowActiveClientsModal(true);
+                      }}
+                    >
+                      <i className="bi bi-people-fill me-1"></i>
+                      Activos
+                    </button>
+                  </div>
                 </div>
 
                 <div className={`card-body ${styleCard['body']}`}>
@@ -211,7 +256,8 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
                     {show.personal && (
                         <ClientData
                             client={currentClient}
-                            onUpdateClient={(u)=>{ setCurrentClient(u); if(onGlobalUpdate) onGlobalUpdate(u);} }
+                            onUpdateClient={(u)=>{ setCurrentClient(u); 
+                                if(onGlobalUpdate) onGlobalUpdate(u);} }
                         />
                     )}
 
@@ -227,7 +273,7 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
 
                     {/* Ver pagos */}
                     {show.payments && (
-                        <ClientPayments client={currentClient?._id} refreshKey={paymentsRefreshKey} />
+                        <ClientPayments isArchived={currentClient?.Archived} client={currentClient?._id} refreshKey={paymentsRefreshKey} />
                     )}
 
                     {/* Ver tickets */}
@@ -240,54 +286,40 @@ function ClientsInfo({ client, initialActiveTab = 'personal', clients = [], onGl
                         <ClientNotes client={currentClient?._id}/>
                     )}
 
-                    {/* Estado Activo */}
-                    {show.active && (
-                        <div className="mt-2">
-                            <h5>Clientes Activos</h5>
-                            <table className="table table-hover justify-content-center">
-                                <thead className={styleCard['head-table']}>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Estado</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody className={`text-wrap ${styleCard['table-body']}`}>
-                                    {clients.filter(c => c.Status === 'ACTIVE').map(item => (
-                                        <tr key={item._id} className={styleCard['selected-row']}>
-                                            <td onClick={()=>{ setCurrentClient(item); setShow(s=>({...s, personal:true, active:false})); }}>
-                                                {`${item.Name.FirstName} ${item.Name.SecondName || ''} ${item.LastName.FatherLastName} ${item.LastName.MotherLastName}`.replace(/\s+/g,' ').trim()}
-                                            </td>
-                                            <td>
-                                                <span className={`badge ${item.Status === 'ACTIVE' ? 'bg-success':'bg-secondary'}`}>{item.Status === 'ACTIVE' ? 'Activo':'Inactivo'}</span>
-                                            </td>
-                                            <td>
-                                                <button className={`btn btn-sm ${item.Status === 'ACTIVE' ? 'btn-outline-danger':'btn-outline-success'}`} onClick={()=>toggleStatusFromActive(item)}>
-                                                    {item.Status === 'ACTIVE' ? 'Desactivar':'Activar'}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {clients.filter(c => c.Status === 'ACTIVE').length === 0 && (
-                                        <tr><td colSpan="3" className="text-center text-muted">No hay clientes activos.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+      </div>
+    </div>
+
+        {/* Modal centrado con listado de clientes activos */}
+        <ActiveClientsModal
+            clients={clients}
+            isOpen={showActiveClientsModal}
+            onClose={() => setShowActiveClientsModal(false)}
+            onSelectClient={(selected) => {
+                setSelectedActiveClient(selected);
+                setShowActiveClientsModal(false);
+                setShowActiveClientPanel(true);
+            }}
+            onToggleStatus={toggleStatusFromActive}
+        />
+
+        {/* Panel lateral con detalle del cliente activo */}
+        <ActiveClientPanel
+            client={selectedActiveClient}
+            isOpen={showActiveClientPanel}
+            onClose={() => {
+                setShowActiveClientPanel(false);
+                setSelectedActiveClient(null);
+            }}
+            onToggleStatus={(item) => toggleStatusFromActive(item)}
+        />
+  </div>
+);
 }
 
 export default ClientsInfo;
 
 ClientsInfo.propTypes = {
-    client: PropTypes.oneOfType([
-        PropTypes.object,
-        PropTypes.string
-    ]),
-    clients: PropTypes.array,
+    client: PropTypes.object,
+    initialActiveTab: PropTypes.string,
     onGlobalUpdate: PropTypes.func
 };

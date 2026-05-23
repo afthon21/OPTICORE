@@ -1,3 +1,16 @@
+// Ver pagos archivados
+export const viewArchivedPayments = async (req, res) => {
+    try {
+        const archivedPayments = await payment.find({ Archived: true })
+            .populate('Client', 'Name LastName Location')
+            .populate('Admin', 'UserName')
+            .exec();
+        return res.status(200).json(archivedPayments);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error finding archived payments' });
+    }
+}
 import payment from "../models/paymentsSchema.js";
 import client from "../models/clientSchema.js";
 import admin from '../models/adminSchema.js';
@@ -154,8 +167,12 @@ export const vieWClientPayments = async (req, res) => {
             return res.status(404).json({ message: 'Client does not exist yet' });
         }
 
+        // Si se envía ?archived=true, devolver solo pagos archivados
+        const archivedQuery = req.query.archived === 'true';
+        const query = archivedQuery ? { Client: idClient._id, Archived: true } : { Client: idClient._id, Archived: { $ne: true } };
+
         // Buscar pagos por el _id del cliente (usar el ObjectId, no el documento completo)
-        const payments = await payment.find({ Client: idClient._id })
+        const payments = await payment.find(query)
             .populate('Client', 'Name LastName Location')
             .populate('Admin', 'UserName')
             .exec();
@@ -231,11 +248,32 @@ export const archivePayments = async (req, res) => {
         }
 
         idPayment.Archived = true;
+        idPayment.ArchivedAt = new Date();
         await idPayment.save();
 
         return res.status(200).json({ message: 'Payment archived successfully' });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Error archiving payment' });
+    }
+}
+
+//Desarchivar pagos
+export const unarchivePayments = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const idPayment = await payment.findById(id);
+        if (!idPayment) {
+            return res.status(404).json({ message: 'Payment does not exist' });
+        }
+
+        idPayment.Archived = false;
+        idPayment.ArchivedAt = null;
+        await idPayment.save();
+
+        return res.status(200).json({ message: 'Payment unarchived successfully' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error unarchiving payment' });
     }
 }

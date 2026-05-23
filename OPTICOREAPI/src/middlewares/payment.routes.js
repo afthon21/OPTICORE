@@ -1,8 +1,11 @@
-import { createPayment, viewAllPayments, viewOnePayment, createPaymentById, vieWClientPayments, deletePayment, editPayment, archivePayments } from "../controller/payment.controller.js";
+
+import { createPayment, viewAllPayments, viewOnePayment, createPaymentById, vieWClientPayments, deletePayment, editPayment, archivePayments, unarchivePayments, viewArchivedPayments } from "../controller/payment.controller.js";
 import { protectRoute, getProfile } from "../controller/auth.controller.js";
 import { Router } from "express";
 
+
 const payRoutes = Router();
+payRoutes.get('/archived', protectRoute, getProfile, viewArchivedPayments);
 
 payRoutes.post('/new', protectRoute, getProfile, createPayment);
 payRoutes.get('/all', protectRoute, getProfile, viewAllPayments);
@@ -12,5 +15,6 @@ payRoutes.get('/all/:id', protectRoute, getProfile, vieWClientPayments);
 payRoutes.post('/edit/:id', protectRoute, getProfile, editPayment);
 payRoutes.delete('/delete/:di', protectRoute, getProfile, deletePayment);
 payRoutes.get('/archive/:id', protectRoute, getProfile, archivePayments);
+payRoutes.get('/unarchive/:id', protectRoute, getProfile, unarchivePayments);
 
 export default payRoutes;

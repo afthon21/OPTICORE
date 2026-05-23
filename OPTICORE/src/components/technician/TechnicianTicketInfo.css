@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* Animación para el panel lateral */
+.technician-ticket-info {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.ticket-circle {
+    padding: 0 4px;
+}
+
+.ticket-box {
+    display: inline-block;
+    align-items: center;
+    width: 10px;
+    height: 10px;
+    padding: 1px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.ticket-red {
+    background-color: #ff605c;
+}
+
+.ticket-yellow {
+    background-color: #ffbd44;
+}
+
+.ticket-green {
+    background-color: #00ca4e;
+}
+
+.ticket-box:hover {
+    transform: scale(1.2);
+}
+
+.ticket-input {
+    border: 0;
+    width: 100%;
+    background: none;
+    font-family: 'Agdasima';
+    color: black;
+    font-size: 14pt;
+    border-bottom: 2px solid #2a9d8f;
+}
+
+.ticket-input:disabled {
+    background: transparent;
+}

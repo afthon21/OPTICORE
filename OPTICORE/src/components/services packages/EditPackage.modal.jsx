@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import './EditPackage.css';
 
 const fiberPackages = [
   { name: "50 Megas", price: 349 },
@@ -27,11 +27,10 @@ function EditPackageModal({ pkg, isOpen, onClose, onSave }) {
   const [selectedPackage, setSelectedPackage] = useState(pkg?.type || '');
   const [selectedPlatforms, setSelectedPlatforms] = useState(pkg?.platforms?.map(p => p.name) || []);
   const [price, setPrice] = useState(pkg?.price || 0);
-  // La descripción se genera automáticamente
+  
   const description = `Paquete de ${selectedPackage || '...'} con ${type === 'fiber' ? 'Fibra Óptica' : 'Radio Frecuencia'}${selectedPlatforms.length > 0 ? `. Plataformas incluidas: ${selectedPlatforms.join(', ')}` : ''}.`;
 
   useEffect(() => {
-    // Actualiza el precio automáticamente al cambiar selección
     const basePkg = [...fiberPackages, ...radioPackages].find(p => p.name === selectedPackage);
     const basePrice = basePkg ? basePkg.price : 0;
     const platformsPrice = selectedPlatforms.reduce((sum, name) => {
@@ -52,7 +51,15 @@ function EditPackageModal({ pkg, isOpen, onClose, onSave }) {
   const [saving, setSaving] = useState(false);
   const handleSave = async () => {
     if (!selectedPackage || !type) {
-      // Validación simple, sin mensaje de confirmación
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor selecciona un paquete',
+        toast: true,
+        position: 'top',
+        timer: 2000,
+        showConfirmButton: false
+      });
       return;
     }
     setSaving(true);
@@ -74,38 +81,41 @@ function EditPackageModal({ pkg, isOpen, onClose, onSave }) {
         window.location.reload();
       }
     } catch (err) {
-      // Error al guardar, sin mensaje
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: 'No se pudo actualizar el paquete',
+        toast: true,
+        position: 'top',
+        timer: 2000,
+        showConfirmButton: false
+      });
     }
     setSaving(false);
   };
 
-  // El modal solo se renderiza cuando se abre, así que no es necesario isOpen
+  if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.3)', zIndex: 9999 }}>
-      <div className="modal-content" style={{ position: 'relative', background: '#fff', borderRadius: 12, padding: 32, maxWidth: 500, margin: '80px auto', boxShadow: '0 4px 24px #0002', maxHeight: '80vh', overflowY: 'auto' }}>
-        <button
+    <div className="edit-package-panel">
+      <div className="panel-header">
+        <h5 className="panel-title">
+          <i className="bi bi-box-seam me-2"></i> 
+          Editar Paquete
+        </h5>
+        <button 
+          type="button" 
+          className="btn-close-panel"
           onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            background: 'transparent',
-            border: 'none',
-            fontSize: 24,
-            color: '#888',
-            cursor: 'pointer',
-            zIndex: 10
-          }}
-          title="Cerrar"
-        >
-          <span aria-hidden="true">&times;</span>
+          aria-label="Cerrar"
+          title="Cerrar panel">
+          <i className="bi bi-x-lg"></i>
         </button>
-        <h4 style={{ marginBottom: 18 }}>Editar Paquete</h4>
+      </div>
 
-        {/* Información actual del paquete seleccionado */}
+      <div className="panel-body">
         {pkg && (
-          <div style={{ background: '#f6f6f6', borderRadius: 8, padding: '12px 18px', marginBottom: 18, fontSize: 15 }}>
+          <div className="package-info-box">
             <div><strong>Folio:</strong> {pkg.folio || 'Sin folio'}</div>
             <div><strong>Cliente:</strong> {pkg.Client ? `${pkg.Client.Name?.FirstName || ''} ${pkg.Client.Name?.SecondName || ''} ${pkg.Client.LastName?.FatherLastName || ''} ${pkg.Client.LastName?.MotherLastName || ''}`.replace(/\s+/g, ' ').trim() : 'Sin cliente'}</div>
             <div><strong>Nombre Paquete:</strong> {(pkg.type || 'No especificado') + ' - ' + (pkg.connectionType || 'No especificado')}</div>
@@ -114,49 +124,87 @@ function EditPackageModal({ pkg, isOpen, onClose, onSave }) {
             <div><strong>Plataformas:</strong> {pkg.platforms && pkg.platforms.length > 0 ? pkg.platforms.map(p => p.name || p).join(', ') : 'Ninguna'}</div>
           </div>
         )}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-          <button
-            className={`btn ${type === 'fiber' ? 'btn-primary' : 'btn-outline-primary'}`}
-            onClick={() => { setType('fiber'); setSelectedPackage(''); setSelectedPlatforms([]); }}
-          >Fibra Óptica</button>
-          <button
-            className={`btn ${type === 'radio' ? 'btn-primary' : 'btn-outline-primary'}`}
-            onClick={() => { setType('radio'); setSelectedPackage(''); setSelectedPlatforms([]); }}
-          >Radio Frecuencia</button>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12, marginBottom: 24 }}>
-          {(type === 'fiber' ? fiberPackages : radioPackages).map(pkgOpt => (
+
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Tipo de Conexión</label>
+          <div className="d-flex gap-2">
             <button
-              key={pkgOpt.name}
-              className={`btn ${selectedPackage === pkgOpt.name ? 'btn-success' : 'btn-outline-success'}`}
-              onClick={() => setSelectedPackage(pkgOpt.name)}
-            >{pkgOpt.name} <span style={{ fontWeight: 400 }}>${pkgOpt.price}</span></button>
-          ))}
+              className={`btn ${type === 'fiber' ? 'btn-primary' : 'btn-outline-primary'}`}
+              onClick={() => { setType('fiber'); setSelectedPackage(''); setSelectedPlatforms([]); }}
+            >
+              <i className="bi bi-ethernet me-1"></i>
+              Fibra Óptica
+            </button>
+            <button
+              className={`btn ${type === 'radio' ? 'btn-primary' : 'btn-outline-primary'}`}
+              onClick={() => { setType('radio'); setSelectedPackage(''); setSelectedPlatforms([]); }}
+            >
+              <i className="bi bi-broadcast me-1"></i>
+              Radio Frecuencia
+            </button>
+          </div>
         </div>
-        <div style={{ marginBottom: 24 }}>
-          <h5 style={{ fontWeight: 600 }}>Plataformas adicionales</h5>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {platforms.map(p => (
+
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Selecciona el Paquete</label>
+          <div className="package-grid">
+            {(type === 'fiber' ? fiberPackages : radioPackages).map(pkgOpt => (
               <button
-                key={p.name}
-                className={`btn ${selectedPlatforms.includes(p.name) ? 'btn-info' : 'btn-outline-info'}`}
-                onClick={() => handlePlatformToggle(p.name)}
-                style={{ minWidth: 120 }}
-              >{p.name} <span style={{ fontWeight: 400 }}>+${p.price}</span></button>
+                key={pkgOpt.name}
+                className={`btn ${selectedPackage === pkgOpt.name ? 'btn-success' : 'btn-outline-success'}`}
+                onClick={() => setSelectedPackage(pkgOpt.name)}
+              >
+                <div>{pkgOpt.name}</div>
+                <small className="text-muted">${pkgOpt.price}</small>
+              </button>
             ))}
           </div>
         </div>
-        <div className="mb-2">
-          <label>Precio total</label>
-          <input type="number" className="form-control" value={price} readOnly />
+
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Plataformas adicionales</label>
+          <div className="platforms-grid">
+            {platforms.map(p => (
+              <button
+                key={p.name}
+                className={`btn btn-sm ${selectedPlatforms.includes(p.name) ? 'btn-info' : 'btn-outline-info'}`}
+                onClick={() => handlePlatformToggle(p.name)}
+              >
+                {p.name} <span className="text-muted">+${p.price}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="mb-2">
-          <label>Descripción</label>
-          <textarea className="form-control" value={description} readOnly />
+
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Precio Total</label>
+          <input 
+            type="text" 
+            className="form-control" 
+            value={`$${price}`} 
+            readOnly 
+            style={{ backgroundColor: '#e9ecef', fontWeight: 'bold', color: '#002b5b' }}
+          />
         </div>
-        <div className="d-flex justify-content-end gap-2 mt-3">
-          <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Descripción</label>
+          <textarea 
+            className="form-control" 
+            rows="3"
+            value={description} 
+            readOnly 
+            style={{ backgroundColor: '#e9ecef', fontSize: '13px' }}
+          />
+        </div>
+
+        <div className="d-flex justify-content-end gap-2 mt-4">
+          <button className="btn btn-secondary" onClick={onClose}>
+            <i className="bi bi-x-circle me-1"></i>
+            Cancelar
+          </button>
           <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            <i className="bi bi-check-circle me-1"></i>
             {saving ? 'Guardando...' : 'Guardar'}
           </button>
         </div>

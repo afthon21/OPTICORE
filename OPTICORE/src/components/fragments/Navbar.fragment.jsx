@@ -2,9 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useRegion } from '../../hooks/RegionContext';
 
-import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket, handleArchiveTickets} from './js/Routes.js';
-import { handleClients, handleCreateClient, handlePayments, handleCreatePayment } from './js/Routes.js';
+import { handleHome, handleLogout, handleProfile, handleTicket, handleCreateTicket, handleArchiveTickets, handleArchivePayments} from './js/Routes.js';
+import { handleClients, handleCreateClient, handlePayments, handleCreatePayment, handleTechnicians, handleCreateTechnician } from './js/Routes.js';
 import { handlePackages, handleCreatePackages, handleArchiveClients} from './js/Routes.js';
+
 
 export function NavbarFragmentAll() {
     const navigate = useNavigate();
@@ -13,7 +14,24 @@ export function NavbarFragmentAll() {
     const adminId = sessionStorage.getItem('adminId');
     const { region, setRegion, isAdmin, canChangeRegion, userRole } = useRegion();
 
+    // Debug para el navbar
+    console.log('🎭 Navbar - Rol de usuario:', userRole);
+    console.log('🎭 Navbar - ¿Es admin?:', isAdmin);
+    console.log('🎭 Navbar - ¿Puede cambiar región?:', canChangeRegion);
+    console.log('🎭 Navbar - Región actual:', region);
+
+    // Función de debug para verificar sessionStorage
+    // eslint-disable-next-line no-unused-vars
+    const debugSessionStorage = () => {
+        console.log('🔍 DEBUG SESSION STORAGE:');
+        console.log('adminRole:', sessionStorage.getItem('adminRole'));
+        console.log('adminRegion:', sessionStorage.getItem('adminRegion'));
+        console.log('adminId:', sessionStorage.getItem('adminId'));
+        console.log('userName:', sessionStorage.getItem('userName'));
+    };
+
     // Función para forzar actualización del nombre
+    // eslint-disable-next-line no-unused-vars
     const refreshUserName = () => {
         const currentName = sessionStorage.getItem('userName');
         setName(currentName);
@@ -42,6 +60,7 @@ export function NavbarFragmentAll() {
         const interval = setInterval(checkForChanges, 500);
 
         return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Solo se ejecuta una vez
 
     return (
@@ -195,11 +214,51 @@ export function NavbarFragmentAll() {
                                 Ver
                             </a>
                         </li>
-                         
-                        
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={()=> handleArchivePayments(navigate, adminId)}
+                                role="button"
+                            >
+                                Archivados
+                            </a>
+
+                        </li>
                         
                     </ul>
                 </li>
+                
+                 <li className="nav-item item">
+                    <a
+                        className="nav-link d-flex align-items-center item-link"
+                        role="button"
+                    >
+                        <i className="bi bi-tools me-2"></i> 
+                        <span className="item-title">Técnicos</span>
+                    </a>
+                    <ul className="list-unstyled ps-3 sub-menu">
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => handleCreateTechnician(navigate, adminId)}
+                                role="button"
+                            >
+                                Crear
+                            </a>
+                        </li>
+
+                        <li className="ms-4">
+                            <a
+                                className="nav-link"
+                                onClick={() => handleTechnicians(navigate, adminId)}
+                                role="button"
+                            >
+                                Ver
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li className="nav-item item">
                     <a
                         className="nav-link d-flex align-items-center item-link"
@@ -256,6 +315,11 @@ export function NavbarFragmentAll() {
                             <a className="nav-link"
                                 onClick={() => handlePackages(navigate, adminId)}
                                 role="button">Ver</a>
+                        </li>
+                        <li className="ms-4">
+                            <a className="nav-link"
+                                onClick={() => navigate(`/packageServices/archived/${adminId}`)}
+                                role="button">Archivados</a>
                         </li>
                     </ul>
                 </li>

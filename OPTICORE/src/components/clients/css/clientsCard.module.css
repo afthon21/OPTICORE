@@ -100,9 +100,15 @@
 
 /** Card-container */
 .card-container {
-    width: 22rem;
+    width: 100%;
+    max-width: 350px;
+    min-width: 280px;
     background: transparent;
     border: none;
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /** table */
@@ -136,6 +142,7 @@
     height: 50px;
     border: none;
     border-bottom: 2px solid #2a9d8f;
+    flex-shrink: 0;
 }
 
 .title {
@@ -143,4 +150,87 @@
     font-weight: bold;
     font-family: 'Kanit';
     color: #002b5b;
+}
+
+/* Responsive styles */
+.card-container :global(.card-body) {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.5rem;
+    max-height: calc(100vh - 200px);
+}
+
+.card-container :global(.table) {
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.card-container :global(.table) td {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+/* Media queries para pantallas pequeñas */
+@media (max-width: 1024px) {
+    .card-container {
+        max-width: 320px;
+    }
+}
+
+@media (max-width: 992px) {
+    .card-container {
+        min-width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 400px;
+    }
+    
+    .card-container :global(.card-body) {
+        max-height: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-container {
+        min-width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 350px;
+    }
+    
+    .input {
+        width: 150px;
+    }
+    
+    .bar {
+        width: 150px;
+    }
+    
+    .title {
+        font-size: 13pt;
+    }
+    
+    .card-container :global(.card-body) {
+        max-height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-container {
+        min-width: 100%;
+        max-height: 300px;
+    }
+    
+    .card-container :global(.card-body) {
+        max-height: 240px;
+    }
+    
+    .input {
+        width: 120px;
+    }
+    
+    .bar {
+        width: 120px;
+    }
 }
