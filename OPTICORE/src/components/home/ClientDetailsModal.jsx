@@ -166,7 +166,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
             URL.revokeObjectURL(link.href);
         } catch (error) {
             console.error('Error al descargar la foto de fachada:', error);
-            // Podríamos agregar una notificación de error aquí si queremos
         }
     };
 
@@ -178,8 +177,6 @@ function ClientDetailsModal({ client, isOpen, onClose }) {
     const handleCloseLocationModal = () => {
         setLocationModalOpen(false);
     };
-
-
 
     // Función principal para descargar la captura del mapa
     const handleDownloadLocationMap = async () => {

@@ -371,17 +371,9 @@ function ClientAddressDetailModal({ client, isOpen, onClose }) {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{
-                            width: '24px',
-                            height: '24px',
-                            backgroundColor: 'white',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#2a9d8f',
+                            width: '24px', height: '24px', backgroundColor: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2a9d8f',
                             fontSize: '14px'
                         }}>
-                            📍
                         </div>
                         <div>
                             <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>
@@ -396,14 +388,7 @@ function ClientAddressDetailModal({ client, isOpen, onClose }) {
                     <button
                         onClick={handleClose}
                         style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'white',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            width: '32px',
-                            height: '32px',
-                            display: 'flex',
+                            background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', width: '32px', height: '32px', display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             borderRadius: '50%',
@@ -412,7 +397,6 @@ function ClientAddressDetailModal({ client, isOpen, onClose }) {
                         onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
                         onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                     >
-                        ×
                     </button>
                 </div>
 

@@ -15,36 +15,12 @@ const radioPackages = [
 
 // Plataformas con logo HBO Max con texto
 const platforms = [
-  {
-    name: "HBO Max",
-    price: 50,
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/HBO_Max_Logo.svg/160px-HBO_Max_Logo.svg.png",
-  },
-  {
-    name: "Netflix",
-    price: 60,
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/160px-Netflix_2015_logo.svg.png",
-  },
-  {
-    name: "Disney+",
-    price: 40,
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Disney%2B_logo.svg/160px-Disney%2B_logo.svg.png",
-  },
-  {
-    name: "Prime Video",
-    price: 45,
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Prime_Video.png/160px-Prime_Video.png",
-  },
-  {
-    name: "Spotify",
-    price: 30,
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/2024_Spotify_Logo.svg/160px-2024_Spotify_Logo.svg.png",
-  },
-  {
-    name: "Roku",
-    price: 25,
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Roku_logo.svg/500px-Roku_logo.svg.png"
-  },
+  { name: "HBO Max", price: 50, img: "/platforms/hbo-max.svg" },
+  { name: "Netflix", price: 60, img: "/platforms/netflix.svg" },
+  { name: "Disney+", price: 40, img: "/platforms/disney-plus.svg" },
+  { name: "Prime Video", price: 45, img: "/platforms/prime-video.svg" },
+  { name: "Spotify", price: 30, img: "/platforms/spotify.svg" },
+  { name: "Roku", price: 25, img: "/platforms/roku.svg" },
 ]; 
 
 const whatsappLogo = "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
@@ -304,6 +280,10 @@ export default function Card() {
                   <img
                     src={p.img}
                     alt={p.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/wifi.svg';
+                    }}
                     style={{
                       height: 40,
                       width: 120,

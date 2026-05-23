@@ -4,7 +4,6 @@ import RegisterComponent from '../auth/register/Register.component.jsx';
 function StartComponent() {
     return (
         <>
-            {/* Fondo con degradado y centrado total */}
             <div
                 className="position-absolute top-50 start-50 translate-middle w-100 text-center px-3"
                 style={{
@@ -17,7 +16,6 @@ function StartComponent() {
                     alignItems: 'center',
                 }}
             >
-                {/* Título */}
                 <h1 className="display-2 fw-bold text-uppercase mb-4" style={{ letterSpacing: '2px' }}>
                     OPTICORE
                 </h1>
